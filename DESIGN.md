@@ -75,11 +75,15 @@ Print CSS: `@media print` hides everything except `.print-sheet`; `@page { margi
 8. Polish: plain-text export, keyboard shortcuts, warnings, README.
 9. Deferred, optional: full buildout for other users. Minimal Hono API server; songs CRUD moves to disk with atomic writes; in-app screenshot upload consumed in memory; POST /api/ai/place calls the Anthropic API server-side (@anthropic-ai/sdk, structured output, claude-sonnet-5 default, key in .env) with the same anchor protocol; client downscales images to 2576 px long edge, 5 MB cap. Everything from v1 (schema, engine, review UI) is reused as-is.
 
+## Chord diagrams (src/engine/shapes.ts, ChordDiagram.tsx, ChordChartRow.tsx)
+
+A CHORDS row shows SVG fretboard grids for the song's unique displayed shapes (post-capo) in first-appearance order: collapsible panel on screen, a row under the print header spanning both columns. Voicings resolve in order: curated open-chord table, known slash voicings, movable E-form and A-form templates (lower position wins). Chords outside the dictionary walk a simplification ladder (drop slash bass; maj9 to maj7; 13/9/11 to 7; m11 to m7 to m; dim family to m7b5/dim7; 2 to sus2 as a pure alias) so every parseable chord gets the closest reasonable shape, labeled with the song's own symbol; screen tooltips name the substitution. Dots only, no fingering numbers, by Jamie's choice.
+
 ## Later ideas (not scheduled)
 
-- Simple SVG chord diagrams above or beside the sheet, keyed off the same open-shape table the capo scorer uses.
 - Short tablature snippets for riffs.
 - Smarter placement re-anchoring when lyrics are edited after placement.
+- Voicing picker (cycle alternates per diagram); hand-editable fingerings.
 
 ## Risks
 

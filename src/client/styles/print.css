@@ -22,7 +22,8 @@
   .status,
   .sheet,
   .lyrics-editor,
-  .autoscroll {
+  .autoscroll,
+  .chord-panel {
     display: none !important;
   }
 
@@ -37,6 +38,23 @@
     font-family: var(--mono);
     font-size: 10.5pt;
     line-height: 1.22;
+    color: black;
+  }
+
+  /* Diagram row spans the page above the columns. */
+  .print-diagrams .chord-chart-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1mm 3mm;
+    margin-bottom: 7pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    font-family: var(--mono);
+  }
+
+  .print-diagrams .chord-diagram {
+    width: 15mm;
+    height: auto;
     color: black;
   }
 

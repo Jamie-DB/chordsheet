@@ -1,5 +1,6 @@
 import { buildChordRow, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
+import { ChordChartRow } from "./ChordChartRow";
 
 interface Props {
   song: Song;
@@ -38,6 +39,9 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
           {soundingKey ? `Key: ${soundingKey}` : ""}
           {soundingKey && song.capo > 0 ? `, Capo ${song.capo}` : song.capo > 0 ? `Capo ${song.capo}` : ""}
         </div>
+      </div>
+      <div className="print-diagrams">
+        <ChordChartRow song={song} shapedKeyName={shapedKeyName} />
       </div>
       <div className={twoCol ? "print-body two-col" : "print-body"}>
         {song.lyrics.map((line, i) => {
