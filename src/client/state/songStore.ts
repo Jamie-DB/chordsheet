@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import type { Song } from "../../shared/types";
-import { loadLibrary, lyricsFromPaste, saveLibrary, slugify } from "../lib/storage";
+import { loadLibrary, saveLibrary, slugify } from "../lib/storage";
+import { parsePastedTab } from "../lib/tabPaste";
 
 export type View = { name: "library" } | { name: "editor"; id: string };
 
@@ -53,7 +54,8 @@ function reducer(state: AppState, action: Action): AppState {
 }
 
 export interface SongActions {
-  createSong(title: string, artist: string, lyricsText: string): void;
+  /** writtenForCapo: the pasted tab's capo; symbols are read as shapes at that fret. */
+  createSong(title: string, artist: string, lyricsText: string, writtenForCapo: number): void;
   importSong(song: Song, open: boolean): void;
   open(id: string): void;
   close(): void;
@@ -85,18 +87,19 @@ export function useSongStore(): [AppState, SongActions] {
 
   const actions = useMemo<SongActions>(
     () => ({
-      createSong(title, artist, lyricsText) {
+      createSong(title, artist, lyricsText, writtenForCapo) {
         const taken = new Set(stateRef.current.songs.map((s) => s.id));
         const now = new Date().toISOString();
+        const parsed = parsePastedTab(lyricsText, writtenForCapo);
         const song: Song = {
           version: 1,
           id: slugify(title, taken),
           title: title.trim() || "Untitled",
           artist: artist.trim() || undefined,
-          lyrics: lyricsFromPaste(lyricsText),
-          placements: [],
+          lyrics: parsed.lyrics,
+          placements: parsed.placements,
           keyOverride: null,
-          capo: 0,
+          capo: writtenForCapo,
           createdAt: now,
           updatedAt: now,
         };

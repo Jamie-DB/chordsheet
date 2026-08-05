@@ -4,7 +4,7 @@ import { downloadSong, parseImport } from "../lib/exchange";
 
 interface Props {
   songs: Song[];
-  onCreate(title: string, artist: string, lyricsText: string): void;
+  onCreate(title: string, artist: string, lyricsText: string, writtenForCapo: number): void;
   onOpen(id: string): void;
   onRename(id: string, title: string): void;
   onDelete(id: string): void;
@@ -15,6 +15,7 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [lyricsText, setLyricsText] = useState("");
+  const [writtenCapo, setWrittenCapo] = useState(0);
   const [status, setStatus] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -25,10 +26,11 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
       setStatus("Give the song a title, some lyrics, or both.");
       return;
     }
-    onCreate(title, artist, lyricsText);
+    onCreate(title, artist, lyricsText, writtenCapo);
     setTitle("");
     setArtist("");
     setLyricsText("");
+    setWrittenCapo(0);
     setStatus(null);
   }
 
@@ -89,13 +91,23 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
         </div>
         <textarea
           value={lyricsText}
-          placeholder="Paste lyrics here, one line per sung line."
+          placeholder="Paste lyrics, or a whole tab with chord lines above the words. Chord lines are detected and become placements."
           rows={8}
           onChange={(e) => setLyricsText(e.target.value)}
-          aria-label="Lyrics"
+          aria-label="Lyrics or tab"
         />
         <div className="new-song-actions">
           <button className="primary" onClick={handleCreate}>Create</button>
+          <label className="written-capo" title="If the pasted tab says 'Capo N', its chords are shapes at that fret. The song starts there and keeps its true key.">
+            Written for capo{" "}
+            <select value={writtenCapo} onChange={(e) => setWrittenCapo(Number(e.target.value))}>
+              {Array.from({ length: 10 }, (_, fret) => (
+                <option key={fret} value={fret}>
+                  {fret === 0 ? "None" : `Fret ${fret}`}
+                </option>
+              ))}
+            </select>
+          </label>
           <button onClick={() => fileRef.current?.click()}>Import JSON</button>
           <input
             ref={fileRef}
