@@ -1,5 +1,6 @@
 import { buildChordRow, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
+import { isSectionLabel } from "../lib/lineOps";
 import { ChordChartRow } from "./ChordChartRow";
 
 interface Props {
@@ -40,6 +41,7 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
           {soundingKey && song.capo > 0 ? `, Capo ${song.capo}` : song.capo > 0 ? `Capo ${song.capo}` : ""}
         </div>
       </div>
+      {song.notes?.trim() && <pre className="print-notes">{song.notes.trim()}</pre>}
       <div className="print-diagrams">
         <ChordChartRow song={song} shapedKeyName={shapedKeyName} />
       </div>
@@ -52,7 +54,9 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
           return (
             <div className="print-pair" key={i}>
               {row.length > 0 && <pre className="print-chords">{row}</pre>}
-              <pre className="print-lyric">{line || " "}</pre>
+              <pre className={`print-lyric${isSectionLabel(line) ? " section-label" : ""}`}>
+                {line || " "}
+              </pre>
             </div>
           );
         })}

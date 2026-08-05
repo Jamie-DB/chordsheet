@@ -17,6 +17,7 @@ export const songSchema = z.object({
   keyOverride: z.string().nullable(),
   capo: z.number().int().min(0).max(9),
   bpm: z.number().int().min(20).max(400).optional(),
+  notes: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

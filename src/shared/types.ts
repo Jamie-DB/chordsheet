@@ -21,6 +21,8 @@ export interface Song {
   capo: number;
   /** Tempo for auto-scroll; absent means the 80 BPM default. */
   bpm?: number;
+  /** Free-text block under the header: tuning, strum pattern, reminders. */
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }

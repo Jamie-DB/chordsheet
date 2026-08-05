@@ -23,7 +23,9 @@
   .sheet,
   .lyrics-editor,
   .autoscroll,
-  .chord-panel {
+  .chord-panel,
+  .notes-panel,
+  .line-tools {
     display: none !important;
   }
 
@@ -39,6 +41,16 @@
     font-size: 10.5pt;
     line-height: 1.22;
     color: black;
+  }
+
+  .print-notes {
+    font-size: 9pt;
+    white-space: pre-wrap;
+    margin: 0 0 6pt;
+  }
+
+  .print-lyric.section-label {
+    font-weight: 700;
   }
 
   /* Diagram row spans the page above the columns. */

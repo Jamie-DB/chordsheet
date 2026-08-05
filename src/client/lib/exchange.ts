@@ -64,6 +64,7 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
     keyOverride: imported.keyOverride,
     capo: imported.capo,
     bpm: imported.bpm,
+    notes: imported.notes,
     createdAt: imported.createdAt,
     updatedAt: imported.updatedAt,
   };

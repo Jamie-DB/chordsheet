@@ -12,6 +12,7 @@ export function sheetText(song: Song, soundingKey: string | null, shapedKeyName:
   if (soundingKey) keyBits.push(`Key: ${soundingKey}`);
   if (song.capo > 0) keyBits.push(`Capo ${song.capo}`);
   if (keyBits.length > 0) out.push(keyBits.join(", "));
+  if (song.notes?.trim()) out.push(...song.notes.trim().split("\n"));
   out.push("");
 
   song.lyrics.forEach((line, i) => {
