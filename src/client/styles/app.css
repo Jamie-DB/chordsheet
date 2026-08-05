@@ -443,6 +443,28 @@ button.mini {
   color: var(--ink);
 }
 
+.chord-hover-card {
+  position: fixed;
+  z-index: 60;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2px 5px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+}
+
+.hover-note {
+  font-size: 0.65rem;
+  color: var(--muted);
+  font-weight: 400;
+  padding-bottom: 3px;
+  white-space: nowrap;
+}
+
 /* Auto-scroll performance bar */
 
 .autoscroll {

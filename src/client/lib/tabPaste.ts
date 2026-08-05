@@ -1,6 +1,7 @@
 import { isChordSymbol, transposeSymbol } from "../../engine";
 import type { ChordPlacement } from "../../shared/types";
 import { freshId } from "./ids";
+import { normalizeSections } from "./normalize";
 import { lyricsFromPaste } from "./storage";
 
 export interface ParsedTab {
@@ -92,5 +93,11 @@ export function parsePastedTab(text: string, writtenForCapo: number = 0): Parsed
     }
   }
 
-  return { lyrics, placements, chordLinesConverted, bpm: detectBpm(raw) };
+  const normalized = normalizeSections(lyrics, placements);
+  return {
+    lyrics: normalized.lyrics,
+    placements: normalized.placements,
+    chordLinesConverted,
+    bpm: detectBpm(raw),
+  };
 }

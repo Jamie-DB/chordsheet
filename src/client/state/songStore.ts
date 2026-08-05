@@ -1,7 +1,21 @@
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import type { Song } from "../../shared/types";
+import { normalizeSections } from "../lib/normalize";
 import { loadLibrary, saveLibrary, slugify } from "../lib/storage";
 import { parsePastedTab } from "../lib/tabPaste";
+
+/** One-time fix-up of stored songs: section spacing normalized on load. */
+function migrate(songs: Song[]): Song[] {
+  let anyChanged = false;
+  const migrated = songs.map((song) => {
+    const n = normalizeSections(song.lyrics, song.placements);
+    if (!n.changed) return song;
+    anyChanged = true;
+    return { ...song, lyrics: n.lyrics, placements: n.placements };
+  });
+  if (anyChanged) saveLibrary(migrated);
+  return migrated;
+}
 
 export type View = { name: "library" } | { name: "editor"; id: string };
 
@@ -68,7 +82,7 @@ export function useSongStore(): [AppState, SongActions] {
   const [state, dispatch] = useReducer(
     reducer,
     undefined,
-    (): AppState => ({ songs: loadLibrary(), view: { name: "library" } }),
+    (): AppState => ({ songs: migrate(loadLibrary()), view: { name: "library" } }),
   );
 
   // Autosave the whole library, debounced.

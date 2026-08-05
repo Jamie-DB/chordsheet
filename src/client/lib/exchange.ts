@@ -1,6 +1,7 @@
 import { resolveAnchor } from "../../engine";
 import { importedSongSchema } from "../../shared/schemas";
 import type { ChordPlacement, Song } from "../../shared/types";
+import { normalizeSections } from "./normalize";
 
 export interface UnresolvedPlacement {
   line: number;
@@ -105,9 +106,12 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
     }
   }
 
+  // New songs get section spacing normalized on the way in; existing songs
+  // keep their library lyrics, which the load-time migration already fixed.
+  const normalized = existing ? { lyrics: base.lyrics, placements } : normalizeSections(base.lyrics, placements);
   return {
     ok: true,
-    song: { ...base, placements },
+    song: { ...base, lyrics: normalized.lyrics, placements: normalized.placements },
     unresolved,
     lyricsRejected,
   };
