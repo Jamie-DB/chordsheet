@@ -21,6 +21,8 @@ interface Props {
   index: number;
   text: string;
   chips: ChipModel[];
+  /** Import-review proposals; amber, click to accept, not draggable. */
+  proposals: ChipModel[];
   charWidth: number;
   pairHeight: number;
   lineCount: number;
@@ -32,6 +34,7 @@ interface Props {
   onOpenEdit(id: string): void;
   onCommitEdit(text: string): void;
   onCancelEdit(): void;
+  onAcceptProposal(id: string): void;
 }
 
 export function LyricLine(props: Props) {
@@ -64,6 +67,20 @@ export function LyricLine(props: Props) {
             />
           ),
         )}
+        {props.proposals.map((p) => (
+          <span
+            key={p.id}
+            className="chord-chip proposal"
+            style={{ left: `${p.col}ch` }}
+            title="Proposed by import; click to accept"
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onAcceptProposal(p.id);
+            }}
+          >
+            {p.label}
+          </span>
+        ))}
         {editingHere && (
           <ChordEditPopover
             col={editing.col}
