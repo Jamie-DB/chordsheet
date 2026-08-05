@@ -26,3 +26,4 @@ export {
   type CapoSuggestion,
 } from "./capo";
 export { buildChordRow, resolveAnchor } from "./layout";
+export { voicingFor, type ShapeResult, type Voicing } from "./shapes";

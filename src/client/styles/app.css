@@ -411,6 +411,38 @@ button.mini {
   font-family: var(--mono);
 }
 
+/* Chord diagram panel */
+
+.chord-panel {
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 10px;
+  padding: 0.5rem 1rem 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.chord-panel summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.chord-chart-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  padding: 0.5rem 0;
+  font-family: var(--mono);
+}
+
+.chord-diagram {
+  color: var(--ink);
+}
+
 /* Auto-scroll performance bar */
 
 .autoscroll {

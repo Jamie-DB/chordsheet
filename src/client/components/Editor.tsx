@@ -8,6 +8,7 @@ import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
 import { AutoScrollBar } from "./AutoScrollBar";
 import { CapoSuggestions } from "./CapoSuggestions";
+import { ChordChartRow } from "./ChordChartRow";
 import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportReview";
 import { LyricLine, type EditingModel } from "./LyricLine";
 import { PrintSheet } from "./PrintSheet";
@@ -300,6 +301,13 @@ export function Editor({ song, onBack, onChange }: Props) {
         <p className="status">
           {longLines} line(s) exceed 90 characters and may not fit a printed page.
         </p>
+      )}
+
+      {song.placements.length > 0 && lyricsDraft === null && (
+        <details className="chord-panel" open>
+          <summary>Chords</summary>
+          <ChordChartRow song={song} shapedKeyName={shaped} />
+        </details>
       )}
 
       {review && (
