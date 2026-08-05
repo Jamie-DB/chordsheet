@@ -41,6 +41,10 @@ Import additionally accepts placements in anchor form `{line, chord, anchor, anc
 - `capo.ts` `displayChord`, `shapedKey` (key minus capo), `soundingFromShape` (entry while capo > 0), `scoreCapoFret`, `suggestCapo` (frets 0-9 ranked by open-shape friendliness: open majors and 7ths of C A G E D plus B7 score +3, open minors Am Em Dm +3, barre-only roots -1, weighted by occurrence count; ties break toward the lower fret).
 - `layout.ts` `buildChordRow` (print and export row builder; chords padded to their columns, collisions shifted right keeping one space between symbols) and `resolveAnchor` (nth-occurrence substring search: exact, then case-insensitive, then first word).
 
+## Paste ingestion (src/client/lib/tabPaste.ts)
+
+Song creation runs the pasted text through `parsePastedTab`. A line whose every whitespace-separated token parses as a chord symbol is a chord line: its tokens become placements at their exact columns on the following lyric line, and the chord line leaves the lyrics array. Chord lines with no lyric line beneath them (intros, instrumentals, stacked rows) attach to an inserted empty line so they still print as standalone rows. A "Written for capo" selector on the create form covers tabs written for a capo: symbols are read as shapes at that fret, transposed up to sounding for storage, and the song starts with that capo set, so the sheet initially shows exactly what was pasted and later capo moves never change the song. Known false positive: a lyric line consisting of a single note-name word ("A"); one click fixes it.
+
 ## Storage and exchange
 
 - localStorage key `chordsheet.songs.v1` holds the library. Autosave debounced 800 ms. Last-write-wins across tabs (accepted limitation).

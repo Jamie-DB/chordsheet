@@ -112,6 +112,25 @@ textarea {
   display: flex;
   gap: 0.75rem;
   margin-top: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.written-capo {
+  font-size: 0.85rem;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.written-capo select {
+  font: inherit;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+  color: var(--ink);
 }
 
 .song-list {
