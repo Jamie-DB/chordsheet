@@ -1,0 +1,83 @@
+/* The print sheet exists in the DOM at all times but only shows on paper. */
+
+.print-sheet {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 15mm;
+  }
+
+  body {
+    background: white;
+  }
+
+  .library,
+  .editor-bar,
+  .toolbar,
+  .capo-suggestions,
+  .review-panel,
+  .modal-backdrop,
+  .status,
+  .sheet,
+  .lyrics-editor {
+    display: none !important;
+  }
+
+  .editor {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .print-sheet {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10.5pt;
+    line-height: 1.32;
+    color: black;
+  }
+
+  .print-sheet pre {
+    margin: 0;
+    font-family: inherit;
+    white-space: pre;
+  }
+
+  .print-header {
+    margin-bottom: 14pt;
+    break-inside: avoid;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .print-header h1 {
+    font-size: 16pt;
+    margin: 0 0 2pt;
+  }
+
+  .print-artist {
+    font-size: 10pt;
+    margin-bottom: 2pt;
+  }
+
+  .print-key {
+    font-size: 11pt;
+    font-weight: 700;
+  }
+
+  .print-pair {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 3pt;
+  }
+
+  .print-chords {
+    font-weight: 700;
+  }
+
+  .print-gap {
+    height: 0.9em;
+  }
+}

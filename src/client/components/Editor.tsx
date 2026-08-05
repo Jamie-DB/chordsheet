@@ -7,6 +7,7 @@ import { lyricsFromPaste } from "../lib/storage";
 import { CapoSuggestions } from "./CapoSuggestions";
 import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportReview";
 import { LyricLine, type EditingModel } from "./LyricLine";
+import { PrintSheet } from "./PrintSheet";
 import { Toolbar } from "./Toolbar";
 
 interface Props {
@@ -202,7 +203,10 @@ export function Editor({ song, onBack, onChange }: Props) {
         onChange={onChange}
         onToggleSuggestions={() => setShowSuggestions((v) => !v)}
         showingSuggestions={showSuggestions}
+        onPrint={() => window.print()}
       />
+
+      <PrintSheet song={song} soundingKey={soundingKey} shapedKeyName={shaped} />
 
       {showSuggestions && soundingKey && (
         <CapoSuggestions
