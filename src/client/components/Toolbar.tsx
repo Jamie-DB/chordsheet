@@ -1,5 +1,6 @@
-import { keyName, keyPrefersFlat, shapedKey, transposeKeyName, transposeSymbol } from "../../engine";
+import { keyName, shapedKey } from "../../engine";
 import type { Song } from "../../shared/types";
+import { transposeSong } from "../lib/songOps";
 
 interface Props {
   song: Song;
@@ -10,6 +11,8 @@ interface Props {
   onToggleSuggestions(): void;
   showingSuggestions: boolean;
   onPrint?(): void;
+  onCopyText?(): void;
+  copiedText?: boolean;
 }
 
 const ALL_KEYS: string[] = [
@@ -20,18 +23,8 @@ const ALL_KEYS: string[] = [
 export function Toolbar(props: Props) {
   const { song, soundingKey, detectedKey, onChange } = props;
 
-  /** A real key change: rewrites every stored sounding chord. Capo is untouched. */
   function transpose(semitones: number) {
-    const newKey = soundingKey ? transposeKeyName(soundingKey, semitones) : null;
-    const prefer = newKey && keyPrefersFlat(newKey) ? "flat" : "sharp";
-    onChange({
-      ...song,
-      keyOverride: song.keyOverride ? transposeKeyName(song.keyOverride, semitones) : null,
-      placements: song.placements.map((p) => ({
-        ...p,
-        chord: transposeSymbol(p.chord, semitones, prefer),
-      })),
-    });
+    onChange(transposeSong(song, soundingKey, semitones));
   }
 
   const shaped = soundingKey ? shapedKey(soundingKey, song.capo) : null;
@@ -84,6 +77,9 @@ export function Toolbar(props: Props) {
         {song.capo > 0 && shaped && ` (play ${shaped} shapes)`}
       </span>
 
+      {props.onCopyText && (
+        <button onClick={props.onCopyText}>{props.copiedText ? "Copied" : "Copy text"}</button>
+      )}
       {props.onPrint && (
         <button className="primary" onClick={props.onPrint}>
           Print
