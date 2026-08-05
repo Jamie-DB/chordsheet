@@ -313,6 +313,85 @@ button.mini {
   font-family: var(--mono);
 }
 
+/* Toolbar and capo suggestions */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 10px;
+  padding: 0.5rem 0.9rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.toolbar-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.toolbar select {
+  font: inherit;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+}
+
+.toolbar-header-preview {
+  font-family: var(--mono);
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.capo-suggestions {
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.capo-suggestions ul {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+.capo-suggestions li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+}
+
+.capo-suggestions li.current {
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding-left: 0.4rem;
+}
+
+.capo-fret {
+  font-weight: 600;
+  min-width: 5.5rem;
+}
+
+.capo-shapes {
+  font-family: var(--mono);
+}
+
 /* Import review */
 
 .review-panel {

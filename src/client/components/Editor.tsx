@@ -4,8 +4,10 @@ import type { Song } from "../../shared/types";
 import { buildAiPrompt } from "../lib/aiPrompt";
 import { parseImport } from "../lib/exchange";
 import { lyricsFromPaste } from "../lib/storage";
+import { CapoSuggestions } from "./CapoSuggestions";
 import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportReview";
 import { LyricLine, type EditingModel } from "./LyricLine";
+import { Toolbar } from "./Toolbar";
 
 interface Props {
   song: Song;
@@ -25,8 +27,10 @@ function freshId(): string {
 }
 
 export function Editor({ song, onBack, onChange }: Props) {
-  const soundingKey = songKeyName(song);
+  const detectedKey = detectKey(song.placements.map((p) => p.chord))?.name ?? null;
+  const soundingKey = song.keyOverride ?? detectedKey;
   const shaped = soundingKey ? shapedKey(soundingKey, song.capo) : "C";
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const [editing, setEditing] = useState<EditingModel | null>(null);
   const [lyricsDraft, setLyricsDraft] = useState<string | null>(null);
@@ -189,11 +193,27 @@ export function Editor({ song, onBack, onChange }: Props) {
             <button onClick={() => setLyricsDraft(null)}>Cancel</button>
           </>
         )}
-        <div className="editor-key">
-          {soundingKey ? `Key: ${soundingKey}` : "Key: unknown"}
-          {song.capo > 0 && `, Capo ${song.capo}`}
-        </div>
       </div>
+
+      <Toolbar
+        song={song}
+        soundingKey={soundingKey}
+        detectedKey={detectedKey}
+        onChange={onChange}
+        onToggleSuggestions={() => setShowSuggestions((v) => !v)}
+        showingSuggestions={showSuggestions}
+      />
+
+      {showSuggestions && soundingKey && (
+        <CapoSuggestions
+          song={song}
+          soundingKey={soundingKey}
+          onApply={(fret) => {
+            onChange({ ...song, capo: fret });
+            setShowSuggestions(false);
+          }}
+        />
+      )}
 
       {notice && (
         <p className="status" role="status">
