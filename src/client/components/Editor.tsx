@@ -1,8 +1,10 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { detectKey, displayChord, isChordSymbol, shapedKey, soundingFromShape } from "../../engine";
 import type { Song } from "../../shared/types";
 import { buildAiPrompt } from "../lib/aiPrompt";
 import { parseImport } from "../lib/exchange";
+import { sheetText } from "../lib/sheetText";
+import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
 import { CapoSuggestions } from "./CapoSuggestions";
 import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportReview";
@@ -39,6 +41,32 @@ export function Editor({ song, onBack, onChange }: Props) {
   const [review, setReview] = useState<ReviewState | null>(null);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedText, setCopiedText] = useState(false);
+
+  // Keyboard shortcuts: +/- transpose, Escape closes any open panel.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const t = e.target as HTMLElement;
+      if (
+        t instanceof HTMLInputElement ||
+        t instanceof HTMLTextAreaElement ||
+        t instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+      if ((e.key === "+" || e.key === "=") && song.placements.length > 0) {
+        onChange(transposeSong(song, song.keyOverride ?? detectedKey, 1));
+      } else if (e.key === "-" && song.placements.length > 0) {
+        onChange(transposeSong(song, song.keyOverride ?? detectedKey, -1));
+      } else if (e.key === "Escape") {
+        setEditing(null);
+        setPasteOpen(false);
+        setShowSuggestions(false);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   const measureRef = useRef<HTMLSpanElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -204,6 +232,16 @@ export function Editor({ song, onBack, onChange }: Props) {
         onToggleSuggestions={() => setShowSuggestions((v) => !v)}
         showingSuggestions={showSuggestions}
         onPrint={() => window.print()}
+        copiedText={copiedText}
+        onCopyText={() => {
+          void navigator.clipboard
+            .writeText(sheetText(song, soundingKey, shaped))
+            .then(() => {
+              setCopiedText(true);
+              setTimeout(() => setCopiedText(false), 2500);
+            })
+            .catch(() => setNotice("Could not write to the clipboard."));
+        }}
       />
 
       <PrintSheet song={song} soundingKey={soundingKey} shapedKeyName={shaped} />
