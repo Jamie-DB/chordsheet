@@ -1,7 +1,10 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { detectKey, displayChord, isChordSymbol, shapedKey, soundingFromShape } from "../../engine";
 import type { Song } from "../../shared/types";
+import { buildAiPrompt } from "../lib/aiPrompt";
+import { parseImport } from "../lib/exchange";
 import { lyricsFromPaste } from "../lib/storage";
+import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportReview";
 import { LyricLine, type EditingModel } from "./LyricLine";
 
 interface Props {
@@ -28,6 +31,9 @@ export function Editor({ song, onBack, onChange }: Props) {
   const [editing, setEditing] = useState<EditingModel | null>(null);
   const [lyricsDraft, setLyricsDraft] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [review, setReview] = useState<ReviewState | null>(null);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const measureRef = useRef<HTMLSpanElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -108,6 +114,61 @@ export function Editor({ song, onBack, onChange }: Props) {
 
   const longLines = song.lyrics.filter((l) => l.length > 90).length;
 
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(buildAiPrompt(song));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      setNotice("Could not write to the clipboard. Copy from the browser permission prompt or try again.");
+    }
+  }
+
+  /** Returns an error message, or null when the reply imported cleanly. */
+  function submitReply(text: string): string | null {
+    const result = parseImport(text, song);
+    if (!result.ok) return result.error;
+    const fresh = result.song.placements.filter(
+      (p) => !song.placements.some((e) => e.line === p.line && e.col === p.col && e.chord === p.chord),
+    );
+    setReview({
+      proposals: result.song.placements,
+      fresh,
+      unresolved: result.unresolved,
+      lyricsRejected: result.lyricsRejected,
+    });
+    setPasteOpen(false);
+    return null;
+  }
+
+  function acceptAll() {
+    if (!review) return;
+    onChange({ ...song, placements: review.proposals });
+    setReview(null);
+  }
+
+  function acceptLine(line: number) {
+    if (!review) return;
+    onChange({
+      ...song,
+      placements: [
+        ...song.placements.filter((p) => p.line !== line),
+        ...review.proposals.filter((p) => p.line === line),
+      ],
+    });
+    const fresh = review.fresh.filter((p) => p.line !== line);
+    setReview(fresh.length > 0 ? { ...review, fresh } : null);
+  }
+
+  function acceptOne(id: string) {
+    if (!review) return;
+    const proposal = review.fresh.find((p) => p.id === id);
+    if (!proposal) return;
+    onChange({ ...song, placements: [...song.placements, proposal] });
+    const fresh = review.fresh.filter((p) => p.id !== id);
+    setReview(fresh.length > 0 ? { ...review, fresh } : null);
+  }
+
   return (
     <div className="editor">
       <div className="editor-bar">
@@ -117,7 +178,11 @@ export function Editor({ song, onBack, onChange }: Props) {
           {song.artist && <span className="muted"> {song.artist}</span>}
         </div>
         {lyricsDraft === null ? (
-          <button onClick={() => setLyricsDraft(song.lyrics.join("\n"))}>Edit lyrics</button>
+          <>
+            <button onClick={() => void copyPrompt()}>{copied ? "Copied" : "Copy AI prompt"}</button>
+            <button onClick={() => setPasteOpen(true)}>Paste AI reply</button>
+            <button onClick={() => setLyricsDraft(song.lyrics.join("\n"))}>Edit lyrics</button>
+          </>
         ) : (
           <>
             <button className="primary" onClick={saveLyrics}>Save lyrics</button>
@@ -140,6 +205,17 @@ export function Editor({ song, onBack, onChange }: Props) {
           {longLines} line(s) exceed 90 characters and may not fit a printed page.
         </p>
       )}
+
+      {review && (
+        <ImportReviewPanel
+          review={review}
+          renderChord={toShape}
+          onAcceptAll={acceptAll}
+          onAcceptLine={acceptLine}
+          onDiscard={() => setReview(null)}
+        />
+      )}
+      {pasteOpen && <PasteReplyModal onSubmit={submitReply} onClose={() => setPasteOpen(false)} />}
 
       {lyricsDraft !== null ? (
         <textarea
@@ -167,6 +243,9 @@ export function Editor({ song, onBack, onChange }: Props) {
                 .filter((p) => p.line === i)
                 .sort((a, b) => a.col - b.col)
                 .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord) }))}
+              proposals={(review?.fresh ?? [])
+                .filter((p) => p.line === i)
+                .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord) }))}
               charWidth={charWidth}
               pairHeight={pairHeight}
               lineCount={song.lyrics.length}
@@ -188,6 +267,7 @@ export function Editor({ song, onBack, onChange }: Props) {
               }}
               onCommitEdit={commitEdit}
               onCancelEdit={() => setEditing(null)}
+              onAcceptProposal={acceptOne}
             />
           ))}
         </div>
