@@ -411,6 +411,36 @@ button.mini {
   font-family: var(--mono);
 }
 
+/* Auto-scroll performance bar */
+
+.autoscroll {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+}
+
+.autoscroll input[type="range"] {
+  width: 9rem;
+  accent-color: var(--accent);
+}
+
+.autoscroll-bpm {
+  font-variant-numeric: tabular-nums;
+  min-width: 4.2rem;
+  color: var(--muted);
+}
+
 /* Import review */
 
 .review-panel {

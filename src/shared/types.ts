@@ -19,6 +19,8 @@ export interface Song {
   keyOverride: string | null;
   /** 0-9. Display transform only; stored chords stay sounding. */
   capo: number;
+  /** Tempo for auto-scroll; absent means the 80 BPM default. */
+  bpm?: number;
   createdAt: string;
   updatedAt: string;
 }
