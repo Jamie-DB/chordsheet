@@ -3,6 +3,7 @@ import { detectKey, displayChord, isChordSymbol, shapedKey, soundingFromShape } 
 import type { Song } from "../../shared/types";
 import { buildAiPrompt } from "../lib/aiPrompt";
 import { parseImport } from "../lib/exchange";
+import { chordsOnLine, deleteLine, editLine, insertLine } from "../lib/lineOps";
 import { normalizeSections } from "../lib/normalize";
 import { sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
@@ -46,6 +47,8 @@ export function Editor({ song, onBack, onChange }: Props) {
   const [copied, setCopied] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [autoEditLine, setAutoEditLine] = useState<number | null>(null);
+  const [notesOpen, setNotesOpen] = useState(() => Boolean(song.notes?.trim()));
 
   const bpm = song.bpm ?? 80;
 
@@ -305,6 +308,23 @@ export function Editor({ song, onBack, onChange }: Props) {
         </p>
       )}
 
+      {lyricsDraft === null && (
+        <details
+          className="notes-panel"
+          open={notesOpen}
+          onToggle={(e) => setNotesOpen((e.target as HTMLDetailsElement).open)}
+        >
+          <summary>Notes</summary>
+          <textarea
+            rows={3}
+            value={song.notes ?? ""}
+            placeholder="Tuning, strum pattern, reminders. Prints under the header."
+            onChange={(e) => onChange({ ...song, notes: e.target.value || undefined })}
+            aria-label="Song notes"
+          />
+        </details>
+      )}
+
       {song.placements.length > 0 && lyricsDraft === null && (
         <details className="chord-panel" open>
           <summary>Chords</summary>
@@ -337,7 +357,8 @@ export function Editor({ song, onBack, onChange }: Props) {
             {"0".repeat(10)}
           </span>
           <p className="sheet-hint muted">
-            Click a spot to add a chord. Click a chord to edit it; drag to move it.
+            Click a spot to add a chord. Click a chord to edit it; drag to move it. Double-click a
+            line to edit its words; hover the left edge for line tools.
             {song.capo > 0 && ` Entry is in shape space for capo ${song.capo}.`}
           </p>
           <AutoScrollBar
@@ -380,6 +401,18 @@ export function Editor({ song, onBack, onChange }: Props) {
               onCommitEdit={commitEdit}
               onCancelEdit={() => setEditing(null)}
               onAcceptProposal={acceptOne}
+              autoEdit={autoEditLine === i}
+              onAutoEditConsumed={() => setAutoEditLine(null)}
+              onCommitLine={(line2, text) => onChange(editLine(song, line2, text))}
+              onInsertLine={(at) => {
+                onChange(insertLine(song, at));
+                setAutoEditLine(at);
+              }}
+              onDeleteLine={(line2) => {
+                const n = chordsOnLine(song, line2);
+                if (n > 0 && !window.confirm(`Delete this line and its ${n} chord(s)?`)) return;
+                onChange(deleteLine(song, line2));
+              }}
             />
           ))}
         </div>
