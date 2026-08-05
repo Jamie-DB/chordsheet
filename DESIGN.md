@@ -45,6 +45,8 @@ Import additionally accepts placements in anchor form `{line, chord, anchor, anc
 
 Song creation runs the pasted text through `parsePastedTab`. A line whose every whitespace-separated token parses as a chord symbol is a chord line: its tokens become placements at their exact columns on the following lyric line, and the chord line leaves the lyrics array. Chord lines with no lyric line beneath them (intros, instrumentals, stacked rows) attach to an inserted empty line so they still print as standalone rows. A "Written for capo" selector on the create form covers tabs written for a capo: symbols are read as shapes at that fret, transposed up to sounding for storage, and the song starts with that capo set, so the sheet initially shows exactly what was pasted and later capo moves never change the song. Known false positive: a lyric line consisting of a single note-name word ("A"); one click fixes it.
 
+Section spacing is normalized everywhere (src/client/lib/normalize.ts): runs of blank lines collapse to exactly one, leading and trailing blanks are stripped, and placement line indices remap. Blank lines carrying placements (standalone instrumental rows) are content and never collapse. Applied on paste, on lyric save, on new-song import, and as a load-time migration that fixes and re-saves songs already in the library.
+
 ## Storage and exchange
 
 - localStorage key `chordsheet.songs.v1` holds the library. Autosave debounced 800 ms. Last-write-wins across tabs (accepted limitation).
@@ -77,7 +79,7 @@ Print CSS: `@media print` hides everything except `.print-sheet`; `@page { margi
 
 ## Chord diagrams (src/engine/shapes.ts, ChordDiagram.tsx, ChordChartRow.tsx)
 
-A CHORDS row shows SVG fretboard grids for the song's unique displayed shapes (post-capo) in first-appearance order: collapsible panel on screen, a row under the print header spanning both columns. Voicings resolve in order: curated open-chord table, known slash voicings, movable E-form and A-form templates (lower position wins). Chords outside the dictionary walk a simplification ladder (drop slash bass; maj9 to maj7; 13/9/11 to 7; m11 to m7 to m; dim family to m7b5/dim7; 2 to sus2 as a pure alias) so every parseable chord gets the closest reasonable shape, labeled with the song's own symbol; screen tooltips name the substitution. Dots only, no fingering numbers, by Jamie's choice.
+A CHORDS row shows SVG fretboard grids for the song's unique displayed shapes (post-capo) in first-appearance order: collapsible panel on screen, a row under the print header spanning both columns. Voicings resolve in order: curated open-chord table, known slash voicings, movable E-form and A-form templates (lower position wins). Chords outside the dictionary walk a simplification ladder (drop slash bass; maj9 to maj7; 13/9/11 to 7; m11 to m7 to m; dim family to m7b5/dim7; 2 to sus2 as a pure alias) so every parseable chord gets the closest reasonable shape, labeled with the song's own symbol; screen tooltips name the substitution. Dots only, no fingering numbers, by Jamie's choice. Hovering a chord chip in the editor for 330 ms pops the same diagram in a fixed-position card (above the chip, below for the top line); it hides on pointer-out, never appears mid-drag, and approximated shapes carry a "shows X" note.
 
 ## Later ideas (not scheduled)
 

@@ -1,7 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { voicingFor } from "../../engine";
 import { dragCol, dragLine } from "../lib/grid";
+import { ChordDiagram } from "./ChordDiagram";
 
 const DRAG_THRESHOLD_PX = 4;
+const HOVER_DELAY_MS = 330;
 
 interface Props {
   id: string;
@@ -17,10 +20,26 @@ interface Props {
   onOpenEdit(id: string): void;
 }
 
+interface HoverCard {
+  x: number;
+  y: number;
+  below: boolean;
+}
+
 export function ChordChip(props: Props) {
   const { id, line, col, label, charWidth, pairHeight, lineCount, maxColForLine } = props;
   const start = useRef<{ x: number; y: number } | null>(null);
   const [offset, setOffset] = useState<{ dx: number; dy: number } | null>(null);
+  const el = useRef<HTMLSpanElement>(null);
+  const hoverTimer = useRef<number | undefined>(undefined);
+  const [card, setCard] = useState<HoverCard | null>(null);
+
+  useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
+
+  function hideCard() {
+    window.clearTimeout(hoverTimer.current);
+    setCard(null);
+  }
 
   function targetFor(dxPx: number, dyPx: number) {
     const newLine = dragLine(line, dyPx, pairHeight, lineCount);
@@ -28,15 +47,30 @@ export function ChordChip(props: Props) {
     return { newLine, newCol };
   }
 
+  const shape = card ? voicingFor(label) : null;
+
   return (
     <span
+      ref={el}
       className={`chord-chip${offset ? " dragging" : ""}`}
       style={{
         left: `${col}ch`,
         transform: offset ? `translate(${offset.dx}px, ${offset.dy}px)` : undefined,
       }}
       onClick={(e) => e.stopPropagation()}
+      onPointerEnter={() => {
+        if (start.current) return;
+        window.clearTimeout(hoverTimer.current);
+        hoverTimer.current = window.setTimeout(() => {
+          const rect = el.current?.getBoundingClientRect();
+          if (!rect) return;
+          const below = rect.top < 130;
+          setCard({ x: rect.left, y: below ? rect.bottom + 6 : rect.top - 6, below });
+        }, HOVER_DELAY_MS);
+      }}
+      onPointerLeave={hideCard}
       onPointerDown={(e) => {
+        hideCard();
         e.stopPropagation();
         e.preventDefault();
         (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -67,9 +101,23 @@ export function ChordChip(props: Props) {
       onPointerCancel={() => {
         start.current = null;
         setOffset(null);
+        hideCard();
       }}
     >
       {label}
+      {card && shape && (
+        <span
+          className="chord-hover-card"
+          style={{
+            left: card.x,
+            top: card.y,
+            transform: card.below ? undefined : "translateY(-100%)",
+          }}
+        >
+          <ChordDiagram label={label} voicing={shape.voicing} />
+          {shape.approximated && <span className="hover-note">shows {shape.playedAs}</span>}
+        </span>
+      )}
     </span>
   );
 }

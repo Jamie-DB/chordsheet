@@ -3,6 +3,7 @@ import { detectKey, displayChord, isChordSymbol, shapedKey, soundingFromShape } 
 import type { Song } from "../../shared/types";
 import { buildAiPrompt } from "../lib/aiPrompt";
 import { parseImport } from "../lib/exchange";
+import { normalizeSections } from "../lib/normalize";
 import { sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
@@ -159,7 +160,7 @@ export function Editor({ song, onBack, onChange }: Props) {
     const lines = lyricsFromPaste(lyricsDraft);
     let dropped = 0;
     let clamped = 0;
-    const placements = song.placements.flatMap((p) => {
+    const kept = song.placements.flatMap((p) => {
       if (p.line >= lines.length) {
         dropped += 1;
         return [];
@@ -171,7 +172,8 @@ export function Editor({ song, onBack, onChange }: Props) {
       }
       return [p];
     });
-    onChange({ ...song, lyrics: lines, placements });
+    const normalized = normalizeSections(lines, kept);
+    onChange({ ...song, lyrics: normalized.lyrics, placements: normalized.placements });
     setLyricsDraft(null);
     setNotice(
       dropped > 0 || clamped > 0
