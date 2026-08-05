@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isChordLine, parsePastedTab } from "./tabPaste";
+import { detectBpm, isChordLine, parsePastedTab } from "./tabPaste";
 
 describe("isChordLine", () => {
   it("accepts rows of chord symbols", () => {
@@ -77,5 +77,24 @@ describe("parsePastedTab", () => {
   it("expands tabs before measuring columns", () => {
     const parsed = parsePastedTab("\tG\nHello world friends");
     expect(parsed.placements[0].col).toBe(4);
+  });
+
+  it("carries a detected tempo", () => {
+    expect(parsePastedTab("Tempo: 120\nG\nHello there friend").bpm).toBe(120);
+    expect(parsePastedTab("G\nHello there friend").bpm).toBeNull();
+  });
+});
+
+describe("detectBpm", () => {
+  it("reads common tempo declarations", () => {
+    expect(detectBpm(["Tempo: 120"])).toBe(120);
+    expect(detectBpm(["tempo = 96"])).toBe(96);
+    expect(detectBpm(["Capo 4, 72 BPM"])).toBe(72);
+    expect(detectBpm(["140bpm"])).toBe(140);
+  });
+  it("ignores implausible or absent tempos", () => {
+    expect(detectBpm(["Tempo: 999"])).toBeNull();
+    expect(detectBpm(["no tempo here"])).toBeNull();
+    expect(detectBpm([])).toBeNull();
   });
 });

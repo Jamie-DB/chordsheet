@@ -6,6 +6,7 @@ import { parseImport } from "../lib/exchange";
 import { sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
+import { AutoScrollBar } from "./AutoScrollBar";
 import { CapoSuggestions } from "./CapoSuggestions";
 import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportReview";
 import { LyricLine, type EditingModel } from "./LyricLine";
@@ -42,6 +43,9 @@ export function Editor({ song, onBack, onChange }: Props) {
   const [pasteOpen, setPasteOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
+  const [playing, setPlaying] = useState(false);
+
+  const bpm = song.bpm ?? 80;
 
   // Keyboard shortcuts: +/- transpose, Escape closes any open panel.
   useEffect(() => {
@@ -58,10 +62,15 @@ export function Editor({ song, onBack, onChange }: Props) {
         onChange(transposeSong(song, song.keyOverride ?? detectedKey, 1));
       } else if (e.key === "-" && song.placements.length > 0) {
         onChange(transposeSong(song, song.keyOverride ?? detectedKey, -1));
+      } else if (e.key === " ") {
+        if (t instanceof HTMLButtonElement) return;
+        e.preventDefault();
+        setPlaying((v) => !v);
       } else if (e.key === "Escape") {
         setEditing(null);
         setPasteOpen(false);
         setShowSuggestions(false);
+        setPlaying(false);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -81,6 +90,31 @@ export function Editor({ song, onBack, onChange }: Props) {
     const pair = sheetRef.current?.querySelector(".line-pair");
     if (pair instanceof HTMLElement && pair.offsetHeight > 0) setPairHeight(pair.offsetHeight);
   }, [song.lyrics.length, lyricsDraft]);
+
+  // Auto-scroll: one line pair is assumed to span 8 beats (two 4/4 bars).
+  useEffect(() => {
+    if (!playing) return;
+    const pxPerSec = (pairHeight * bpm) / 60 / 8;
+    let raf = 0;
+    let last = performance.now();
+    let carry = 0;
+    const step = (now: number) => {
+      carry += pxPerSec * ((now - last) / 1000);
+      last = now;
+      const px = Math.floor(carry);
+      if (px >= 1) {
+        window.scrollBy(0, px);
+        carry -= px;
+      }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+        setPlaying(false);
+        return;
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [playing, bpm, pairHeight]);
 
   const maxColForLine = (line: number) => song.lyrics[line]?.length ?? 0;
 
@@ -296,6 +330,12 @@ export function Editor({ song, onBack, onChange }: Props) {
             Click a spot to add a chord. Click a chord to edit it; drag to move it.
             {song.capo > 0 && ` Entry is in shape space for capo ${song.capo}.`}
           </p>
+          <AutoScrollBar
+            bpm={bpm}
+            playing={playing}
+            onToggle={() => setPlaying((v) => !v)}
+            onBpm={(next) => onChange({ ...song, bpm: next })}
+          />
           {song.lyrics.map((line, i) => (
             <LyricLine
               key={i}

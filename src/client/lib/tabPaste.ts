@@ -8,6 +8,20 @@ export interface ParsedTab {
   placements: ChordPlacement[];
   /** How many chord lines were converted into placements. */
   chordLinesConverted: number;
+  /** Tempo found in the pasted text ("Tempo: 120", "96 bpm"), else null. */
+  bpm: number | null;
+}
+
+/** Scan pasted text for a tempo declaration. The line itself is kept as text. */
+export function detectBpm(lines: string[]): number | null {
+  for (const line of lines) {
+    const m = /\b(\d{2,3})\s*bpm\b/i.exec(line) ?? /\btempo\b[^0-9]{0,6}(\d{2,3})/i.exec(line);
+    if (m) {
+      const bpm = Number(m[1]);
+      if (bpm >= 30 && bpm <= 300) return bpm;
+    }
+  }
+  return null;
 }
 
 interface Token {
@@ -78,5 +92,5 @@ export function parsePastedTab(text: string, writtenForCapo: number = 0): Parsed
     }
   }
 
-  return { lyrics, placements, chordLinesConverted };
+  return { lyrics, placements, chordLinesConverted, bpm: detectBpm(raw) };
 }

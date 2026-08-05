@@ -100,6 +100,7 @@ export function useSongStore(): [AppState, SongActions] {
           placements: parsed.placements,
           keyOverride: null,
           capo: writtenForCapo,
+          bpm: parsed.bpm ?? undefined,
           createdAt: now,
           updatedAt: now,
         };

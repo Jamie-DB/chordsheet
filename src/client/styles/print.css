@@ -21,7 +21,8 @@
   .modal-backdrop,
   .status,
   .sheet,
-  .lyrics-editor {
+  .lyrics-editor,
+  .autoscroll {
     display: none !important;
   }
 
@@ -35,8 +36,15 @@
     display: block;
     font-family: var(--mono);
     font-size: 10.5pt;
-    line-height: 1.32;
+    line-height: 1.22;
     color: black;
+  }
+
+  /* Dense but glanceable: same font, sequential-fill columns when lines fit. */
+  .print-body.two-col {
+    column-count: 2;
+    column-gap: 7mm;
+    column-fill: auto;
   }
 
   .print-sheet pre {
@@ -46,7 +54,7 @@
   }
 
   .print-header {
-    margin-bottom: 14pt;
+    margin-bottom: 9pt;
     break-inside: avoid;
     break-after: avoid;
     page-break-after: avoid;
@@ -70,7 +78,7 @@
   .print-pair {
     break-inside: avoid;
     page-break-inside: avoid;
-    margin-bottom: 3pt;
+    margin-bottom: 1.5pt;
   }
 
   .print-chords {
@@ -78,6 +86,6 @@
   }
 
   .print-gap {
-    height: 0.9em;
+    height: 0.45em;
   }
 }
