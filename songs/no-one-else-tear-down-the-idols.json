@@ -23,6 +23,7 @@
     "You’re the only one",
     "",
     "[Chorus]",
+    "Page 1/4",
     "",
     "  No one else, no one else",
     "  Deserves our worship",
@@ -54,6 +55,7 @@
     "[Bridge]",
     "",
     "Tear down the idols",
+    "Page 2/4",
     "We want revival",
     "Clean hands and pure hearts",
     "We behold You",
@@ -85,6 +87,7 @@
     "[Bridge]",
     "",
     "Tear down the idols",
+    "Page 3/4",
     "We want revival",
     "Clean hands and pure hearts",
     "We behold You",
@@ -212,481 +215,481 @@
     },
     {
       "id": "6f0b2956-280d-4d95-a2f2-335ca2e55ee5",
-      "line": 20,
+      "line": 21,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "2fad9484-61a8-4078-89ef-17f079da28da",
-      "line": 21,
+      "line": 22,
       "col": 0,
       "chord": "C"
     },
     {
       "id": "a9909c91-413e-4b84-831b-15a267e3b59c",
-      "line": 22,
+      "line": 23,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "3cda6c35-63d8-450d-838a-b308e833b6e1",
-      "line": 23,
+      "line": 24,
       "col": 0,
       "chord": "C"
     },
     {
       "id": "e7eb709a-bada-4c79-8b80-cadc94a2647e",
-      "line": 24,
+      "line": 25,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "ba4bc906-fb38-4970-a76e-1116c6cd1549",
-      "line": 24,
+      "line": 25,
       "col": 9,
       "chord": "Bb"
     },
     {
       "id": "36771e0b-61c8-436d-9116-5bd81c07b067",
-      "line": 24,
+      "line": 25,
       "col": 23,
       "chord": "C"
     },
     {
       "id": "6a5e0752-28e7-4ed6-a960-7a1db0e7b21e",
-      "line": 25,
+      "line": 26,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "e6552890-4eac-46f7-8d22-1c29d22169c2",
-      "line": 25,
+      "line": 26,
       "col": 9,
       "chord": "Bb"
     },
     {
       "id": "d08b6c09-3942-460f-8232-74638ba16551",
-      "line": 25,
+      "line": 26,
       "col": 23,
       "chord": "C"
     },
     {
       "id": "60a3d7ce-8c6b-406f-9467-6030ca4d7164",
-      "line": 29,
+      "line": 30,
       "col": 2,
       "chord": "F"
     },
     {
       "id": "9d364b5e-78a3-4d60-94e6-33484341cd1e",
-      "line": 30,
+      "line": 31,
       "col": 2,
       "chord": "Gm"
     },
     {
       "id": "6916ee40-c923-45b6-a37a-9fe7d88b3374",
-      "line": 31,
+      "line": 32,
       "col": 7,
       "chord": "Bb"
     },
     {
       "id": "fd7a3acb-f6e8-4254-a779-7d30a33b7968",
-      "line": 32,
+      "line": 33,
       "col": 5,
       "chord": "C"
     },
     {
       "id": "821e48bb-b8bc-4842-8f31-f89819f0a444",
-      "line": 33,
+      "line": 34,
       "col": 4,
       "chord": "F"
     },
     {
       "id": "97aedb54-2e18-4741-a79c-823b0aa4cf43",
-      "line": 34,
+      "line": 35,
       "col": 2,
       "chord": "Gm"
     },
     {
       "id": "02643196-cd24-44ce-870a-def47d9ef9c7",
-      "line": 35,
+      "line": 36,
       "col": 10,
       "chord": "Bb"
     },
     {
       "id": "3a767d3c-f933-4353-acd9-4fc32e644048",
-      "line": 36,
+      "line": 37,
       "col": 10,
       "chord": "C"
     },
     {
       "id": "f841d093-933b-4186-8ece-08566da47634",
-      "line": 40,
+      "line": 41,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "ca4556ee-49a6-4832-b433-ff467ba3e505",
-      "line": 41,
+      "line": 42,
       "col": 0,
       "chord": "C"
     },
     {
       "id": "591ceff5-ca79-4f45-9d21-68ec9a29ffda",
-      "line": 42,
+      "line": 43,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "85a0c44b-0db9-40ef-af00-c584c0af7f21",
-      "line": 43,
+      "line": 44,
       "col": 0,
       "chord": "C"
     },
     {
       "id": "2b380bd4-3bb7-4880-a3d6-426bc76deb0b",
-      "line": 44,
+      "line": 45,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "35d9d3cb-2324-491c-91cc-b53d75400055",
-      "line": 44,
+      "line": 45,
       "col": 9,
       "chord": "Bb"
     },
     {
       "id": "ae990139-14f0-44e5-b32e-a66d9acbaf60",
-      "line": 44,
+      "line": 45,
       "col": 23,
       "chord": "C"
     },
     {
       "id": "ca202902-83e3-43ce-81f3-9ac41853c778",
-      "line": 45,
+      "line": 46,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "23a0c344-0629-4836-ae6c-5ae3632458c2",
-      "line": 45,
+      "line": 46,
       "col": 9,
       "chord": "Bb"
     },
     {
       "id": "6f658241-37cf-4874-aa2a-c028e1dca19c",
-      "line": 45,
+      "line": 46,
       "col": 23,
       "chord": "C"
     },
     {
       "id": "b3ce68f8-2dd4-48e1-bb6c-acc85efe9c08",
-      "line": 49,
+      "line": 50,
       "col": 14,
       "chord": "Bb"
     },
     {
       "id": "27915429-29b3-488b-aeb7-a6d1e3b83b9a",
-      "line": 50,
-      "col": 10,
-      "chord": "C"
-    },
-    {
-      "id": "d955479e-19c1-44cc-b839-66488457fa1a",
-      "line": 51,
-      "col": 16,
-      "chord": "Dm"
-    },
-    {
-      "id": "cf70360d-4e50-452f-b1db-5cb294227b66",
       "line": 52,
       "col": 10,
       "chord": "C"
     },
     {
-      "id": "cb6cb23b-26f8-45a5-802b-3e277352df6b",
+      "id": "d955479e-19c1-44cc-b839-66488457fa1a",
+      "line": 53,
+      "col": 16,
+      "chord": "Dm"
+    },
+    {
+      "id": "cf70360d-4e50-452f-b1db-5cb294227b66",
       "line": 54,
+      "col": 10,
+      "chord": "C"
+    },
+    {
+      "id": "cb6cb23b-26f8-45a5-802b-3e277352df6b",
+      "line": 56,
       "col": 12,
       "chord": "Bb"
     },
     {
       "id": "d0682022-ff0e-4b83-ac7c-fd44bdf7c54a",
-      "line": 55,
+      "line": 57,
       "col": 15,
       "chord": "C"
     },
     {
       "id": "6a0571ef-0cac-4059-868f-888952daa389",
-      "line": 56,
+      "line": 58,
       "col": 13,
       "chord": "Dm"
     },
     {
       "id": "2ff82989-2e59-4cb2-a9fa-773b0cf719e8",
-      "line": 57,
+      "line": 59,
       "col": 17,
       "chord": "C"
     },
     {
       "id": "c7b233f2-50e5-44f6-8fe7-af5ed7ef78f7",
-      "line": 59,
+      "line": 61,
       "col": 14,
       "chord": "Bb"
     },
     {
       "id": "5bebfe40-cb67-457e-b757-7f7bf7bac824",
-      "line": 60,
-      "col": 10,
-      "chord": "C"
-    },
-    {
-      "id": "1828aadf-eebb-42ab-bb7a-b1390a291d6b",
-      "line": 61,
-      "col": 16,
-      "chord": "Dm"
-    },
-    {
-      "id": "6978d451-cd2d-4389-b316-60c40cf2d9bb",
       "line": 62,
       "col": 10,
       "chord": "C"
     },
     {
-      "id": "6dbb0531-5093-40ab-9e54-11f15dcaf637",
+      "id": "1828aadf-eebb-42ab-bb7a-b1390a291d6b",
+      "line": 63,
+      "col": 16,
+      "chord": "Dm"
+    },
+    {
+      "id": "6978d451-cd2d-4389-b316-60c40cf2d9bb",
       "line": 64,
+      "col": 10,
+      "chord": "C"
+    },
+    {
+      "id": "6dbb0531-5093-40ab-9e54-11f15dcaf637",
+      "line": 66,
       "col": 12,
       "chord": "Bb"
     },
     {
       "id": "2bfde5be-9e59-48e0-b793-79f36f27e44c",
-      "line": 65,
+      "line": 67,
       "col": 15,
       "chord": "C"
     },
     {
       "id": "4e4d7f2f-798f-4f98-ba0f-8f9386d8d8a4",
-      "line": 66,
+      "line": 68,
       "col": 13,
       "chord": "Dm"
     },
     {
       "id": "2b577c04-900b-4d1d-8776-550218aec733",
-      "line": 67,
+      "line": 69,
       "col": 17,
       "chord": "C"
     },
     {
       "id": "e1a76131-a983-4f7c-8db4-fa5569663dbb",
-      "line": 71,
-      "col": 0,
-      "chord": "F"
-    },
-    {
-      "id": "32655a4f-ccf8-45f2-9b5d-791faf8641e8",
-      "line": 72,
-      "col": 0,
-      "chord": "C"
-    },
-    {
-      "id": "742362e9-9d0b-481b-8627-e1ad1422b55a",
       "line": 73,
       "col": 0,
       "chord": "F"
     },
     {
-      "id": "c8ab0c79-8060-400e-b852-81133f68f832",
+      "id": "32655a4f-ccf8-45f2-9b5d-791faf8641e8",
       "line": 74,
       "col": 0,
       "chord": "C"
     },
     {
-      "id": "b60d4d86-9384-4f45-9cda-0c2a8b5a13ad",
+      "id": "742362e9-9d0b-481b-8627-e1ad1422b55a",
       "line": 75,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "c8ab0c79-8060-400e-b852-81133f68f832",
+      "line": 76,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "b60d4d86-9384-4f45-9cda-0c2a8b5a13ad",
+      "line": 77,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "e1f87ddc-ea55-4d60-805c-06e0b3c3923c",
-      "line": 75,
+      "line": 77,
       "col": 9,
       "chord": "Bb"
     },
     {
       "id": "36f92a28-bcfa-4308-8730-1b05f0c54c14",
-      "line": 75,
+      "line": 77,
       "col": 23,
       "chord": "C"
     },
     {
       "id": "5b08491c-9e43-45bc-9bbf-62927afdbbe7",
-      "line": 76,
+      "line": 78,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "3b1b83da-2884-4ec6-8de1-ea1193b4677c",
-      "line": 76,
+      "line": 78,
       "col": 9,
       "chord": "Bb"
     },
     {
       "id": "57e205f2-60ff-44b9-a919-a87b0ef0bada",
-      "line": 76,
+      "line": 78,
       "col": 23,
       "chord": "C"
     },
     {
       "id": "dbafe0f5-0c5c-4269-9235-5d41e9fa39df",
-      "line": 80,
+      "line": 82,
       "col": 14,
       "chord": "Bb"
     },
     {
       "id": "fb9b1604-3150-4690-adbb-2aa68c20c3b4",
-      "line": 81,
+      "line": 84,
       "col": 10,
       "chord": "C"
     },
     {
       "id": "1bd1e1d5-ead0-4649-ad01-d8ef19b8616b",
-      "line": 82,
+      "line": 85,
       "col": 16,
       "chord": "Dm"
     },
     {
       "id": "b9f18a81-51a8-4ba4-99d1-d0c119bccd96",
-      "line": 83,
+      "line": 86,
       "col": 10,
       "chord": "C"
     },
     {
       "id": "23941d04-77a7-4f10-8600-80b03947be07",
-      "line": 85,
+      "line": 88,
       "col": 12,
       "chord": "Bb"
     },
     {
       "id": "3faef11f-d72f-482f-b9ec-213fefa8e15e",
-      "line": 86,
+      "line": 89,
       "col": 15,
       "chord": "C"
     },
     {
       "id": "44b90043-5517-4b6a-8440-31eb90c1df29",
-      "line": 87,
+      "line": 90,
       "col": 13,
       "chord": "Dm"
     },
     {
       "id": "4f26bec1-5f61-4e92-81f5-bf74caedc764",
-      "line": 88,
+      "line": 91,
       "col": 17,
       "chord": "C"
     },
     {
       "id": "5338b0b6-c624-4334-8359-3ecf1b25599a",
-      "line": 90,
+      "line": 93,
       "col": 14,
       "chord": "Bb"
     },
     {
       "id": "9721d431-ead5-4398-bb1a-94a9ac512b70",
-      "line": 91,
+      "line": 94,
       "col": 10,
       "chord": "C"
     },
     {
       "id": "79987dfb-9339-4f54-869d-49eeaa992a15",
-      "line": 92,
+      "line": 95,
       "col": 16,
       "chord": "Dm"
     },
     {
       "id": "4d6ce953-496a-4488-83fb-44e1db280939",
-      "line": 93,
+      "line": 96,
       "col": 10,
       "chord": "C"
     },
     {
       "id": "fcbbef87-b823-4aec-8f7c-fa80ed399b66",
-      "line": 95,
+      "line": 98,
       "col": 12,
       "chord": "Bb"
     },
     {
       "id": "d7b92fb1-88ce-42ee-b554-5b2fb75f2ce5",
-      "line": 96,
+      "line": 99,
       "col": 15,
       "chord": "C"
     },
     {
       "id": "21c05efd-d3c0-4e99-85b1-063443f36393",
-      "line": 97,
+      "line": 100,
       "col": 13,
       "chord": "Dm"
     },
     {
       "id": "ef2568e6-defb-439f-be51-836cb3bc74fb",
-      "line": 98,
+      "line": 101,
       "col": 17,
       "chord": "C"
     },
     {
       "id": "ce3b329d-1c6c-4425-b94d-eb3c76d1df29",
-      "line": 102,
+      "line": 105,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "fed4d975-8da3-4201-9134-43f645cc1fe6",
-      "line": 103,
+      "line": 106,
       "col": 0,
       "chord": "C"
     },
     {
       "id": "248495d9-5036-4fe9-abfd-10b47737c8ef",
-      "line": 104,
+      "line": 107,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "e162692b-db68-4056-a476-06ca52fc973f",
-      "line": 105,
+      "line": 108,
       "col": 0,
       "chord": "C"
     },
     {
       "id": "b085264a-61a9-417a-a41b-1241185352d1",
-      "line": 106,
+      "line": 109,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "643a4b8a-ed82-424c-9b84-b57d71a20152",
-      "line": 106,
+      "line": 109,
       "col": 9,
       "chord": "Bb"
     },
     {
       "id": "1b0c1db0-5ecc-48d2-8d2e-75ed618196b6",
-      "line": 106,
+      "line": 109,
       "col": 23,
       "chord": "C"
     },
     {
       "id": "49b4026c-e9b2-4cfa-80ec-3560835c3c42",
-      "line": 107,
+      "line": 110,
       "col": 0,
       "chord": "F"
     },
     {
       "id": "9663a0e2-b1e5-4f00-9458-c27f2da31ac9",
-      "line": 107,
+      "line": 110,
       "col": 9,
       "chord": "Bb"
     },
     {
       "id": "3a9d2151-582f-4865-8602-d28dc8552a7a",
-      "line": 107,
+      "line": 110,
       "col": 23,
       "chord": "C"
     }

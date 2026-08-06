@@ -121,7 +121,10 @@ export function Editor({ song, onBack, onChange }: Props) {
     return () => cancelAnimationFrame(raf);
   }, [playing, bpm, pairHeight]);
 
-  const maxColForLine = (line: number) => song.lyrics[line]?.length ?? 0;
+  // Chords may sit past the end of any line (between-phrase progressions),
+  // so every lane is interactive out to the song's grid width.
+  const gridCols = Math.max(50, ...song.lyrics.map((l) => l.length));
+  const maxColForLine = (_line: number) => gridCols;
 
   /** Convert typed text (shape space under capo) to the stored sounding symbol. */
   function toSounding(typed: string): string {
@@ -162,25 +165,19 @@ export function Editor({ song, onBack, onChange }: Props) {
     if (lyricsDraft === null) return;
     const lines = lyricsFromPaste(lyricsDraft);
     let dropped = 0;
-    let clamped = 0;
-    const kept = song.placements.flatMap((p) => {
+    const kept = song.placements.filter((p) => {
       if (p.line >= lines.length) {
         dropped += 1;
-        return [];
+        return false;
       }
-      const max = lines[p.line].length;
-      if (p.col > max) {
-        clamped += 1;
-        return [{ ...p, col: max }];
-      }
-      return [p];
+      return true;
     });
     const normalized = normalizeSections(lines, kept);
     onChange({ ...song, lyrics: normalized.lyrics, placements: normalized.placements });
     setLyricsDraft(null);
     setNotice(
-      dropped > 0 || clamped > 0
-        ? `Lyrics updated. ${dropped} chord(s) lost their line and were removed; ${clamped} moved to a line end. Check placements.`
+      dropped > 0
+        ? `Lyrics updated. ${dropped} chord(s) lost their line and were removed. Check placements.`
         : null,
     );
   }

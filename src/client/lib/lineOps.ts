@@ -6,14 +6,15 @@ export function isSectionLabel(line: string): boolean {
   return /^\[.+\]$/.test(line.trim());
 }
 
-/** Replace one line's text; that line's chords clamp, nothing else moves. */
+/**
+ * Replace one line's text; nothing else moves. Chords keep their columns
+ * even past the new end of the words, a legitimate state used for
+ * between-phrase progressions.
+ */
 export function editLine(song: Song, index: number, text: string): Song {
   const cleaned = text.replace(/\t/g, "    ").replace(/\s+$/g, "");
   const lyrics = song.lyrics.map((l, i) => (i === index ? cleaned : l));
-  const placements = song.placements.map((p) =>
-    p.line === index && p.col > cleaned.length ? { ...p, col: cleaned.length } : p,
-  );
-  const n = normalizeSections(lyrics, placements);
+  const n = normalizeSections(lyrics, song.placements);
   return { ...song, lyrics: n.lyrics, placements: n.placements };
 }
 

@@ -86,10 +86,12 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
     }
     const lineText = base.lyrics[p.line];
     if ("col" in p) {
+      // Past-end columns are legitimate (between-phrase progressions);
+      // only an absurd value gets bounded.
       placements.push({
         id: p.id ?? freshId(),
         line: p.line,
-        col: Math.max(0, Math.min(lineText.length, p.col)),
+        col: Math.max(0, Math.min(200, p.col)),
         chord: p.chord,
       });
     } else {
