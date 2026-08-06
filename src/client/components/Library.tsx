@@ -148,14 +148,25 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
       <section className="song-list">
         <div className="song-list-head">
           <h2>Library</h2>
-          {diskSyncSupported() && sorted.length > 0 && (
+          {sorted.length > 0 && (
             <span className="song-list-tools">
-              <button onClick={() => void saveAll(false)} title="Write every song as JSON into a folder you choose (checks disk first, skips unchanged files)">
+              <button
+                onClick={() =>
+                  diskSyncSupported()
+                    ? void saveAll(false)
+                    : setSyncMsg(
+                        "Folder saving needs a Chromium browser (Chrome, Edge, Arc, Brave). In this browser, use per-song Export instead.",
+                      )
+                }
+                title="Write every song as JSON into a folder you choose (checks disk first, skips unchanged files)"
+              >
                 Save all to folder
               </button>
-              <button className="mini" onClick={() => void saveAll(true)} title="Pick a different folder">
-                change folder
-              </button>
+              {diskSyncSupported() && (
+                <button className="mini" onClick={() => void saveAll(true)} title="Pick a different folder">
+                  change folder
+                </button>
+              )}
             </span>
           )}
         </div>
