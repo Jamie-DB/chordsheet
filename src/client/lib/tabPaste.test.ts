@@ -90,6 +90,12 @@ describe("parsePastedTab", () => {
     expect(parsed.placements.map((p) => p.line)).toEqual([1, 1, 1]);
   });
 
+  it("keeps a chord row standalone when a section label follows", () => {
+    const parsed = parsePastedTab("G C D\n[Chorus]\nSing the words");
+    expect(parsed.lyrics).toEqual(["", "[Chorus]", "Sing the words"]);
+    expect(parsed.placements.every((p) => p.line === 0)).toBe(true);
+  });
+
   it("transposes shapes to sounding when written for a capo", () => {
     const parsed = parsePastedTab("C        Am\nHello my friend", 4);
     expect(parsed.placements.map((p) => p.chord)).toEqual(["E", "C#m"]);
@@ -151,6 +157,12 @@ describe("repairChordTextLines", () => {
     const result = repairChordTextLines(["A", "wretch like me"], []);
     expect(result.changed).toBe(false);
     expect(result.lyrics).toEqual(["A", "wretch like me"]);
+  });
+
+  it("never attaches a chord row to a section label", () => {
+    const result = repairChordTextLines(["|D / F#m7 /|", "[Verse 1]", "The words begin"], []);
+    expect(result.lyrics).toEqual(["", "[Verse 1]", "The words begin"]);
+    expect(result.placements.every((x) => x.line === 0)).toBe(true);
   });
 
   it("skips rows that already carry placements and remaps others", () => {

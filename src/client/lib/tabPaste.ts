@@ -1,6 +1,7 @@
 import { isChordSymbol, transposeSymbol } from "../../engine";
 import type { ChordPlacement } from "../../shared/types";
 import { freshId } from "./ids";
+import { isSectionLabel } from "./lineOps";
 import { isPageArtifact, normalizeSections } from "./normalize";
 import { lyricsFromPaste } from "./storage";
 
@@ -114,7 +115,8 @@ export function parsePastedTab(text: string, writtenForCapo: number = 0): Parsed
     }
     chordLinesConverted += 1;
     const next = raw[i + 1];
-    const nextIsLyric = next !== undefined && next.length > 0 && !isChordLine(next);
+    const nextIsLyric =
+      next !== undefined && next.length > 0 && !isChordLine(next) && !isSectionLabel(next);
     if (nextIsLyric) {
       // The lyric line will be pushed on the next iteration at this index.
       addPlacements(notation, lyrics.length);
@@ -181,6 +183,7 @@ export function repairChordTextLines(
       next !== undefined &&
       next.trim().length > 0 &&
       parseChordNotationLine(next) === null &&
+      !isSectionLabel(next) &&
       !linesWithChords.has(i + 1);
 
     const target = newLyrics.length;
