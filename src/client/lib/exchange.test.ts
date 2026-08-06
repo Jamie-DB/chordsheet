@@ -100,6 +100,31 @@ describe("parseImport", () => {
   });
 });
 
+describe("library backup files", () => {
+  it("round-trips a library", async () => {
+    const { libraryToJson, parseLibraryFile } = await import("./exchange");
+    const other = { ...song, id: "second", title: "Second" };
+    const parsed = parseLibraryFile(libraryToJson([song, other]));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.songs.map((s) => s.id)).toEqual(["test-song", "second"]);
+    expect(parsed!.invalid).toBe(0);
+  });
+
+  it("counts invalid entries instead of absorbing them", async () => {
+    const { parseLibraryFile } = await import("./exchange");
+    const parsed = parseLibraryFile(JSON.stringify({ chordsheetLibrary: 1, songs: [song, { junk: true }] }));
+    expect(parsed!.songs).toHaveLength(1);
+    expect(parsed!.invalid).toBe(1);
+  });
+
+  it("returns null for non-library JSON so single-song import handles it", async () => {
+    const { parseLibraryFile, songToJson: toJson } = await import("./exchange");
+    expect(parseLibraryFile(toJson(song))).toBeNull();
+    expect(parseLibraryFile("{not json")).toBeNull();
+    expect(parseLibraryFile("[1,2]")).toBeNull();
+  });
+});
+
 describe("slugify", () => {
   it("slugs and dedupes", () => {
     expect(slugify("Amazing Grace!", new Set())).toBe("amazing-grace");

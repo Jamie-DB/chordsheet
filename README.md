@@ -27,7 +27,7 @@ Shortcuts: `+` and `-` transpose; `Space` toggles auto-scroll; `Escape` closes a
 
 ## Storage
 
-Songs autosave to browser localStorage. "Save all to folder" in the library writes every song as `<id>.json` straight into a folder you pick once (choose `songs/` here); it checks the disk first and skips files that are already up to date, so repeated saves are idempotent. Commit `songs/` when you want the backup in git (this repo is private). Per-song "Export" (a browser download) and "Import JSON" remain for one-offs and non-Chromium browsers. `songs/amazing-grace.json` is the public domain seed used by tests.
+Songs autosave to browser localStorage. "Save all to folder" in the library writes every song as `<id>.json` straight into a folder you pick once (choose `songs/` here); it checks the disk first and skips files that are already up to date, so repeated saves are idempotent. Commit `songs/` when you want the backup in git (this repo is private). Note for Brave: it disables the File System Access API by default; enable it at brave://flags (search "File System Access API") and relaunch, or use "Download backup", which saves the whole library as one chordsheet-library.json in any browser and restores through Import. Per-song "Export" and "Import JSON" remain for one-offs. `songs/amazing-grace.json` is the public domain seed used by tests.
 
 ## Layout model
 
