@@ -137,6 +137,22 @@ textarea {
   margin-top: 2rem;
 }
 
+.song-list-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.song-list-head h2 {
+  margin-right: auto;
+}
+
+.song-list-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .song-list ul {
   list-style: none;
   margin: 0;

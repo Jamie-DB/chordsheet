@@ -27,7 +27,7 @@ Shortcuts: `+` and `-` transpose; `Space` toggles auto-scroll; `Escape` closes a
 
 ## Storage
 
-Songs autosave to browser localStorage. "Export" downloads a song as JSON; keep those files in `songs/` and commit them (this repo is private). "Import JSON" loads them back. `songs/amazing-grace.json` is the public domain seed used by tests.
+Songs autosave to browser localStorage. "Save all to folder" in the library writes every song as `<id>.json` straight into a folder you pick once (choose `songs/` here); it checks the disk first and skips files that are already up to date, so repeated saves are idempotent. Commit `songs/` when you want the backup in git (this repo is private). Per-song "Export" (a browser download) and "Import JSON" remain for one-offs and non-Chromium browsers. `songs/amazing-grace.json` is the public domain seed used by tests.
 
 ## Layout model
 
