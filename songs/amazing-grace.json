@@ -10,15 +10,60 @@
     "Was blind, but now I see"
   ],
   "placements": [
-    { "id": "ag-1", "line": 0, "col": 0, "chord": "G" },
-    { "id": "ag-2", "line": 0, "col": 19, "chord": "C" },
-    { "id": "ag-3", "line": 0, "col": 29, "chord": "G" },
-    { "id": "ag-4", "line": 1, "col": 25, "chord": "D" },
-    { "id": "ag-5", "line": 2, "col": 2, "chord": "G" },
-    { "id": "ag-6", "line": 2, "col": 21, "chord": "C" },
-    { "id": "ag-7", "line": 2, "col": 28, "chord": "G" },
-    { "id": "ag-8", "line": 3, "col": 15, "chord": "D" },
-    { "id": "ag-9", "line": 3, "col": 21, "chord": "G" }
+    {
+      "id": "ag-1",
+      "line": 0,
+      "col": 0,
+      "chord": "G"
+    },
+    {
+      "id": "ag-2",
+      "line": 0,
+      "col": 19,
+      "chord": "C"
+    },
+    {
+      "id": "ag-3",
+      "line": 0,
+      "col": 29,
+      "chord": "G"
+    },
+    {
+      "id": "ag-4",
+      "line": 1,
+      "col": 25,
+      "chord": "D"
+    },
+    {
+      "id": "ag-5",
+      "line": 2,
+      "col": 2,
+      "chord": "G"
+    },
+    {
+      "id": "ag-6",
+      "line": 2,
+      "col": 21,
+      "chord": "C"
+    },
+    {
+      "id": "ag-7",
+      "line": 2,
+      "col": 28,
+      "chord": "G"
+    },
+    {
+      "id": "ag-8",
+      "line": 3,
+      "col": 15,
+      "chord": "D"
+    },
+    {
+      "id": "ag-9",
+      "line": 3,
+      "col": 21,
+      "chord": "G"
+    }
   ],
   "keyOverride": null,
   "capo": 0,

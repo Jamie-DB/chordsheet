@@ -1,7 +1,7 @@
 import { isChordSymbol, transposeSymbol } from "../../engine";
 import type { ChordPlacement } from "../../shared/types";
 import { freshId } from "./ids";
-import { normalizeSections } from "./normalize";
+import { isPageArtifact, normalizeSections } from "./normalize";
 import { lyricsFromPaste } from "./storage";
 
 export interface ParsedTab {
@@ -55,7 +55,9 @@ export function isChordLine(line: string): boolean {
  * are shapes at that fret; they are transposed up to sounding for storage.
  */
 export function parsePastedTab(text: string, writtenForCapo: number = 0): ParsedTab {
-  const raw = lyricsFromPaste(text);
+  // Page artifacts go first so they can never sit between a chord row and
+  // its lyric line and swallow the placements.
+  const raw = lyricsFromPaste(text).filter((line) => !isPageArtifact(line));
   const lyrics: string[] = [];
   const placements: ChordPlacement[] = [];
   let chordLinesConverted = 0;

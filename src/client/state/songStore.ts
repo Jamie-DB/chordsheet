@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import type { Song } from "../../shared/types";
-import { normalizeSections } from "../lib/normalize";
+import { normalizeSections, stripPageLines } from "../lib/normalize";
 import { loadLibrary, saveLibrary, slugify } from "../lib/storage";
 import { parsePastedTab } from "../lib/tabPaste";
 
-/** One-time fix-up of stored songs: section spacing normalized on load. */
+/**
+ * One-time fix-up of stored songs on load: page artifacts stripped, section
+ * spacing normalized. updatedAt is deliberately untouched so cleaned browser
+ * and disk copies stay identical and folder sync keeps skipping them.
+ */
 function migrate(songs: Song[]): Song[] {
   let anyChanged = false;
   const migrated = songs.map((song) => {
-    const n = normalizeSections(song.lyrics, song.placements);
-    if (!n.changed) return song;
+    const stripped = stripPageLines(song.lyrics, song.placements);
+    const n = normalizeSections(stripped.lyrics, stripped.placements);
+    if (!stripped.changed && !n.changed) return song;
     anyChanged = true;
     return { ...song, lyrics: n.lyrics, placements: n.placements };
   });

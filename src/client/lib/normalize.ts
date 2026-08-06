@@ -6,6 +6,34 @@ export interface Normalized {
   changed: boolean;
 }
 
+// "Page 1/3", "Page 2 of 12": PDF export artifacts, wrong at any other print size.
+const PAGE_ARTIFACT = /^\s*page\s+\d+\s*(?:\/|of)\s*\d+\s*$/i;
+
+export function isPageArtifact(line: string): boolean {
+  return PAGE_ARTIFACT.test(line);
+}
+
+/** Remove page-number lines; placements remap, any sitting on one are dropped. */
+export function stripPageLines(lyrics: string[], placements: ChordPlacement[]): Normalized {
+  const map = new Map<number, number>();
+  const out: string[] = [];
+  lyrics.forEach((line, i) => {
+    if (isPageArtifact(line)) return;
+    map.set(i, out.length);
+    out.push(line);
+  });
+  const remapped = placements.flatMap((p) => {
+    const line = map.get(p.line);
+    if (line === undefined) return [];
+    return [line === p.line ? p : { ...p, line }];
+  });
+  const changed =
+    out.length !== lyrics.length ||
+    remapped.length !== placements.length ||
+    remapped.some((p, i) => p !== placements[i]);
+  return { lyrics: out, placements: remapped, changed };
+}
+
 /**
  * Sections are separated by exactly one blank line, no matter what was
  * pasted: runs of blanks collapse, leading and trailing blanks go away.

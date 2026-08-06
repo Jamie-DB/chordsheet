@@ -79,6 +79,12 @@ describe("parsePastedTab", () => {
     expect(parsed.placements[0].col).toBe(4);
   });
 
+  it("drops page artifacts before pairing chord rows", () => {
+    const parsed = parsePastedTab("G   C\nPage 1/3\nHello there my friend");
+    expect(parsed.lyrics).toEqual(["Hello there my friend"]);
+    expect(parsed.placements.map((p) => `${p.chord}@${p.line}:${p.col}`)).toEqual(["G@0:0", "C@0:4"]);
+  });
+
   it("carries a detected tempo", () => {
     expect(parsePastedTab("Tempo: 120\nG\nHello there friend").bpm).toBe(120);
     expect(parsePastedTab("G\nHello there friend").bpm).toBeNull();
