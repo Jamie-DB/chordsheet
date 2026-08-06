@@ -51,6 +51,7 @@ const OPEN: Record<string, number[]> = {
   "2:maj7": [X, X, 0, 2, 2, 2],    // Dmaj7
   "4:maj7": [0, 2, 1, 1, 0, 0],    // Emaj7
   "7:maj7": [3, 2, 0, 0, 0, 2],    // Gmaj7
+  "0:sus4": [X, 3, 3, 0, 1, 0],    // Csus4, one finger from open C
   "9:sus2": [X, 0, 2, 2, 0, 0],    // Asus2
   "9:sus4": [X, 0, 2, 2, 3, 0],    // Asus4
   "2:sus2": [X, X, 0, 2, 3, 0],    // Dsus2
@@ -69,6 +70,7 @@ const SLASH: Record<string, number[]> = {
   "7:/11": [X, 2, 0, 0, 3, 3],     // G/B
   "2:/6": [2, 0, 0, 2, 3, 2],      // D/F#
   "0:/4": [0, 3, 2, 0, 1, 0],      // C/E
+  "5:/9": [X, 0, 3, 2, 1, 0],      // F/A, the open x03210 shape (no barre)
   "0:/7": [3, 3, 2, 0, 1, 0],      // C/G
   "4:/8": [4, X, 2, 1, 0, 0],      // E/G#
   "9:/1": [X, 4, 2, 2, 2, 0],      // A/C#

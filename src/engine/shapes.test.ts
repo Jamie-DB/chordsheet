@@ -27,6 +27,12 @@ describe("voicingFor", () => {
     expect(a2.approximated).toBe(false);
   });
 
+  it("voices Csus as the one-finger move from open C", () => {
+    const csus = voicingFor("Csus")!;
+    expect(csus.voicing.frets).toEqual([X, 3, 3, 0, 1, 0]);
+    expect(csus.approximated).toBe(false);
+  });
+
   it("simplifies extended chords to the closest reasonable shape", () => {
     const cmaj9 = voicingFor("Cmaj9")!;
     expect(cmaj9.playedAs).toBe("Cmaj7");
@@ -43,6 +49,9 @@ describe("voicingFor", () => {
     const gOverB = voicingFor("G/B")!;
     expect(gOverB.voicing.frets).toEqual([X, 2, 0, 0, 3, 3]);
     expect(gOverB.approximated).toBe(false);
+    const fOverA = voicingFor("F/A")!;
+    expect(fOverA.voicing.frets).toEqual([X, 0, 3, 2, 1, 0]);
+    expect(fOverA.approximated).toBe(false);
     const ebOverBb = voicingFor("Eb/Bb")!;
     expect(ebOverBb.approximated).toBe(true);
     expect(ebOverBb.playedAs).toBe("Eb");
