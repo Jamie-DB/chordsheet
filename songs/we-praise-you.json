@@ -735,7 +735,7 @@
   ],
   "keyOverride": null,
   "capo": 2,
+  "notes": "NOTES\nKey of A either way, both match the record's pitch.\nOption 1: Capo 2, G shapes (G, Am, C, Em, D, Gsus). No barres, drone character.\nOption 2: No capo (A, Bm x20202, D, F#m 2x2200, E, Asus x02230). Punchier.\nPick by the record: constant high ring = capo 2. Tight and chunky = open A.\nSolo guitar = open A. Blending with a band or track = capo 2.",
   "createdAt": "2026-08-06T16:42:46.806Z",
-  "updatedAt": "2026-08-06T16:59:28.189Z",
-  "notes": "NOTES\nKey of A either way, both match the record's pitch.\nOption 1: Capo 2, G shapes (G, Am, C, Em, D, Gsus). No barres, drone character.\nOption 2: No capo (A, Bm x20202, D, F#m 2x2200, E, Asus x02230). Punchier.\nPick by the record: constant high ring = capo 2. Tight and chunky = open A.\nSolo guitar = open A. Blending with a band or track = capo 2."
+  "updatedAt": "2026-08-06T16:59:28.189Z"
 }

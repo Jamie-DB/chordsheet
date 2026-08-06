@@ -93,6 +93,12 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
         setStatus(`${file.name}: ${result.error}`);
         return;
       }
+      if (result.ok && result.lyricsRejected) {
+        setStatus(
+          `${file.name}: its lyrics differ from your library copy, so its chord positions would land on the wrong lines. Delete "${existing?.title}" here first, then import the file fresh.`,
+        );
+        continue;
+      }
       if (existing && !window.confirm(`Replace placements of "${existing.title}" with ${file.name}?`)) {
         continue;
       }
