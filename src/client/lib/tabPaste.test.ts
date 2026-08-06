@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { detectBpm, isChordLine, parsePastedTab } from "./tabPaste";
+import {
+  detectBpm,
+  isChordLine,
+  parseChordNotationLine,
+  parsePastedTab,
+  repairChordTextLines,
+} from "./tabPaste";
 
 describe("isChordLine", () => {
   it("accepts rows of chord symbols", () => {
@@ -12,6 +18,22 @@ describe("isChordLine", () => {
     expect(isChordLine("[Verse 1]")).toBe(false);
     expect(isChordLine("A wretch like me")).toBe(false);
     expect(isChordLine("")).toBe(false);
+  });
+  it("accepts bar and rhythm notation", () => {
+    expect(isChordLine("|C / / /|Csus / / /|C / / /|Csus / / /|")).toBe(true);
+    expect(isChordLine("       F/A             C         |C / F/A / |C / F/A /|")).toBe(true);
+    expect(isChordLine("G - - - Am (x2)")).toBe(true);
+    expect(isChordLine("| / / / |")).toBe(false);
+    expect(isChordLine("C / word")).toBe(false);
+  });
+});
+
+describe("parseChordNotationLine", () => {
+  it("keeps chord columns exact through pipe blanking", () => {
+    const line = "|C / / /|Csus / / /|";
+    const notation = parseChordNotationLine(line)!;
+    expect(notation.chords.map((t) => `${t.text}@${t.col}`)).toEqual(["C@1", "Csus@9"]);
+    expect(notation.hasRhythm).toBe(true);
   });
 });
 
@@ -88,6 +110,63 @@ describe("parsePastedTab", () => {
   it("carries a detected tempo", () => {
     expect(parsePastedTab("Tempo: 120\nG\nHello there friend").bpm).toBe(120);
     expect(parsePastedTab("G\nHello there friend").bpm).toBeNull();
+  });
+});
+
+describe("repairChordTextLines", () => {
+  const p = (line: number, col: number, chord: string) => ({ id: `${line}-${col}`, line, col, chord });
+
+  it("attaches a missed chord row to the chord-free lyric below and deletes the row", () => {
+    const result = repairChordTextLines(
+      ["       F/A             C         |C / F/A /|", "Of Your kingdom breaking through"],
+      [],
+    );
+    expect(result.lyrics).toEqual(["Of Your kingdom breaking through"]);
+    expect(result.placements.map((x) => `${x.chord}@${x.line}:${x.col}`)).toEqual([
+      "F/A@0:7",
+      "C@0:23",
+      "C@0:34",
+      "F/A@0:38",
+    ]);
+    expect(result.converted).toBe(1);
+  });
+
+  it("converts standalone bar rows in place over blanked lines", () => {
+    const result = repairChordTextLines(["[Intro]", "|C / / /|Csus / / /|", ""], []);
+    expect(result.lyrics).toEqual(["[Intro]", "", ""]);
+    expect(result.placements.map((x) => `${x.chord}@${x.line}:${x.col}`)).toEqual(["C@1:1", "Csus@1:9"]);
+  });
+
+  it("leaves the row standalone when the lyric below already has chords", () => {
+    const result = repairChordTextLines(
+      ["C   G", "Words with chords"],
+      [p(1, 0, "Am")],
+    );
+    expect(result.lyrics).toEqual(["", "Words with chords"]);
+    expect(result.placements.filter((x) => x.line === 0).map((x) => x.chord)).toEqual(["C", "G"]);
+    expect(result.placements.filter((x) => x.line === 1).map((x) => x.chord)).toEqual(["Am"]);
+  });
+
+  it("never converts a single bare note-word line", () => {
+    const result = repairChordTextLines(["A", "wretch like me"], []);
+    expect(result.changed).toBe(false);
+    expect(result.lyrics).toEqual(["A", "wretch like me"]);
+  });
+
+  it("skips rows that already carry placements and remaps others", () => {
+    const result = repairChordTextLines(
+      ["C G Am", "Some words here", "|D / /|", "More words here"],
+      [p(0, 0, "C"), p(3, 2, "G")],
+    );
+    expect(result.lyrics).toEqual(["C G Am", "Some words here", "", "More words here"]);
+    expect(result.placements.find((x) => x.id === "3-2")!.line).toBe(3);
+    expect(result.placements.filter((x) => x.chord === "D").map((x) => x.line)).toEqual([2]);
+  });
+
+  it("uses deterministic ids", () => {
+    const a = repairChordTextLines(["|C / G /|", ""], []);
+    const b = repairChordTextLines(["|C / G /|", ""], []);
+    expect(a.placements.map((x) => x.id)).toEqual(b.placements.map((x) => x.id));
   });
 });
 

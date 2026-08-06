@@ -34,14 +34,43 @@ function tokenize(line: string): Token[] {
   return [...line.matchAll(/\S+/g)].map((m) => ({ col: m.index ?? 0, text: m[0] }));
 }
 
+// Rhythm notation that may share a chord row: slashes, dashes, dots, repeats.
+const RHYTHM_TOKEN = /^(\/+|-+|\.+|\(?(?:\d+[xX]|[xX]\d+)\)?)$/;
+
+export interface ChordNotation {
+  /** Chord tokens at their exact columns. */
+  chords: Token[];
+  tokenCount: number;
+  hasRhythm: boolean;
+}
+
 /**
- * A chord line is non-empty and every token parses as a chord symbol.
- * Lyric lines that consist of a single note-name word ("A") are the known
- * false positive; the editor makes that a one-click fix.
+ * Recognize a chord row, including bar notation like "|C / / /|Csus / / /|".
+ * Pipes are treated as spacing (they never shift columns); the line
+ * qualifies when it has at least one chord and every token is a chord or a
+ * rhythm mark. Returns null for anything else.
+ */
+export function parseChordNotationLine(line: string): ChordNotation | null {
+  const tokens = tokenize(line.replace(/\|/g, " "));
+  if (tokens.length === 0) return null;
+  const chords: Token[] = [];
+  let hasRhythm = false;
+  for (const token of tokens) {
+    if (isChordSymbol(token.text)) chords.push(token);
+    else if (RHYTHM_TOKEN.test(token.text)) hasRhythm = true;
+    else return null;
+  }
+  if (chords.length === 0) return null;
+  return { chords, tokenCount: tokens.length, hasRhythm };
+}
+
+/**
+ * A chord line has at least one chord and nothing but chords and rhythm
+ * marks. Lyric lines consisting of a single note-name word ("A") are the
+ * known false positive; the editor makes that a one-click fix.
  */
 export function isChordLine(line: string): boolean {
-  const tokens = tokenize(line);
-  return tokens.length > 0 && tokens.every((t) => isChordSymbol(t.text));
+  return parseChordNotationLine(line) !== null;
 }
 
 /**
@@ -65,8 +94,8 @@ export function parsePastedTab(text: string, writtenForCapo: number = 0): Parsed
   const toSounding = (symbol: string): string =>
     writtenForCapo > 0 ? transposeSymbol(symbol, writtenForCapo, "sharp") : symbol;
 
-  const addPlacements = (line: string, targetLine: number) => {
-    for (const token of tokenize(line)) {
+  const addPlacements = (notation: ChordNotation, targetLine: number) => {
+    for (const token of notation.chords) {
       placements.push({
         id: freshId(),
         line: targetLine,
@@ -78,7 +107,8 @@ export function parsePastedTab(text: string, writtenForCapo: number = 0): Parsed
 
   for (let i = 0; i < raw.length; i++) {
     const line = raw[i];
-    if (!isChordLine(line)) {
+    const notation = parseChordNotationLine(line);
+    if (!notation) {
       lyrics.push(line);
       continue;
     }
@@ -87,10 +117,10 @@ export function parsePastedTab(text: string, writtenForCapo: number = 0): Parsed
     const nextIsLyric = next !== undefined && next.length > 0 && !isChordLine(next);
     if (nextIsLyric) {
       // The lyric line will be pushed on the next iteration at this index.
-      addPlacements(line, lyrics.length);
+      addPlacements(notation, lyrics.length);
     } else {
       // Standalone chord row: keep it printable over an inserted empty line.
-      addPlacements(line, lyrics.length);
+      addPlacements(notation, lyrics.length);
       lyrics.push("");
     }
   }
@@ -101,5 +131,80 @@ export function parsePastedTab(text: string, writtenForCapo: number = 0): Parsed
     placements: normalized.placements,
     chordLinesConverted,
     bpm: detectBpm(raw),
+  };
+}
+
+export interface RepairResult {
+  lyrics: string[];
+  placements: ChordPlacement[];
+  /** Chord-text lines converted to placements. */
+  converted: number;
+  changed: boolean;
+}
+
+/**
+ * Convert chord rows that live as lyric TEXT (an older parser missed bar
+ * notation) into real placements, so they transpose and capo. Attaches to
+ * the following plain lyric line when it has no chords yet; otherwise the
+ * chords stand alone over the blanked line. Extra safety for existing data:
+ * single bare note-words ("A") are never converted. Placement ids are
+ * deterministic so browser and disk repairs produce identical files.
+ */
+export function repairChordTextLines(
+  lyrics: string[],
+  placements: ChordPlacement[],
+): RepairResult {
+  const linesWithChords = new Set(placements.map((p) => p.line));
+
+  const newLyrics: string[] = [];
+  const map = new Map<number, number>();
+  const added: ChordPlacement[] = [];
+  let converted = 0;
+
+  for (let i = 0; i < lyrics.length; i++) {
+    const line = lyrics[i];
+    const notation = parseChordNotationLine(line);
+    const eligible =
+      notation !== null &&
+      !linesWithChords.has(i) &&
+      (notation.tokenCount >= 2 || notation.hasRhythm);
+
+    if (!eligible) {
+      map.set(i, newLyrics.length);
+      newLyrics.push(line);
+      continue;
+    }
+
+    converted += 1;
+    const next = lyrics[i + 1];
+    const attachToNext =
+      next !== undefined &&
+      next.trim().length > 0 &&
+      parseChordNotationLine(next) === null &&
+      !linesWithChords.has(i + 1);
+
+    const target = newLyrics.length;
+    for (const token of notation.chords) {
+      added.push({ id: `repair-${target}-${token.col}`, line: target, col: token.col, chord: token.text });
+    }
+    if (!attachToNext) {
+      // Standalone: the chords sit over what becomes an empty line.
+      map.set(i, newLyrics.length);
+      newLyrics.push("");
+    }
+    // When attaching, this text row disappears; the next (kept) lyric line
+    // lands exactly at `target` on its own iteration.
+  }
+
+  const remapped = placements.map((p) => {
+    const line = map.get(p.line);
+    return line === undefined || line === p.line ? p : { ...p, line };
+  });
+  const all = [...remapped, ...added];
+  return {
+    lyrics: newLyrics,
+    placements: all,
+    converted,
+    changed: converted > 0,
   };
 }

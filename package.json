@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "repair-songs": "tsx scripts/repair-songs.mts"
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -19,6 +20,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.0.5",
+    "tsx": "^4.23.9",
     "typescript": "^7.0.2",
     "vite": "^8.2.0",
     "vitest": "^4.1.10"
