@@ -1,5 +1,5 @@
 import { resolveAnchor } from "../../engine";
-import { importedSongSchema } from "../../shared/schemas";
+import { importedSongSchema, songSchema } from "../../shared/schemas";
 import type { ChordPlacement, Song } from "../../shared/types";
 import { normalizeSections } from "./normalize";
 
@@ -120,6 +120,57 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
 
 export function songToJson(song: Song): string {
   return JSON.stringify(song, null, 2) + "\n";
+}
+
+export function libraryToJson(songs: Song[]): string {
+  return JSON.stringify({ chordsheetLibrary: 1, songs }, null, 2) + "\n";
+}
+
+export interface LibraryImport {
+  songs: Song[];
+  /** Entries that failed schema validation and were left out. */
+  invalid: number;
+}
+
+/**
+ * Recognize a whole-library backup file. Returns null when the text is not
+ * one (single-song import handles it instead); invalid entries are counted,
+ * never silently absorbed.
+ */
+export function parseLibraryFile(jsonText: string): LibraryImport | null {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(jsonText);
+  } catch {
+    return null;
+  }
+  if (
+    typeof raw !== "object" ||
+    raw === null ||
+    (raw as { chordsheetLibrary?: unknown }).chordsheetLibrary !== 1 ||
+    !Array.isArray((raw as { songs?: unknown }).songs)
+  ) {
+    return null;
+  }
+  const songs: Song[] = [];
+  let invalid = 0;
+  for (const item of (raw as { songs: unknown[] }).songs) {
+    const result = songSchema.safeParse(item);
+    if (result.success) songs.push(result.data);
+    else invalid += 1;
+  }
+  return { songs, invalid };
+}
+
+/** Browser-only: download the whole library as one backup file. */
+export function downloadLibrary(songs: Song[]): void {
+  const blob = new Blob([libraryToJson(songs)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "chordsheet-library.json";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 /** Browser-only: trigger a download of the song as <id>.json. */

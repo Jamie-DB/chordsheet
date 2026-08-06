@@ -3,12 +3,13 @@ import type { Song } from "../../shared/types";
 import {
   diskSyncSupported,
   ensurePermission,
+  isBrave,
   loadSavedDir,
   pickDir,
   syncSongs,
   type DirHandleLike,
 } from "../lib/diskSync";
-import { downloadSong, parseImport } from "../lib/exchange";
+import { downloadLibrary, downloadSong, parseImport, parseLibraryFile } from "../lib/exchange";
 
 interface Props {
   songs: Song[];
@@ -62,6 +63,24 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
     if (!files || files.length === 0) return;
     for (const file of Array.from(files)) {
       const text = await file.text();
+
+      const library = parseLibraryFile(text);
+      if (library) {
+        const clashes = library.songs.filter((s) => songs.some((e) => e.id === s.id)).length;
+        if (
+          clashes > 0 &&
+          !window.confirm(`${file.name} contains ${library.songs.length} song(s); ${clashes} will replace songs already in the library. Continue?`)
+        ) {
+          continue;
+        }
+        for (const s of library.songs) onImport(s, false);
+        setStatus(
+          `Restored ${library.songs.length} song(s) from ${file.name}.` +
+            (library.invalid > 0 ? ` ${library.invalid} invalid entr${library.invalid === 1 ? "y was" : "ies were"} skipped.` : ""),
+        );
+        continue;
+      }
+
       let probableId: string | null = null;
       try {
         probableId = (JSON.parse(text) as { id?: string }).id ?? null;
@@ -151,13 +170,19 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
           {sorted.length > 0 && (
             <span className="song-list-tools">
               <button
-                onClick={() =>
-                  diskSyncSupported()
-                    ? void saveAll(false)
-                    : setSyncMsg(
-                        "Folder saving needs a Chromium browser (Chrome, Edge, Arc, Brave). In this browser, use per-song Export instead.",
-                      )
-                }
+                onClick={() => {
+                  if (diskSyncSupported()) {
+                    void saveAll(false);
+                    return;
+                  }
+                  void isBrave().then((brave) =>
+                    setSyncMsg(
+                      brave
+                        ? "Brave disables folder access by default. Open brave://flags, search for File System Access API, set it to Enabled, and relaunch Brave. Or use Download backup below."
+                        : "Folder saving needs Chrome, Edge, or Arc. In this browser, use Download backup instead.",
+                    ),
+                  );
+                }}
                 title="Write every song as JSON into a folder you choose (checks disk first, skips unchanged files)"
               >
                 Save all to folder
@@ -167,6 +192,12 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
                   change folder
                 </button>
               )}
+              <button
+                onClick={() => downloadLibrary(songs)}
+                title="Download every song in one chordsheet-library.json file; works in any browser. Import it to restore."
+              >
+                Download backup
+              </button>
             </span>
           )}
         </div>

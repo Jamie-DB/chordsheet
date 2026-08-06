@@ -34,6 +34,16 @@ export function diskSyncSupported(): boolean {
   return typeof window !== "undefined" && typeof window.showDirectoryPicker === "function";
 }
 
+/** Brave ships Chromium but removes the File System Access API by default. */
+export async function isBrave(): Promise<boolean> {
+  const nav = navigator as Navigator & { brave?: { isBrave?: () => Promise<boolean> } };
+  try {
+    return (await nav.brave?.isBrave?.()) ?? false;
+  } catch {
+    return false;
+  }
+}
+
 const DB_NAME = "chordsheet-fs";
 const STORE = "handles";
 const KEY = "songsDir";
