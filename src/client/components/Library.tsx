@@ -1,5 +1,13 @@
 import { useRef, useState } from "react";
 import type { Song } from "../../shared/types";
+import {
+  diskSyncSupported,
+  ensurePermission,
+  loadSavedDir,
+  pickDir,
+  syncSongs,
+  type DirHandleLike,
+} from "../lib/diskSync";
 import { downloadSong, parseImport } from "../lib/exchange";
 
 interface Props {
@@ -17,7 +25,23 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
   const [lyricsText, setLyricsText] = useState("");
   const [writtenCapo, setWrittenCapo] = useState(0);
   const [status, setStatus] = useState<string | null>(null);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  async function saveAll(forcePick: boolean) {
+    try {
+      let dir: DirHandleLike | null = forcePick ? null : await loadSavedDir();
+      if (dir && !(await ensurePermission(dir))) dir = null;
+      if (!dir) dir = await pickDir();
+      if (!dir) return;
+      const result = await syncSongs(songs, dir);
+      const skipNote = result.skipped > 0 ? `, ${result.skipped} already up to date` : "";
+      setSyncMsg(`Saved ${result.written} song file(s) to "${dir.name}"${skipNote}.`);
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+      setSyncMsg("Could not save to the folder. Try choosing it again.");
+    }
+  }
 
   const sorted = [...songs].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
@@ -122,7 +146,20 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
       </section>
 
       <section className="song-list">
-        <h2>Library</h2>
+        <div className="song-list-head">
+          <h2>Library</h2>
+          {diskSyncSupported() && sorted.length > 0 && (
+            <span className="song-list-tools">
+              <button onClick={() => void saveAll(false)} title="Write every song as JSON into a folder you choose (checks disk first, skips unchanged files)">
+                Save all to folder
+              </button>
+              <button className="mini" onClick={() => void saveAll(true)} title="Pick a different folder">
+                change folder
+              </button>
+            </span>
+          )}
+        </div>
+        {syncMsg && <p className="muted">{syncMsg}</p>}
         {sorted.length === 0 && <p className="muted">No songs yet.</p>}
         <ul>
           {sorted.map((song) => (
