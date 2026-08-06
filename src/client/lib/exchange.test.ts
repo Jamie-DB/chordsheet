@@ -75,11 +75,20 @@ describe("parseImport", () => {
     if (result.ok) expect(result.unresolved[0].reason).toContain("line 99");
   });
 
-  it("clamps col-form placements to the line length", () => {
-    const imported = { ...song, placements: [{ line: 1, col: 500, chord: "D" }] };
+  it("keeps past-end columns, bounding only absurd values", () => {
+    const imported = {
+      ...song,
+      placements: [
+        { line: 1, col: 40, chord: "D" },
+        { line: 1, col: 5000, chord: "E" },
+      ],
+    };
     const result = parseImport(JSON.stringify(imported));
     expect(result.ok).toBe(true);
-    if (result.ok) expect(result.song.placements[0].col).toBe(song.lyrics[1].length);
+    if (result.ok) {
+      expect(result.song.placements[0].col).toBe(40);
+      expect(result.song.placements[1].col).toBe(200);
+    }
   });
 
   it("rejects lyric changes for an existing song, keeping library lyrics", () => {

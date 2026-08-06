@@ -29,11 +29,11 @@ describe("isSectionLabel", () => {
 });
 
 describe("editLine", () => {
-  it("replaces text and clamps only that line's chords", () => {
+  it("replaces text and keeps chord columns, even past the new end", () => {
     const next = editLine(song, 1, "Morning light");
     expect(next.lyrics[1]).toBe("Morning light");
     expect(next.placements.find((p) => p.id === "a")!.col).toBe(0);
-    expect(next.placements.find((p) => p.id === "b")!.col).toBe(13);
+    expect(next.placements.find((p) => p.id === "b")!.col).toBe(24);
     expect(next.placements.find((p) => p.id === "c")!.col).toBe(0);
   });
   it("trims trailing whitespace and expands tabs", () => {
