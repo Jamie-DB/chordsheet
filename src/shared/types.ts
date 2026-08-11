@@ -27,6 +27,17 @@ export interface Song {
   updatedAt: string;
 }
 
+export interface Setlist {
+  version: 1;
+  /** Slug from the name; setlists sync as one setlists.json file. */
+  id: string;
+  name: string;
+  /** Ordered; a song may appear more than once. */
+  songIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SongSummary {
   id: string;
   title: string;

@@ -1,6 +1,6 @@
 import { resolveAnchor } from "../../engine";
-import { importedSongSchema, songSchema } from "../../shared/schemas";
-import type { ChordPlacement, Song } from "../../shared/types";
+import { importedSongSchema, setlistSchema, songSchema } from "../../shared/schemas";
+import type { ChordPlacement, Setlist, Song } from "../../shared/types";
 import { normalizeSections } from "./normalize";
 
 export interface UnresolvedPlacement {
@@ -124,12 +124,17 @@ export function songToJson(song: Song): string {
   return JSON.stringify(song, null, 2) + "\n";
 }
 
-export function libraryToJson(songs: Song[]): string {
-  return JSON.stringify({ chordsheetLibrary: 1, songs }, null, 2) + "\n";
+export function libraryToJson(songs: Song[], setlists: Setlist[] = []): string {
+  return JSON.stringify({ chordsheetLibrary: 1, songs, setlists }, null, 2) + "\n";
+}
+
+export function setlistsToJson(setlists: Setlist[]): string {
+  return JSON.stringify({ chordsheetSetlists: 1, setlists }, null, 2) + "\n";
 }
 
 export interface LibraryImport {
   songs: Song[];
+  setlists: Setlist[];
   /** Entries that failed schema validation and were left out. */
   invalid: number;
 }
@@ -161,12 +166,22 @@ export function parseLibraryFile(jsonText: string): LibraryImport | null {
     if (result.success) songs.push(result.data);
     else invalid += 1;
   }
-  return { songs, invalid };
+  // Older backups have no setlists field; that is fine.
+  const setlists: Setlist[] = [];
+  const rawSets = (raw as { setlists?: unknown }).setlists;
+  if (Array.isArray(rawSets)) {
+    for (const item of rawSets) {
+      const result = setlistSchema.safeParse(item);
+      if (result.success) setlists.push(result.data);
+      else invalid += 1;
+    }
+  }
+  return { songs, setlists, invalid };
 }
 
-/** Browser-only: download the whole library as one backup file. */
-export function downloadLibrary(songs: Song[]): void {
-  const blob = new Blob([libraryToJson(songs)], { type: "application/json" });
+/** Browser-only: download the whole library and sets as one backup file. */
+export function downloadLibrary(songs: Song[], setlists: Setlist[] = []): void {
+  const blob = new Blob([libraryToJson(songs, setlists)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

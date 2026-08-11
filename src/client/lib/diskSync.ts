@@ -1,5 +1,5 @@
-import type { Song } from "../../shared/types";
-import { songToJson } from "./exchange";
+import type { Setlist, Song } from "../../shared/types";
+import { setlistsToJson, songToJson } from "./exchange";
 
 /**
  * One-click library sync to a real folder via the File System Access API.
@@ -114,36 +114,40 @@ export interface SyncResult {
  * already matches is skipped, never rewritten, so repeated saves are
  * idempotent and no duplicate or churned files appear.
  */
+/** Write content into name unless the on-disk copy already matches. */
+async function writeIfChanged(dir: DirHandleLike, name: string, content: string): Promise<boolean> {
+  let existing: FileHandleLike | null = null;
+  try {
+    existing = await dir.getFileHandle(name);
+  } catch {
+    existing = null;
+  }
+  if (existing?.getFile) {
+    try {
+      const current = await (await existing.getFile()).text();
+      if (current === content) return false;
+    } catch {
+      // Unreadable; fall through and rewrite.
+    }
+  }
+  const file = existing ?? (await dir.getFileHandle(name, { create: true }));
+  const writable = await file.createWritable();
+  await writable.write(content);
+  await writable.close();
+  return true;
+}
+
 export async function syncSongs(songs: Song[], dir: DirHandleLike): Promise<SyncResult> {
   let written = 0;
   let skipped = 0;
   for (const song of songs) {
-    const json = songToJson(song);
-    const name = `${song.id}.json`;
-
-    let existing: FileHandleLike | null = null;
-    try {
-      existing = await dir.getFileHandle(name);
-    } catch {
-      existing = null;
-    }
-    if (existing?.getFile) {
-      try {
-        const current = await (await existing.getFile()).text();
-        if (current === json) {
-          skipped += 1;
-          continue;
-        }
-      } catch {
-        // Unreadable; fall through and rewrite.
-      }
-    }
-
-    const file = existing ?? (await dir.getFileHandle(name, { create: true }));
-    const writable = await file.createWritable();
-    await writable.write(json);
-    await writable.close();
-    written += 1;
+    if (await writeIfChanged(dir, `${song.id}.json`, songToJson(song))) written += 1;
+    else skipped += 1;
   }
   return { written, skipped };
+}
+
+/** All setlists live in one setlists.json beside the songs. */
+export async function syncSetlists(sets: Setlist[], dir: DirHandleLike): Promise<boolean> {
+  return writeIfChanged(dir, "setlists.json", setlistsToJson(sets));
 }
