@@ -1006,7 +1006,8 @@
   ],
   "keyOverride": null,
   "capo": 0,
+  "bpm": 146,
   "notes": "NOTES\nKey of C, no capo. Index finger anchors B string 1st fret nearly all song.\nF/A = x03210 (Fmaj7/A). Two fingers move from C, index stays, open e rings.\nC/E = 032010, your C chord plus open low E. Not a new shape.\nDm = Dm7 xx0211, keeps the anchor.\nF barre never needed. F/A or Fmaj7 xx3210 covers it.\nIntro C to Csus is one finger, D string 2nd to 3rd fret.\nG is the only anchor-lift. Lean into it, it is the motion moment.\n",
   "createdAt": "2026-08-06T14:53:48.273Z",
-  "updatedAt": "2026-08-06T17:17:09.447Z"
+  "updatedAt": "2026-08-07T22:46:16.818Z"
 }

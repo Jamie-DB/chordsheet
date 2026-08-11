@@ -1,0 +1,1107 @@
+{
+  "version": 1,
+  "id": "ressurrecting",
+  "title": "Ressurrecting",
+  "artist": "Elevation Worship",
+  "lyrics": [
+    "[Intro]",
+    "",
+    "",
+    "",
+    "",
+    "[Verse 1]",
+    "",
+    "The head that once was crowned with thorns",
+    "Is crowned with glory now",
+    "The Savior knelt to wash our feet",
+    "Now at His feet we bow",
+    "",
+    "[Verse 2]",
+    "",
+    "The One who wore our sin and shame",
+    "Now robed in majesty",
+    "The radiance of perfect love",
+    "Now shines for all to see",
+    "",
+    "[Chorus]",
+    "",
+    "Your name, Your name is victory",
+    "All praise will rise to Christ our King",
+    "Your name, Your name is victory",
+    "All praise will rise to Christ our King",
+    "",
+    "[Verse 3]",
+    "",
+    "The fear that held us now gives way",
+    "To Him who is our peace",
+    "His final breath upon the cross",
+    "Is now alive in me",
+    "",
+    "[Chorus] x2",
+    "",
+    "Your name, Your name is victory",
+    "All praise will rise to Christ our King",
+    "Your name, Your name is victory",
+    "All praise will rise to Christ our King",
+    "",
+    "[Bridge] x2",
+    "",
+    "By Your Spirit I will rise from the ashes of defeat",
+    "The resurrected King is resurrecting me",
+    "In Your name I come alive to declare Your victory",
+    "The resurrected King is resurrecting me",
+    "",
+    "[Instrumental] (same as bridge)",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "[Verse 4]",
+    "",
+    "The tomb where soldiers watched in vain",
+    "Was borrowed for three days",
+    "His body there would not remain",
+    "Our God has robbed the grave",
+    "Our God has robbed the grave",
+    "",
+    "[Chorus]",
+    "",
+    "Your name, Your name is victory",
+    "All praise will rise to Christ our King",
+    "Your name, Your name is victory",
+    "All praise will rise to Christ our King",
+    "",
+    "[Bridge]",
+    "",
+    "By Your Spirit I will rise from the ashes of defeat",
+    "The resurrected King is resurrecting me",
+    "In Your name I come alive to declare Your victory",
+    "The resurrected King is resurrecting me",
+    "",
+    "[Bridge]",
+    "",
+    "( Just Drums For First Half)",
+    "",
+    " N.C.",
+    "By Your Spirit I will rise from the ashes of defeat",
+    " N.C.",
+    "The resurrected King is resurrecting me",
+    "  (Begin Build)",
+    "In Your name I come alive to declare Your victory",
+    "                            (Break On C All In)",
+    "The resurrected King is resurrecting me",
+    "",
+    "[Bridge] (All In)",
+    "",
+    "By Your Spirit I will rise from the ashes of defeat",
+    "The resurrected King is resurrecting me",
+    "In Your name I come alive to declare Your victory",
+    "The resurrected King is resurrecting me",
+    "The resurrected King is resurrecting me"
+  ],
+  "placements": [
+    {
+      "id": "d094358a-008f-4ed4-ba87-a6567c04e690",
+      "line": 2,
+      "col": 0,
+      "chord": "F#"
+    },
+    {
+      "id": "085cbcd9-797a-429d-a583-480cf9bf2ca5",
+      "line": 2,
+      "col": 6,
+      "chord": "A#m"
+    },
+    {
+      "id": "bde0a164-795e-4333-8324-affd2df558fd",
+      "line": 2,
+      "col": 13,
+      "chord": "G#"
+    },
+    {
+      "id": "cde6d2fe-c694-4031-95e1-a1aaae0a7f80",
+      "line": 2,
+      "col": 19,
+      "chord": "G#"
+    },
+    {
+      "id": "16c2263b-355c-456d-be98-fe875e0a6b41",
+      "line": 3,
+      "col": 0,
+      "chord": "F#"
+    },
+    {
+      "id": "77a04d77-fdcc-48fb-8f12-d54cb802293b",
+      "line": 3,
+      "col": 6,
+      "chord": "A#m"
+    },
+    {
+      "id": "d5938034-0a9c-44b7-816d-e9f190a93ba2",
+      "line": 3,
+      "col": 13,
+      "chord": "G#"
+    },
+    {
+      "id": "9aac8943-d9c5-4dd6-af77-db074382cf6a",
+      "line": 3,
+      "col": 19,
+      "chord": "G#"
+    },
+    {
+      "id": "da4289fd-418d-4866-8371-feffb7d4729a",
+      "line": 7,
+      "col": 14,
+      "chord": "F#"
+    },
+    {
+      "id": "43aef06c-1cab-4809-bd31-0a1fbeaad5f6",
+      "line": 7,
+      "col": 23,
+      "chord": "A#m"
+    },
+    {
+      "id": "f41e6f84-2ea0-4afc-ba9c-241c644f572b",
+      "line": 7,
+      "col": 37,
+      "chord": "G#"
+    },
+    {
+      "id": "afbfac2b-4117-480e-948f-2d7d0e859ba7",
+      "line": 8,
+      "col": 16,
+      "chord": "F#"
+    },
+    {
+      "id": "691d8907-a53d-42ac-ad0f-f58a5f142cca",
+      "line": 8,
+      "col": 22,
+      "chord": "C#"
+    },
+    {
+      "id": "3cc8edad-3460-47ed-9279-294a4eb3252b",
+      "line": 9,
+      "col": 11,
+      "chord": "F#"
+    },
+    {
+      "id": "f2ce5b9b-5dcf-449b-9d00-de666f16aed3",
+      "line": 9,
+      "col": 20,
+      "chord": "A#m"
+    },
+    {
+      "id": "6708ef92-a71e-4cdf-898d-bfbe6883e3dd",
+      "line": 9,
+      "col": 29,
+      "chord": "G#"
+    },
+    {
+      "id": "edefab4a-d881-4b34-8243-8ffacfcea518",
+      "line": 10,
+      "col": 11,
+      "chord": "F#"
+    },
+    {
+      "id": "ae52e268-cb8d-4feb-9154-ab2ef1faebb5",
+      "line": 10,
+      "col": 19,
+      "chord": "C#"
+    },
+    {
+      "id": "db2cadc1-23e2-41a2-9e50-6dc6af3cc979",
+      "line": 14,
+      "col": 12,
+      "chord": "F#"
+    },
+    {
+      "id": "c509de93-2567-468f-b88e-03ec130b35f2",
+      "line": 14,
+      "col": 21,
+      "chord": "A#m"
+    },
+    {
+      "id": "34c7df56-3ed5-45ed-8b19-cb9352f57874",
+      "line": 14,
+      "col": 30,
+      "chord": "G#"
+    },
+    {
+      "id": "ae180a39-f47a-45d4-9d2d-bf659dccae36",
+      "line": 15,
+      "col": 13,
+      "chord": "F#"
+    },
+    {
+      "id": "6d56bb09-1eb7-4fa3-b91e-1e0c3ec8db9c",
+      "line": 15,
+      "col": 19,
+      "chord": "C#"
+    },
+    {
+      "id": "750b3c0f-0f1d-4e1e-a78e-735a087a43bd",
+      "line": 16,
+      "col": 8,
+      "chord": "F#"
+    },
+    {
+      "id": "3f8ef8ab-2430-463f-9894-19d6a98330e6",
+      "line": 16,
+      "col": 16,
+      "chord": "A#m"
+    },
+    {
+      "id": "506d353b-d619-43c4-9340-8e5cc911aebc",
+      "line": 16,
+      "col": 25,
+      "chord": "G#"
+    },
+    {
+      "id": "3aef8a82-f75b-4840-872e-ce58fd5ba9dc",
+      "line": 17,
+      "col": 15,
+      "chord": "F#"
+    },
+    {
+      "id": "39c234e9-d648-4106-b311-33df3df59423",
+      "line": 17,
+      "col": 22,
+      "chord": "C#"
+    },
+    {
+      "id": "e865930c-98ae-46d5-ac27-989f8faa5852",
+      "line": 21,
+      "col": 5,
+      "chord": "F#"
+    },
+    {
+      "id": "bfac4114-6e3d-4260-a0aa-ba9ed6c35180",
+      "line": 21,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "63b8f32b-02fe-4b18-a0ff-ede34a03f045",
+      "line": 21,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "964d487b-5901-443d-9619-712e5de82270",
+      "line": 22,
+      "col": 5,
+      "chord": "F#"
+    },
+    {
+      "id": "c3a6b956-ba54-49dc-899d-7adcdda7a80d",
+      "line": 22,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "0593c843-5bdd-4b72-a0a4-453be9dfbe36",
+      "line": 22,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "546a85a6-0bde-4dde-aa96-14cf4458e42a",
+      "line": 23,
+      "col": 5,
+      "chord": "F#"
+    },
+    {
+      "id": "df7a2b30-d880-4588-953b-99c7100d93fa",
+      "line": 23,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "90e38003-f940-4905-8872-fae14368fbc6",
+      "line": 23,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "084ca7df-5cf9-4488-8b95-b15c6c986fa6",
+      "line": 24,
+      "col": 4,
+      "chord": "F#"
+    },
+    {
+      "id": "f9596c51-d738-4dd4-ba8b-bf10c8464fae",
+      "line": 24,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "280dec17-4721-40af-9b35-40ec69312577",
+      "line": 24,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "ac49c3c8-c93e-46b0-acb2-465ef6d71e61",
+      "line": 28,
+      "col": 14,
+      "chord": "F#"
+    },
+    {
+      "id": "bea6c95f-606a-41fc-9538-b8fff9485ecb",
+      "line": 28,
+      "col": 22,
+      "chord": "A#m"
+    },
+    {
+      "id": "0c92134d-e465-4792-87d0-a00a7b086599",
+      "line": 28,
+      "col": 32,
+      "chord": "G#"
+    },
+    {
+      "id": "9f980aba-752a-4ccd-8c02-626c879d532c",
+      "line": 29,
+      "col": 11,
+      "chord": "F#"
+    },
+    {
+      "id": "4dc4c1ab-0cfa-4ea7-a1bb-7ef9c5f42904",
+      "line": 29,
+      "col": 18,
+      "chord": "C#"
+    },
+    {
+      "id": "9aa6c1fb-e213-4d8f-935a-e181726e4b32",
+      "line": 30,
+      "col": 10,
+      "chord": "F#"
+    },
+    {
+      "id": "97a381a9-eda1-4a39-92d2-90b0757f6d16",
+      "line": 30,
+      "col": 18,
+      "chord": "A#m"
+    },
+    {
+      "id": "33cff5b5-78d8-4557-8575-0c97448d516c",
+      "line": 30,
+      "col": 26,
+      "chord": "G#"
+    },
+    {
+      "id": "92e9e287-9a3f-4df8-8302-bef222db0413",
+      "line": 31,
+      "col": 8,
+      "chord": "F#"
+    },
+    {
+      "id": "0393403a-cf12-4439-87ef-c9f02d7a8dd6",
+      "line": 31,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "6b88d22f-c4d4-4f4b-adb0-cc193d2fb434",
+      "line": 35,
+      "col": 5,
+      "chord": "F#"
+    },
+    {
+      "id": "a15c4367-5604-459e-810f-c93299e23099",
+      "line": 35,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "beb9ef84-5073-4f08-98c1-6602f779033e",
+      "line": 35,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "0d8c125f-5adc-4cf8-9688-d6d727231fce",
+      "line": 36,
+      "col": 5,
+      "chord": "F#"
+    },
+    {
+      "id": "b3673fa4-e7c7-40a0-a46d-91e6f646aec7",
+      "line": 36,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "a7c090fb-27ba-4731-bb5e-de3ff34614fc",
+      "line": 36,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "feba4697-047b-4039-93d8-55cc05e52bb0",
+      "line": 37,
+      "col": 5,
+      "chord": "F#"
+    },
+    {
+      "id": "e1fb316c-4908-485b-a0a6-e7e63bdac2f1",
+      "line": 37,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "e04137c3-169b-4eb9-bed2-f51871b3c26a",
+      "line": 37,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "5b8783e1-5e5e-47a1-8236-e13a5a81c7a6",
+      "line": 38,
+      "col": 4,
+      "chord": "F#"
+    },
+    {
+      "id": "57ca3327-375a-45a7-8a0c-ea2f5d49606c",
+      "line": 38,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "fcd65afa-1c77-45cb-8553-a39a39a11e07",
+      "line": 38,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "b9e0fcbb-351c-4ad4-8567-3ff7302f8395",
+      "line": 42,
+      "col": 0,
+      "chord": "F#"
+    },
+    {
+      "id": "82ad90c2-b299-462b-b829-ce1af6949d86",
+      "line": 42,
+      "col": 8,
+      "chord": "C#"
+    },
+    {
+      "id": "36d3f026-053f-4816-8204-ac2580fec52d",
+      "line": 42,
+      "col": 22,
+      "chord": "G#"
+    },
+    {
+      "id": "afd8bf26-7c88-4a13-b41a-0afd3742a80d",
+      "line": 42,
+      "col": 42,
+      "chord": "A#m"
+    },
+    {
+      "id": "b0073919-bca7-408d-8752-c289fbb79cc3",
+      "line": 42,
+      "col": 48,
+      "chord": "F#"
+    },
+    {
+      "id": "f0b8f226-d205-4de3-81b6-1817ef7efb55",
+      "line": 43,
+      "col": 6,
+      "chord": "C#"
+    },
+    {
+      "id": "68523636-6feb-4942-8e49-ade546c1cc9c",
+      "line": 43,
+      "col": 16,
+      "chord": "G#"
+    },
+    {
+      "id": "b0a57251-6af1-4465-b0a7-7c8192ea6796",
+      "line": 43,
+      "col": 30,
+      "chord": "A#m"
+    },
+    {
+      "id": "aaa1391d-b00c-401c-b5a1-d51b0fed0918",
+      "line": 43,
+      "col": 37,
+      "chord": "F#"
+    },
+    {
+      "id": "70be7293-b78c-47a1-8c62-4cb1da5b04e3",
+      "line": 44,
+      "col": 8,
+      "chord": "C#"
+    },
+    {
+      "id": "64252e26-df52-4cbd-913c-f04ba0233771",
+      "line": 44,
+      "col": 20,
+      "chord": "G#"
+    },
+    {
+      "id": "c6913371-0132-46ab-83f0-e299ad5ec440",
+      "line": 44,
+      "col": 43,
+      "chord": "A#m"
+    },
+    {
+      "id": "51198d35-75bc-4a8e-a2f6-b64e6c62222c",
+      "line": 44,
+      "col": 48,
+      "chord": "F#"
+    },
+    {
+      "id": "5e496145-a3f8-4e65-8009-bc4424d3d940",
+      "line": 45,
+      "col": 6,
+      "chord": "C#"
+    },
+    {
+      "id": "5d233d11-f7e1-479c-bb63-bfed4fe87906",
+      "line": 45,
+      "col": 16,
+      "chord": "G#"
+    },
+    {
+      "id": "79db7299-a866-46d0-b4d8-88bdef0c548f",
+      "line": 45,
+      "col": 30,
+      "chord": "A#m"
+    },
+    {
+      "id": "bef24d2e-dac9-4e8b-8fa2-85897663b633",
+      "line": 49,
+      "col": 0,
+      "chord": "F#"
+    },
+    {
+      "id": "b3b4386c-edbd-45ef-bdf7-830342e9bb94",
+      "line": 49,
+      "col": 2,
+      "chord": "C#"
+    },
+    {
+      "id": "3c893bca-43cb-44e0-9135-253a12b9530a",
+      "line": 49,
+      "col": 4,
+      "chord": "G#"
+    },
+    {
+      "id": "0e5d6f04-41f9-47b5-986f-8e74934ab59a",
+      "line": 49,
+      "col": 6,
+      "chord": "A#m"
+    },
+    {
+      "id": "f5306c64-c52b-4ea5-8491-3ca26b0e03a6",
+      "line": 49,
+      "col": 9,
+      "chord": "F#"
+    },
+    {
+      "id": "0a7adaf9-6af5-4030-aa55-6cd58060bf85",
+      "line": 50,
+      "col": 0,
+      "chord": "C#"
+    },
+    {
+      "id": "e8e80c4c-4b9e-489a-a821-c66a258266cc",
+      "line": 50,
+      "col": 2,
+      "chord": "G#"
+    },
+    {
+      "id": "4bce38fe-fde3-4898-8404-7d4862c6c15a",
+      "line": 50,
+      "col": 4,
+      "chord": "A#m"
+    },
+    {
+      "id": "b9d41456-95d4-4a42-9011-e5d85d15a885",
+      "line": 50,
+      "col": 7,
+      "chord": "F#"
+    },
+    {
+      "id": "4b6730cf-c527-4aba-af76-b6d55da73f13",
+      "line": 51,
+      "col": 0,
+      "chord": "C#"
+    },
+    {
+      "id": "ab9fd101-9764-4c02-99f2-8901e9d6632a",
+      "line": 51,
+      "col": 2,
+      "chord": "G#"
+    },
+    {
+      "id": "0d55713a-147d-41ca-b1da-19fd85ba2668",
+      "line": 51,
+      "col": 4,
+      "chord": "A#m"
+    },
+    {
+      "id": "b1a5297d-9fca-4b86-aa4e-cdeb3a185693",
+      "line": 51,
+      "col": 7,
+      "chord": "F#"
+    },
+    {
+      "id": "89361509-0ceb-4849-b143-4a70b75a5873",
+      "line": 52,
+      "col": 0,
+      "chord": "C#"
+    },
+    {
+      "id": "646a7c5d-5cd7-432e-b7eb-d2be30b3166b",
+      "line": 52,
+      "col": 2,
+      "chord": "G#"
+    },
+    {
+      "id": "dec2da38-21bb-48be-bb24-e7966cebe60f",
+      "line": 52,
+      "col": 4,
+      "chord": "A#m"
+    },
+    {
+      "id": "a98a33de-52c7-438e-b9c1-53c26abf99ab",
+      "line": 56,
+      "col": 15,
+      "chord": "F#"
+    },
+    {
+      "id": "31f75906-c25a-43f7-918a-f64cba3f6fd7",
+      "line": 56,
+      "col": 24,
+      "chord": "A#m"
+    },
+    {
+      "id": "e7199dc5-302f-4d50-bc0d-15ad18fd9b3e",
+      "line": 56,
+      "col": 35,
+      "chord": "G#"
+    },
+    {
+      "id": "36168750-f1ae-4c43-b6de-4f3a43a22e1f",
+      "line": 57,
+      "col": 13,
+      "chord": "F#"
+    },
+    {
+      "id": "6084d150-c347-4aa9-a83a-993cba9c14d7",
+      "line": 57,
+      "col": 23,
+      "chord": "C#"
+    },
+    {
+      "id": "dc296ea2-fe0c-4425-9d06-b828e92de39a",
+      "line": 58,
+      "col": 10,
+      "chord": "F#"
+    },
+    {
+      "id": "cfc84df3-975a-456e-ac85-0d3e091fb6e6",
+      "line": 58,
+      "col": 21,
+      "chord": "A#m"
+    },
+    {
+      "id": "d31fd21e-100c-4817-ae58-8d9b4eb1d8e0",
+      "line": 58,
+      "col": 28,
+      "chord": "G#"
+    },
+    {
+      "id": "6c1fe2ff-3c7a-4ad8-b08a-0642fa9efb66",
+      "line": 59,
+      "col": 12,
+      "chord": "F#"
+    },
+    {
+      "id": "ee109b82-5d6a-4749-8ecc-04b466fb767f",
+      "line": 59,
+      "col": 24,
+      "chord": "C#"
+    },
+    {
+      "id": "ebd376ff-ba5b-468b-a41b-aa5ab06f25e9",
+      "line": 60,
+      "col": 12,
+      "chord": "F#"
+    },
+    {
+      "id": "157e6d0c-a178-4983-96de-9a7d3882bc8b",
+      "line": 60,
+      "col": 24,
+      "chord": "C#"
+    },
+    {
+      "id": "1f37699a-89c9-4af4-b0b2-9bb454dad3a9",
+      "line": 64,
+      "col": 5,
+      "chord": "F#"
+    },
+    {
+      "id": "b49e0155-3199-4d6b-9fba-2de30292d687",
+      "line": 64,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "9876cabc-b106-46c1-a530-3904e1a85c3c",
+      "line": 64,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "6358a0f5-53a2-4121-99fc-883929da5988",
+      "line": 65,
+      "col": 5,
+      "chord": "F#"
+    },
+    {
+      "id": "5adf9a6d-9604-4eff-a7e7-ebfa1c74e45b",
+      "line": 65,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "57a7bbbc-1d86-4096-bb38-e2d0ad17c33a",
+      "line": 65,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "c8d58c94-4bc1-42a7-8f75-55d3e2017db0",
+      "line": 66,
+      "col": 5,
+      "chord": "F#"
+    },
+    {
+      "id": "87b1a8f2-d927-47b0-86b1-cb137294594d",
+      "line": 66,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "86d8d704-e98b-4aba-87b4-497b2623e2bf",
+      "line": 66,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "b4fd87c1-cb63-4980-80e4-ac915ee756f7",
+      "line": 67,
+      "col": 4,
+      "chord": "F#"
+    },
+    {
+      "id": "5ee784b0-f189-45b2-bb2a-2bed5710ce8d",
+      "line": 67,
+      "col": 16,
+      "chord": "C#"
+    },
+    {
+      "id": "8a461075-309f-4262-8d60-17335cd9b2fe",
+      "line": 67,
+      "col": 24,
+      "chord": "G#"
+    },
+    {
+      "id": "e6380286-ccbd-44af-9c04-d8973d74c36f",
+      "line": 71,
+      "col": 0,
+      "chord": "F#"
+    },
+    {
+      "id": "e191e8c9-5f41-4de4-98bd-934a990c3ec3",
+      "line": 71,
+      "col": 8,
+      "chord": "C#"
+    },
+    {
+      "id": "76a469f2-c7ed-4321-b433-41edef8334aa",
+      "line": 71,
+      "col": 22,
+      "chord": "G#"
+    },
+    {
+      "id": "771ef327-d57f-41b1-a606-2ebc9ef377ee",
+      "line": 71,
+      "col": 42,
+      "chord": "A#m"
+    },
+    {
+      "id": "3b18392b-8b52-45c0-a240-4e8b7b0345a5",
+      "line": 71,
+      "col": 48,
+      "chord": "F#"
+    },
+    {
+      "id": "c328b660-7c40-47ed-a081-c0bbe3e2558b",
+      "line": 72,
+      "col": 6,
+      "chord": "C#"
+    },
+    {
+      "id": "b3b433e8-41b9-4dfe-8a59-0178c85801c4",
+      "line": 72,
+      "col": 16,
+      "chord": "G#"
+    },
+    {
+      "id": "6bd8b2ce-6a1c-4347-b009-669649b8fa3b",
+      "line": 72,
+      "col": 30,
+      "chord": "A#m"
+    },
+    {
+      "id": "3cea786b-26b3-4305-b2f1-3d0e2024323a",
+      "line": 72,
+      "col": 38,
+      "chord": "F#"
+    },
+    {
+      "id": "8d0e6a6f-197c-4deb-b749-cc648a0d5ed3",
+      "line": 73,
+      "col": 8,
+      "chord": "C#"
+    },
+    {
+      "id": "d6cde408-45b0-4154-a58a-6556cf17c7a7",
+      "line": 73,
+      "col": 20,
+      "chord": "G#"
+    },
+    {
+      "id": "8a11fb4e-def8-466c-9118-675e1a40c667",
+      "line": 73,
+      "col": 42,
+      "chord": "A#m"
+    },
+    {
+      "id": "9419fca1-6062-4f20-b50a-2931940680dc",
+      "line": 73,
+      "col": 48,
+      "chord": "F#"
+    },
+    {
+      "id": "3af85098-57b3-41b1-8c0b-51e1ef53ec86",
+      "line": 74,
+      "col": 6,
+      "chord": "C#"
+    },
+    {
+      "id": "c203155e-8dae-4ff4-94a8-2c3c7e363f3b",
+      "line": 74,
+      "col": 16,
+      "chord": "G#"
+    },
+    {
+      "id": "fbba8c16-04c4-414d-a56d-c68cd21f38d7",
+      "line": 74,
+      "col": 29,
+      "chord": "A#m"
+    },
+    {
+      "id": "585c69f1-0054-4a1f-afb0-825f55d3161b",
+      "line": 85,
+      "col": 8,
+      "chord": "C#"
+    },
+    {
+      "id": "2de3c662-d330-42fd-992b-6a9a55db1d26",
+      "line": 85,
+      "col": 20,
+      "chord": "G#"
+    },
+    {
+      "id": "3817a787-4a5e-47d7-bf3d-ba8575b995d2",
+      "line": 85,
+      "col": 42,
+      "chord": "A#m"
+    },
+    {
+      "id": "a046eb66-1b32-438d-b32f-4f214c6b03f4",
+      "line": 85,
+      "col": 47,
+      "chord": "F#"
+    },
+    {
+      "id": "1daca427-6e1c-44c1-b5f6-c31058f27a76",
+      "line": 87,
+      "col": 4,
+      "chord": "C#"
+    },
+    {
+      "id": "85afdaef-713b-46a7-8546-f82ae1c88254",
+      "line": 87,
+      "col": 16,
+      "chord": "G#"
+    },
+    {
+      "id": "08077bf3-da6d-4c2a-8d90-a4f25db619cf",
+      "line": 87,
+      "col": 30,
+      "chord": "A#m"
+    },
+    {
+      "id": "7eab7d69-feb8-49cb-9fbe-b16a192c2767",
+      "line": 87,
+      "col": 37,
+      "chord": "F#"
+    },
+    {
+      "id": "8488895e-c3dc-4c87-9a5d-9ac7246a22da",
+      "line": 91,
+      "col": 0,
+      "chord": "F#"
+    },
+    {
+      "id": "1213c0cb-50db-422f-8239-b9f8c1aafcdd",
+      "line": 91,
+      "col": 8,
+      "chord": "C#"
+    },
+    {
+      "id": "20325cf0-847b-4ab0-a592-63ef1f68cf67",
+      "line": 91,
+      "col": 22,
+      "chord": "G#"
+    },
+    {
+      "id": "1d903f94-bea7-4698-a17a-2f053c494d7c",
+      "line": 91,
+      "col": 42,
+      "chord": "A#m"
+    },
+    {
+      "id": "ceba6f7e-2b95-4793-abe1-c713ddb890c9",
+      "line": 91,
+      "col": 48,
+      "chord": "F#"
+    },
+    {
+      "id": "72927a04-86db-4b06-94d3-44cf55e58dd4",
+      "line": 92,
+      "col": 6,
+      "chord": "C#"
+    },
+    {
+      "id": "cf1d2159-cd81-43be-92de-4946e72a0446",
+      "line": 92,
+      "col": 16,
+      "chord": "G#"
+    },
+    {
+      "id": "4e058c83-f23c-499d-99c4-a135eb91f736",
+      "line": 92,
+      "col": 30,
+      "chord": "A#m"
+    },
+    {
+      "id": "80ebfd48-2dce-4b6a-8e2e-3a3d623d0fb0",
+      "line": 92,
+      "col": 37,
+      "chord": "F#"
+    },
+    {
+      "id": "06ba8cbf-aeb2-41cd-8819-5bdbf1543bd2",
+      "line": 93,
+      "col": 8,
+      "chord": "C#"
+    },
+    {
+      "id": "5ae0a900-dafe-4332-8383-88d35d8f1161",
+      "line": 93,
+      "col": 20,
+      "chord": "G#"
+    },
+    {
+      "id": "638e6287-fa5e-4609-aa5e-849c83e6233a",
+      "line": 93,
+      "col": 42,
+      "chord": "A#m"
+    },
+    {
+      "id": "10da9849-8d9b-41b0-8bef-0263d6e6751b",
+      "line": 93,
+      "col": 47,
+      "chord": "F#"
+    },
+    {
+      "id": "33d943e0-8598-4371-92e3-4d5b3575e9a2",
+      "line": 94,
+      "col": 6,
+      "chord": "C#"
+    },
+    {
+      "id": "600b95e3-9852-429d-a3d5-445f26dd97e7",
+      "line": 94,
+      "col": 16,
+      "chord": "G#"
+    },
+    {
+      "id": "3d4b028c-c2e5-4a0f-a537-aece16543202",
+      "line": 94,
+      "col": 29,
+      "chord": "A#m"
+    },
+    {
+      "id": "e79d5201-6297-48a3-83e1-a3d35665aab7",
+      "line": 95,
+      "col": 6,
+      "chord": "C#"
+    },
+    {
+      "id": "0c231f27-2e6b-45aa-b88d-e9c787dc8382",
+      "line": 95,
+      "col": 16,
+      "chord": "G#"
+    },
+    {
+      "id": "480e067c-e0bd-4f0d-bb0a-d2cbcc6e2946",
+      "line": 95,
+      "col": 29,
+      "chord": "A#m"
+    },
+    {
+      "id": "48a0fdcd-88b9-416b-8bbb-33f26b83ea60",
+      "line": 11,
+      "col": 6,
+      "chord": "Gb"
+    },
+    {
+      "id": "13b2ddb1-7b72-44f9-bbf0-85d2175b2a71",
+      "line": 11,
+      "col": 10,
+      "chord": "Bbm"
+    },
+    {
+      "id": "de30b289-c363-4fd7-8731-961d081dde14",
+      "line": 11,
+      "col": 15,
+      "chord": "Ab"
+    },
+    {
+      "id": "3e1568d8-1c26-4600-9f79-1c646d6d3158",
+      "line": 11,
+      "col": 21,
+      "chord": "Gb"
+    },
+    {
+      "id": "a587379d-8671-4fc2-a627-b3c32afd610b",
+      "line": 11,
+      "col": 26,
+      "chord": "Db"
+    }
+  ],
+  "keyOverride": null,
+  "capo": 6,
+  "createdAt": "2026-08-07T22:41:37.211Z",
+  "updatedAt": "2026-08-10T23:03:39.003Z",
+  "bpm": 164
+}
