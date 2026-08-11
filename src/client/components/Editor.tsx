@@ -16,10 +16,19 @@ import { LyricLine, type EditingModel } from "./LyricLine";
 import { PrintSheet } from "./PrintSheet";
 import { Toolbar } from "./Toolbar";
 
+export interface SetNav {
+  setName: string;
+  prevTitle: string | null;
+  nextTitle: string | null;
+  onPrev(): void;
+  onNext(): void;
+}
+
 interface Props {
   song: Song;
   onBack(): void;
   onChange(song: Song): void;
+  setNav?: SetNav;
 }
 
 export function songKeyName(song: Song): string | null {
@@ -33,7 +42,7 @@ function freshId(): string {
     : `p-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function Editor({ song, onBack, onChange }: Props) {
+export function Editor({ song, onBack, onChange, setNav }: Props) {
   const detectedKey = detectKey(song.placements.map((p) => p.chord))?.name ?? null;
   const soundingKey = song.keyOverride ?? detectedKey;
   const shaped = soundingKey ? shapedKey(soundingKey, song.capo) : "C";
@@ -242,11 +251,22 @@ export function Editor({ song, onBack, onChange }: Props) {
   return (
     <div className="editor">
       <div className="editor-bar">
-        <button onClick={onBack}>Back to library</button>
+        <button onClick={onBack}>{setNav ? "Back to set" : "Back to library"}</button>
         <div className="editor-heading">
           <strong>{song.title}</strong>
           {song.artist && <span className="muted"> {song.artist}</span>}
+          {setNav && <span className="badge">{setNav.setName}</span>}
         </div>
+        {setNav && (
+          <span className="set-nav">
+            <button disabled={setNav.prevTitle === null} onClick={setNav.onPrev} title={setNav.prevTitle ?? undefined}>
+              &#8592; Prev
+            </button>
+            <button disabled={setNav.nextTitle === null} onClick={setNav.onNext}>
+              {setNav.nextTitle ? `Next: ${setNav.nextTitle}` : "Next"} &#8594;
+            </button>
+          </span>
+        )}
         {lyricsDraft === null ? (
           <>
             <button onClick={() => void copyPrompt()}>{copied ? "Copied" : "Copy AI prompt"}</button>

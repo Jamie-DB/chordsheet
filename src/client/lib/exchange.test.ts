@@ -110,13 +110,30 @@ describe("parseImport", () => {
 });
 
 describe("library backup files", () => {
-  it("round-trips a library", async () => {
+  const setlist = {
+    version: 1 as const,
+    id: "sunday",
+    name: "Sunday",
+    songIds: ["test-song"],
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  };
+
+  it("round-trips a library with setlists", async () => {
     const { libraryToJson, parseLibraryFile } = await import("./exchange");
     const other = { ...song, id: "second", title: "Second" };
-    const parsed = parseLibraryFile(libraryToJson([song, other]));
+    const parsed = parseLibraryFile(libraryToJson([song, other], [setlist]));
     expect(parsed).not.toBeNull();
     expect(parsed!.songs.map((s) => s.id)).toEqual(["test-song", "second"]);
+    expect(parsed!.setlists.map((s) => s.id)).toEqual(["sunday"]);
     expect(parsed!.invalid).toBe(0);
+  });
+
+  it("tolerates old backups without setlists", async () => {
+    const { parseLibraryFile } = await import("./exchange");
+    const parsed = parseLibraryFile(JSON.stringify({ chordsheetLibrary: 1, songs: [song] }));
+    expect(parsed!.songs).toHaveLength(1);
+    expect(parsed!.setlists).toEqual([]);
   });
 
   it("counts invalid entries instead of absorbing them", async () => {

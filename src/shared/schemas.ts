@@ -22,6 +22,15 @@ export const songSchema = z.object({
   updatedAt: z.string(),
 });
 
+export const setlistSchema = z.object({
+  version: z.literal(1),
+  id: z.string().min(1),
+  name: z.string().min(1),
+  songIds: z.array(z.string().min(1)),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
 /** Col-form placement as it may arrive from outside; id is optional there. */
 export const importedColPlacementSchema = z.object({
   id: z.string().optional(),

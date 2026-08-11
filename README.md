@@ -25,6 +25,10 @@ npm run dev      # http://localhost:5173
 
 Shortcuts: `+` and `-` transpose; `Space` toggles auto-scroll; `Escape` closes any open popover or panel.
 
+## Library and sets
+
+The library lists songs alphabetically by default, with a search box (title and artist) and a sort selector (Title, Artist, Recently updated, Recently added) that remembers your choice. Sets group songs in order for a service: create one in the Sets section, add songs (repeats allowed), reorder, then step through it in the editor with Prev and Next. Deleting a song removes it from every set. Sets ride along in "Save all to folder" (one setlists.json) and in Download backup.
+
 ## Storage
 
 Songs autosave to browser localStorage. "Save all to folder" in the library writes every song as `<id>.json` straight into a folder you pick once (choose `songs/` here); it checks the disk first and skips files that are already up to date, so repeated saves are idempotent. Commit `songs/` when you want the backup in git (this repo is private). Note for Brave: it disables the File System Access API by default; enable it at brave://flags (search "File System Access API") and relaunch, or use "Download backup", which saves the whole library as one chordsheet-library.json in any browser and restores through Import. Per-song "Export" and "Import JSON" remain for one-offs. `songs/amazing-grace.json` is the public domain seed used by tests.

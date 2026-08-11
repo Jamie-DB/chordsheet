@@ -1,7 +1,8 @@
-import type { Song } from "../../shared/types";
-import { songSchema } from "../../shared/schemas";
+import type { Setlist, Song } from "../../shared/types";
+import { setlistSchema, songSchema } from "../../shared/schemas";
 
 const KEY = "chordsheet.songs.v1";
+const SETS_KEY = "chordsheet.setlists.v1";
 
 export function loadLibrary(): Song[] {
   try {
@@ -27,6 +28,33 @@ export function saveLibrary(songs: Song[]): void {
     localStorage.setItem(KEY, JSON.stringify(songs));
   } catch (err) {
     console.warn("chordsheet: could not save library", err);
+  }
+}
+
+export function loadSetlists(): Setlist[] {
+  try {
+    const raw = localStorage.getItem(SETS_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const sets: Setlist[] = [];
+    for (const item of parsed) {
+      const result = setlistSchema.safeParse(item);
+      if (result.success) sets.push(result.data);
+      else console.warn("chordsheet: skipping invalid stored setlist", result.error);
+    }
+    return sets;
+  } catch (err) {
+    console.warn("chordsheet: could not read setlists", err);
+    return [];
+  }
+}
+
+export function saveSetlists(sets: Setlist[]): void {
+  try {
+    localStorage.setItem(SETS_KEY, JSON.stringify(sets));
+  } catch (err) {
+    console.warn("chordsheet: could not save setlists", err);
   }
 }
 

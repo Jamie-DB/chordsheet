@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
-import type { Song } from "../../shared/types";
+import type { Setlist, Song } from "../../shared/types";
 import {
   diskSyncSupported,
   ensurePermission,
   isBrave,
   loadSavedDir,
   pickDir,
+  syncSetlists,
   syncSongs,
   type DirHandleLike,
 } from "../lib/diskSync";
@@ -15,14 +16,30 @@ import { loadUiPrefs, saveUiPrefs } from "../lib/storage";
 
 interface Props {
   songs: Song[];
+  setlists: Setlist[];
   onCreate(title: string, artist: string, lyricsText: string, writtenForCapo: number): void;
   onOpen(id: string): void;
   onRename(id: string, title: string): void;
   onDelete(id: string): void;
   onImport(song: Song, open: boolean): void;
+  onCreateSet(name: string): void;
+  onOpenSet(id: string): void;
+  onImportSetlists(sets: Setlist[]): void;
 }
 
-export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport }: Props) {
+export function Library({
+  songs,
+  setlists,
+  onCreate,
+  onOpen,
+  onRename,
+  onDelete,
+  onImport,
+  onCreateSet,
+  onOpenSet,
+  onImportSetlists,
+}: Props) {
+  const [setName, setSetName] = useState("");
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [lyricsText, setLyricsText] = useState("");
@@ -43,8 +60,10 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
       if (!dir) dir = await pickDir();
       if (!dir) return;
       const result = await syncSongs(songs, dir);
+      const setsWritten = await syncSetlists(setlists, dir);
       const skipNote = result.skipped > 0 ? `, ${result.skipped} already up to date` : "";
-      setSyncMsg(`Saved ${result.written} song file(s) to "${dir.name}"${skipNote}.`);
+      const setsNote = setsWritten ? ", setlists.json updated" : "";
+      setSyncMsg(`Saved ${result.written} song file(s) to "${dir.name}"${skipNote}${setsNote}.`);
     } catch (err) {
       if ((err as DOMException)?.name === "AbortError") return;
       setSyncMsg("Could not save to the folder. Try choosing it again.");
@@ -81,8 +100,10 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
           continue;
         }
         for (const s of library.songs) onImport(s, false);
+        if (library.setlists.length > 0) onImportSetlists(library.setlists);
+        const setsNote = library.setlists.length > 0 ? ` and ${library.setlists.length} set(s)` : "";
         setStatus(
-          `Restored ${library.songs.length} song(s) from ${file.name}.` +
+          `Restored ${library.songs.length} song(s)${setsNote} from ${file.name}.` +
             (library.invalid > 0 ? ` ${library.invalid} invalid entr${library.invalid === 1 ? "y was" : "ies were"} skipped.` : ""),
         );
         continue;
@@ -177,6 +198,53 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
         {status && <p className="status">{status}</p>}
       </section>
 
+      <section className="sets-section">
+        <div className="song-list-head">
+          <h2>Sets</h2>
+          <span className="song-list-tools">
+            <input
+              value={setName}
+              placeholder="New set name"
+              onChange={(e) => setSetName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && setName.trim()) {
+                  onCreateSet(setName.trim());
+                  setSetName("");
+                }
+              }}
+              aria-label="New set name"
+            />
+            <button
+              disabled={!setName.trim()}
+              onClick={() => {
+                onCreateSet(setName.trim());
+                setSetName("");
+              }}
+            >
+              Create set
+            </button>
+          </span>
+        </div>
+        {setlists.length === 0 ? (
+          <p className="muted">No sets yet. Name one to start grouping songs for a service.</p>
+        ) : (
+          <ul>
+            {[...setlists]
+              .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }))
+              .map((set) => (
+                <li key={set.id} className="song-row">
+                  <button className="song-open" onClick={() => onOpenSet(set.id)}>
+                    <span className="song-title">{set.name}</span>
+                    <span className="song-artist">
+                      {set.songIds.length} song{set.songIds.length === 1 ? "" : "s"}
+                    </span>
+                  </button>
+                </li>
+              ))}
+          </ul>
+        )}
+      </section>
+
       <section className="song-list">
         <div className="song-list-head">
           <h2>Library</h2>
@@ -206,8 +274,8 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
                 </button>
               )}
               <button
-                onClick={() => downloadLibrary(songs)}
-                title="Download every song in one chordsheet-library.json file; works in any browser. Import it to restore."
+                onClick={() => downloadLibrary(songs, setlists)}
+                title="Download every song and set in one chordsheet-library.json file; works in any browser. Import it to restore."
               >
                 Download backup
               </button>
