@@ -43,6 +43,24 @@ export function slugify(title: string, taken: Set<string>): string {
   }
 }
 
+const UI_KEY = "chordsheet.ui.v1";
+
+export function loadUiPrefs(): { sort?: string } {
+  try {
+    return JSON.parse(localStorage.getItem(UI_KEY) ?? "{}") as { sort?: string };
+  } catch {
+    return {};
+  }
+}
+
+export function saveUiPrefs(prefs: { sort?: string }): void {
+  try {
+    localStorage.setItem(UI_KEY, JSON.stringify(prefs));
+  } catch {
+    // Preference only; losing it is harmless.
+  }
+}
+
 /** Split pasted lyrics into lines: tabs to spaces, trailing whitespace trimmed. */
 export function lyricsFromPaste(text: string): string[] {
   return text

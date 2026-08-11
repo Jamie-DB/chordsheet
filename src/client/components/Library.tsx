@@ -10,6 +10,8 @@ import {
   type DirHandleLike,
 } from "../lib/diskSync";
 import { downloadLibrary, downloadSong, parseImport, parseLibraryFile } from "../lib/exchange";
+import { DEFAULT_SORT, SORTS, isSortKey, matchesQuery, type SortKey } from "../lib/librarySort";
+import { loadUiPrefs, saveUiPrefs } from "../lib/storage";
 
 interface Props {
   songs: Song[];
@@ -27,6 +29,11 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
   const [writtenCapo, setWrittenCapo] = useState(0);
   const [status, setStatus] = useState<string | null>(null);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>(() => {
+    const stored = loadUiPrefs().sort;
+    return isSortKey(stored) ? stored : DEFAULT_SORT;
+  });
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function saveAll(forcePick: boolean) {
@@ -44,7 +51,7 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
     }
   }
 
-  const sorted = [...songs].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const sorted = songs.filter((s) => matchesQuery(s, query)).sort(SORTS[sort].compare);
 
   function handleCreate() {
     if (!title.trim() && !lyricsText.trim()) {
@@ -173,7 +180,7 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
       <section className="song-list">
         <div className="song-list-head">
           <h2>Library</h2>
-          {sorted.length > 0 && (
+          {songs.length > 0 && (
             <span className="song-list-tools">
               <button
                 onClick={() => {
@@ -208,7 +215,41 @@ export function Library({ songs, onCreate, onOpen, onRename, onDelete, onImport 
           )}
         </div>
         {syncMsg && <p className="muted">{syncMsg}</p>}
-        {sorted.length === 0 && <p className="muted">No songs yet.</p>}
+        {songs.length > 0 && (
+          <div className="library-controls">
+            <input
+              value={query}
+              placeholder="Search title or artist"
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search songs"
+            />
+            <label className="sort-control">
+              Sort{" "}
+              <select
+                value={sort}
+                onChange={(e) => {
+                  const next = e.target.value as SortKey;
+                  setSort(next);
+                  saveUiPrefs({ sort: next });
+                }}
+                aria-label="Sort songs"
+              >
+                {Object.entries(SORTS).map(([key, s]) => (
+                  <option key={key} value={key}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {query.trim().length > 0 && (
+              <span className="muted">
+                {sorted.length} of {songs.length} songs
+              </span>
+            )}
+          </div>
+        )}
+        {songs.length === 0 && <p className="muted">No songs yet.</p>}
+        {songs.length > 0 && sorted.length === 0 && <p className="muted">No matches.</p>}
         <ul>
           {sorted.map((song) => (
             <li key={song.id} className="song-row">
