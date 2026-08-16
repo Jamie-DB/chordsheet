@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import type { Setlist, Song } from "../../shared/types";
 import { normalizeSections, stripPageLines } from "../lib/normalize";
+import { extractLabelNotes } from "../lib/sectionMarks";
 import {
   addSongToSet,
   createSetlist,
@@ -61,9 +62,15 @@ function migrate(songs: Song[]): Song[] {
     const stripped = stripPageLines(song.lyrics, song.placements);
     const repaired = repairChordTextLines(stripped.lyrics, stripped.placements);
     const n = normalizeSections(repaired.lyrics, repaired.placements);
-    if (!stripped.changed && !repaired.changed && !n.changed) return song;
+    const extracted = extractLabelNotes(n.lyrics, song.sectionMarks ?? []);
+    if (!stripped.changed && !repaired.changed && !n.changed && !extracted.changed) return song;
     anyChanged = true;
-    return { ...song, lyrics: n.lyrics, placements: n.placements };
+    return {
+      ...song,
+      lyrics: extracted.lyrics,
+      placements: n.placements,
+      sectionMarks: extracted.sectionMarks.length > 0 ? extracted.sectionMarks : song.sectionMarks,
+    };
   });
   if (anyChanged) saveLibrary(migrated);
   return migrated;
@@ -213,6 +220,7 @@ export function useSongStore(): [AppState, SongActions] {
           artist: artist.trim() || undefined,
           lyrics: parsed.lyrics,
           placements: parsed.placements,
+          sectionMarks: parsed.sectionMarks.length > 0 ? parsed.sectionMarks : undefined,
           keyOverride: null,
           capo: writtenForCapo,
           bpm: parsed.bpm ?? undefined,

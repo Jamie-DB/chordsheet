@@ -113,6 +113,14 @@ describe("parsePastedTab", () => {
     expect(parsed.placements.map((p) => `${p.chord}@${p.line}:${p.col}`)).toEqual(["G@0:0", "C@0:4"]);
   });
 
+  it("promotes inline label notes at paste time", () => {
+    const parsed = parsePastedTab("[Verse] *soft piano*\nG   C\nHello there my friend");
+    expect(parsed.lyrics[0]).toBe("[Verse]");
+    expect(parsed.sectionMarks).toEqual([
+      { section: "[Verse]", occurrence: 1, kind: "soft", text: "soft piano" },
+    ]);
+  });
+
   it("carries a detected tempo", () => {
     expect(parsePastedTab("Tempo: 120\nG\nHello there friend").bpm).toBe(120);
     expect(parsePastedTab("G\nHello there friend").bpm).toBeNull();

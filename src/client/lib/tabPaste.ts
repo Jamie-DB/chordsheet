@@ -1,13 +1,17 @@
 import { isChordSymbol, transposeSymbol } from "../../engine";
 import type { ChordPlacement } from "../../shared/types";
 import { freshId } from "./ids";
+import type { SectionMark } from "../../shared/types";
 import { isSectionLabel } from "./lineOps";
 import { isPageArtifact, normalizeSections } from "./normalize";
+import { extractLabelNotes } from "./sectionMarks";
 import { lyricsFromPaste } from "./storage";
 
 export interface ParsedTab {
   lyrics: string[];
   placements: ChordPlacement[];
+  /** Marks promoted from inline label notes ("[Verse] *soft piano*"). */
+  sectionMarks: SectionMark[];
   /** How many chord lines were converted into placements. */
   chordLinesConverted: number;
   /** Tempo found in the pasted text ("Tempo: 120", "96 bpm"), else null. */
@@ -128,9 +132,11 @@ export function parsePastedTab(text: string, writtenForCapo: number = 0): Parsed
   }
 
   const normalized = normalizeSections(lyrics, placements);
+  const extracted = extractLabelNotes(normalized.lyrics, []);
   return {
-    lyrics: normalized.lyrics,
+    lyrics: extracted.lyrics,
     placements: normalized.placements,
+    sectionMarks: extracted.sectionMarks,
     chordLinesConverted,
     bpm: detectBpm(raw),
   };

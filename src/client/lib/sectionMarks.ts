@@ -63,6 +63,72 @@ export function withMark(marks: SectionMark[], mark: SectionMark): SectionMark[]
   ];
 }
 
+/** Best-guess preset for a promoted note; wrong guesses are one click away. */
+export function inferKind(note: string): { kind: MarkKind; color?: MarkColor } {
+  const n = note.toLowerCase();
+  if (/\btacet\b|don'?t play/.test(n)) return { kind: "tacet" };
+  if (/soft|quiet|piano only|gentle/.test(n)) return { kind: "soft" };
+  if (/build|swell|rise|grow/.test(n)) return { kind: "build" };
+  if (/\bfull\b|loud|all in/.test(n)) return { kind: "full" };
+  return { kind: "custom", color: "amber" };
+}
+
+const LABEL_WITH_NOTE = /^(\s*\[[^\]]+\])\s+(\S.*)$/;
+
+export interface ExtractResult {
+  lyrics: string[];
+  sectionMarks: SectionMark[];
+  changed: boolean;
+  converted: number;
+}
+
+/**
+ * Promote inline label notes ("[Verse 1] *soft piano only*") into real
+ * section marks: the line becomes the bare label and the note becomes the
+ * tag's term with an inferred preset. Existing marks are never clobbered.
+ * Line count never changes, so placements need no remapping. Deterministic,
+ * so browser migration and the disk script converge identically.
+ */
+export function extractLabelNotes(lyrics: string[], marks: SectionMark[]): ExtractResult {
+  const found: Array<{ index: number; note: string }> = [];
+  const newLyrics = lyrics.map((line, i) => {
+    const m = LABEL_WITH_NOTE.exec(line);
+    if (!m || !isSectionLabel(m[1])) return line;
+    const note = m[2].trim().replace(/^\*+\s*/, "").replace(/\s*\*+$/, "").trim();
+    if (note.length > 0) found.push({ index: i, note });
+    return m[1].trim();
+  });
+  if (found.length === 0) return { lyrics, sectionMarks: marks, changed: false, converted: 0 };
+
+  // Occurrences count against the REWRITTEN lyrics; rewrites can merge labels.
+  const counts = new Map<string, number>();
+  const occurrenceAt = new Map<number, { label: string; occurrence: number }>();
+  newLyrics.forEach((line, i) => {
+    if (!isSectionLabel(line)) return;
+    const label = line.trim();
+    const occurrence = (counts.get(label) ?? 0) + 1;
+    counts.set(label, occurrence);
+    occurrenceAt.set(i, { label, occurrence });
+  });
+
+  let out = marks;
+  let converted = 0;
+  for (const f of found) {
+    const at = occurrenceAt.get(f.index);
+    if (!at || markFor(out, at.label, at.occurrence)) continue;
+    const inferred = inferKind(f.note);
+    out = withMark(out, {
+      section: at.label,
+      occurrence: at.occurrence,
+      kind: inferred.kind,
+      text: f.note,
+      ...(inferred.kind === "custom" ? { color: inferred.color } : {}),
+    });
+    converted += 1;
+  }
+  return { lyrics: newLyrics, sectionMarks: out, changed: true, converted };
+}
+
 export function withoutMark(
   marks: SectionMark[],
   label: string,

@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizeSections, stripPageLines } from "../src/client/lib/normalize";
+import { extractLabelNotes } from "../src/client/lib/sectionMarks";
 import { repairChordTextLines } from "../src/client/lib/tabPaste";
 import type { Song } from "../src/shared/types";
 
@@ -19,17 +20,28 @@ for (const file of readdirSync(DIR).filter((f) => f.endsWith(".json")).sort()) {
   const path = join(DIR, file);
   const original = readFileSync(path, "utf8");
   const song = JSON.parse(original) as Song;
+  if (!Array.isArray(song.lyrics)) {
+    // Not a song (setlists.json lives here too); leave it alone.
+    continue;
+  }
 
   const stripped = stripPageLines(song.lyrics, song.placements);
   const repaired = repairChordTextLines(stripped.lyrics, stripped.placements);
   const n = normalizeSections(repaired.lyrics, repaired.placements);
-  const cleaned: Song = { ...song, lyrics: n.lyrics, placements: n.placements };
+  const extracted = extractLabelNotes(n.lyrics, song.sectionMarks ?? []);
+  const cleaned: Song = {
+    ...song,
+    lyrics: extracted.lyrics,
+    placements: n.placements,
+    sectionMarks: extracted.sectionMarks.length > 0 ? extracted.sectionMarks : song.sectionMarks,
+  };
 
   const next = JSON.stringify(cleaned, null, 2) + "\n";
   if (next !== original) {
     writeFileSync(path, next);
     console.log(
-      `${file}: ${repaired.converted} chord-text line(s) converted, ` +
+      `${file}: ${repaired.converted} chord-text line(s), ` +
+        `${extracted.converted} label note(s) promoted, ` +
         `placements ${song.placements.length} -> ${cleaned.placements.length}, ` +
         `lines ${song.lyrics.length} -> ${cleaned.lyrics.length}`,
     );
