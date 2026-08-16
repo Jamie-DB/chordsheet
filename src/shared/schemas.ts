@@ -8,6 +8,14 @@ export const chordPlacementSchema = z.object({
   hold: z.boolean().optional(),
 });
 
+export const sectionMarkSchema = z.object({
+  section: z.string().min(1),
+  occurrence: z.number().int().min(1),
+  kind: z.enum(["tacet", "soft", "build", "full", "custom"]),
+  text: z.string().optional(),
+  color: z.enum(["red", "blue", "amber", "green"]).optional(),
+});
+
 export const songSchema = z.object({
   version: z.literal(1),
   id: z.string().min(1),
@@ -19,6 +27,7 @@ export const songSchema = z.object({
   capo: z.number().int().min(0).max(9),
   bpm: z.number().int().min(20).max(400).optional(),
   notes: z.string().optional(),
+  sectionMarks: z.array(sectionMarkSchema).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

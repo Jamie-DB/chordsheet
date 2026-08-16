@@ -5,6 +5,7 @@ import { buildAiPrompt } from "../lib/aiPrompt";
 import { parseImport } from "../lib/exchange";
 import { chordsOnLine, deleteLine, editLine, insertLine } from "../lib/lineOps";
 import { normalizeSections } from "../lib/normalize";
+import { markColor, markFor, markName, sectionRanges, withMark, withoutMark } from "../lib/sectionMarks";
 import { sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
@@ -57,6 +58,18 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
   const [copiedText, setCopiedText] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [autoEditLine, setAutoEditLine] = useState<number | null>(null);
+  const [markPickerLine, setMarkPickerLine] = useState<number | null>(null);
+
+  const marks = song.sectionMarks ?? [];
+  const ranges = sectionRanges(song.lyrics);
+  const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
+  const sectionClassByLine = new Map<number, string>();
+  for (const r of ranges) {
+    const mark = markFor(marks, r.label, r.occurrence);
+    if (!mark) continue;
+    const cls = `sec-${markColor(mark)}`;
+    for (let i = r.start; i <= r.end; i++) sectionClassByLine.set(i, cls);
+  }
   const [notesOpen, setNotesOpen] = useState(() => Boolean(song.notes?.trim()));
 
   const bpm = song.bpm ?? 80;
@@ -85,6 +98,7 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
         setPasteOpen(false);
         setShowSuggestions(false);
         setPlaying(false);
+        setMarkPickerLine(null);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -446,6 +460,35 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
                 if (n > 0 && !window.confirm(`Delete this line and its ${n} chord(s)?`)) return;
                 onChange(deleteLine(song, line2));
               }}
+              sectionClass={sectionClassByLine.get(i)}
+              sectionUi={(() => {
+                const range = rangeByStart.get(i);
+                if (!range) return undefined;
+                const current = markFor(marks, range.label, range.occurrence);
+                return {
+                  pillName: current ? markName(current) : null,
+                  pillColor: current ? markColor(current) : null,
+                  pickerOpen: markPickerLine === i,
+                  current,
+                  onOpen: () => setMarkPickerLine(i),
+                  onPick: (kind, text, color) => {
+                    const next = withMark(marks, {
+                      section: range.label,
+                      occurrence: range.occurrence,
+                      kind,
+                      ...(kind === "custom" ? { text, color } : {}),
+                    });
+                    onChange({ ...song, sectionMarks: next });
+                    setMarkPickerLine(null);
+                  },
+                  onClear: () => {
+                    const next = withoutMark(marks, range.label, range.occurrence);
+                    onChange({ ...song, sectionMarks: next.length > 0 ? next : undefined });
+                    setMarkPickerLine(null);
+                  },
+                  onClose: () => setMarkPickerLine(null),
+                };
+              })()}
             />
           ))}
         </div>

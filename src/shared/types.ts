@@ -25,8 +25,27 @@ export interface Song {
   bpm?: number;
   /** Free-text block under the header: tuning, strum pattern, reminders. */
   notes?: string;
+  /** Per-section dynamics marks for this arrangement. */
+  sectionMarks?: SectionMark[];
   createdAt: string;
   updatedAt: string;
+}
+
+export type MarkColor = "red" | "blue" | "amber" | "green";
+export type MarkKind = "tacet" | "soft" | "build" | "full" | "custom";
+
+/**
+ * A dynamics mark on one section, anchored by the label line's exact text
+ * and its occurrence among identical labels, so line edits never shift it.
+ */
+export interface SectionMark {
+  section: string;
+  occurrence: number;
+  kind: MarkKind;
+  /** Custom marks only: a short word shown in place of the preset name. */
+  text?: string;
+  /** Custom marks only; presets carry fixed colors. */
+  color?: MarkColor;
 }
 
 export interface Setlist {

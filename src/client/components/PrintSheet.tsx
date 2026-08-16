@@ -1,7 +1,9 @@
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
 import { isSectionLabel } from "../lib/lineOps";
+import { markColor, markFor, markName, sectionRanges } from "../lib/sectionMarks";
 import { ChordChartRow } from "./ChordChartRow";
+import { DiamondOutline } from "./DiamondOutline";
 
 interface Props {
   song: Song;
@@ -33,6 +35,17 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
   );
   const twoCol = widest > 0 && widest <= TWO_COLUMN_MAX_CHARS;
 
+  const marks = song.sectionMarks ?? [];
+  const ranges = sectionRanges(song.lyrics);
+  const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
+  const sectionClassByLine = new Map<number, string>();
+  for (const r of ranges) {
+    const mark = markFor(marks, r.label, r.occurrence);
+    if (!mark) continue;
+    const cls = ` sec-${markColor(mark)}`;
+    for (let i = r.start; i <= r.end; i++) sectionClassByLine.set(i, cls);
+  }
+
   return (
     <div className="print-sheet">
       <div className="print-header">
@@ -53,14 +66,17 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
           if (line.length === 0 && row.length === 0) {
             return <div className="print-gap" key={i} />;
           }
+          const range = rangeByStart.get(i);
+          const mark = range ? markFor(marks, range.label, range.occurrence) : null;
           return (
-            <div className="print-pair" key={i}>
+            <div className={`print-pair${sectionClassByLine.get(i) ?? ""}`} key={i}>
               {row.length > 0 && (
                 <pre className="print-chords">
                   {row.map((s, j) =>
                     s.hold ? (
                       <span key={j} className="hold-diamond">
                         {s.text}
+                        <DiamondOutline />
                       </span>
                     ) : (
                       s.text
@@ -70,6 +86,11 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
               )}
               <pre className={`print-lyric${isSectionLabel(line) ? " section-label" : ""}`}>
                 {line || " "}
+                {mark && (
+                  <span className={`print-mark-name name-${markColor(mark)}`}>
+                    {"  " + markName(mark).toUpperCase()}
+                  </span>
+                )}
               </pre>
             </div>
           );

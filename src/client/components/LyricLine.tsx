@@ -1,9 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
+import type { MarkColor, MarkKind, SectionMark } from "../../shared/types";
 import { xToCol } from "../lib/grid";
 import { isSectionLabel } from "../lib/lineOps";
 import { ChordChip } from "./ChordChip";
 import { ChordEditPopover } from "./ChordEditPopover";
+import { SectionMarkPicker } from "./SectionMarkPicker";
+
+export interface SectionUi {
+  pillName: string | null;
+  pillColor: MarkColor | null;
+  pickerOpen: boolean;
+  current: SectionMark | null;
+  onOpen(): void;
+  onPick(kind: MarkKind, text?: string, color?: MarkColor): void;
+  onClear(): void;
+  onClose(): void;
+}
 
 export interface ChipModel {
   id: string;
@@ -45,6 +58,10 @@ interface Props {
   onCommitLine(index: number, text: string): void;
   onInsertLine(at: number): void;
   onDeleteLine(index: number): void;
+  /** Present only on section label lines. */
+  sectionUi?: SectionUi;
+  /** Tint/bar class when this line sits inside a marked section. */
+  sectionClass?: string;
 }
 
 export function LyricLine(props: Props) {
@@ -77,8 +94,10 @@ export function LyricLine(props: Props) {
 
   const editingHere = editing !== null && editing.line === index;
 
+  const { sectionUi } = props;
+
   return (
-    <div className="line-pair" data-line={index}>
+    <div className={`line-pair${props.sectionClass ? ` ${props.sectionClass}` : ""}`} data-line={index}>
       <span className="line-tools">
         <button className="mini" title="Insert line above" onClick={() => props.onInsertLine(index)}>
           +&#8593;
@@ -132,6 +151,28 @@ export function LyricLine(props: Props) {
             validate={props.validate}
             onCommit={props.onCommitEdit}
             onCancel={props.onCancelEdit}
+          />
+        )}
+        {sectionUi && !sectionUi.pickerOpen && (
+          <button
+            className={`mark-pill${sectionUi.pillColor ? ` pill-${sectionUi.pillColor}` : ""}`}
+            style={{ left: `${text.length + 2}ch` }}
+            onClick={(e) => {
+              e.stopPropagation();
+              sectionUi.onOpen();
+            }}
+            title="Section dynamics mark"
+          >
+            {sectionUi.pillName ?? "mark"}
+          </button>
+        )}
+        {sectionUi?.pickerOpen && (
+          <SectionMarkPicker
+            col={text.length + 2}
+            current={sectionUi.current}
+            onPick={sectionUi.onPick}
+            onClear={sectionUi.onClear}
+            onClose={sectionUi.onClose}
           />
         )}
       </div>
