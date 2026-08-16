@@ -34,6 +34,12 @@ describe("marks", () => {
     expect(markName({ ...custom, text: "  " })).toBe("Custom");
   });
 
+  it("a note overrides any preset's term while keeping its color", () => {
+    const noted: SectionMark = { ...tacet, text: "Hard cut - Absolute Quiet" };
+    expect(markName(noted)).toBe("Hard cut - Absolute Quiet");
+    expect(markColor(noted)).toBe("red");
+  });
+
   it("replaces and clears without touching other sections", () => {
     const soft: SectionMark = { section: "[Chorus]", occurrence: 2, kind: "soft" };
     const next = withMark([tacet, custom], soft);

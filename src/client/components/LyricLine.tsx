@@ -8,8 +8,11 @@ import { ChordEditPopover } from "./ChordEditPopover";
 import { SectionMarkPicker } from "./SectionMarkPicker";
 
 export interface SectionUi {
-  pillName: string | null;
-  pillColor: MarkColor | null;
+  /** Bracket-free section title, e.g. "Verse 1". */
+  title: string;
+  /** Displayed term when marked (preset name or note override), else null. */
+  name: string | null;
+  color: MarkColor | null;
   pickerOpen: boolean;
   current: SectionMark | null;
   onOpen(): void;
@@ -95,9 +98,15 @@ export function LyricLine(props: Props) {
   const editingHere = editing !== null && editing.line === index;
 
   const { sectionUi } = props;
+  // Section label rows leave the vertical flow (their tag lives in the left
+  // sidebar) unless being edited or carrying chords above them.
+  const collapsed = sectionUi !== undefined && draft === null && chips.length === 0 && !editingHere;
 
   return (
-    <div className={`line-pair${props.sectionClass ? ` ${props.sectionClass}` : ""}`} data-line={index}>
+    <div
+      className={`line-pair${props.sectionClass ? ` ${props.sectionClass}` : ""}${collapsed ? " label-collapsed" : ""}`}
+      data-line={index}
+    >
       <span className="line-tools">
         <button className="mini" title="Insert line above" onClick={() => props.onInsertLine(index)}>
           +&#8593;
@@ -153,22 +162,9 @@ export function LyricLine(props: Props) {
             onCancel={props.onCancelEdit}
           />
         )}
-        {sectionUi && !sectionUi.pickerOpen && (
-          <button
-            className={`mark-pill${sectionUi.pillColor ? ` pill-${sectionUi.pillColor}` : ""}`}
-            style={{ left: `${text.length + 2}ch` }}
-            onClick={(e) => {
-              e.stopPropagation();
-              sectionUi.onOpen();
-            }}
-            title="Section dynamics mark"
-          >
-            {sectionUi.pillName ?? "mark"}
-          </button>
-        )}
         {sectionUi?.pickerOpen && (
           <SectionMarkPicker
-            col={text.length + 2}
+            col={2}
             current={sectionUi.current}
             onPick={sectionUi.onPick}
             onClear={sectionUi.onClear}
@@ -189,6 +185,25 @@ export function LyricLine(props: Props) {
           }}
           aria-label={`Edit line ${index + 1}`}
         />
+      ) : sectionUi ? (
+        <div className="label-side">
+          <button
+            className={`section-tag${sectionUi.color ? ` pill-${sectionUi.color}` : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              sectionUi.onOpen();
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              props.onCancelEdit();
+              setDraft(text);
+            }}
+            title="Click for a dynamics mark; double-click to rename the section"
+          >
+            {sectionUi.title}
+            {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
+          </button>
+        </div>
       ) : (
         <pre
           className={`lyric-row${isSectionLabel(text) ? " section-label" : ""}`}

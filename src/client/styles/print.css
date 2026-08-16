@@ -60,13 +60,16 @@
 
   .print-pair {
     position: relative;
+    /* Contains the floated sidebar label, so a label taller than its
+       section extends the section instead of overlapping the next one. */
+    display: flow-root;
   }
 
   .print-side-label {
-    position: absolute;
-    right: calc(100% + 3.5mm);
-    top: 0.15em;
+    float: left;
     width: 17mm;
+    margin-left: -20.5mm;
+    margin-bottom: 1pt;
     text-align: right;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 8pt;

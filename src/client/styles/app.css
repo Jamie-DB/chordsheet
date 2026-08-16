@@ -310,7 +310,8 @@ textarea {
   background: white;
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 1.5rem 1.5rem 1.5rem 4.25rem;
+  /* Wide left gutter: section tags live there, music indents right. */
+  padding: 1.5rem 1.5rem 1.5rem 14.5rem;
   overflow-x: auto;
 }
 
@@ -393,35 +394,59 @@ textarea {
   font-size: 67%;
 }
 
-.mark-pill {
+/* One capsule tag per section, floated into the left sidebar gutter so the
+   label row leaves the vertical flow, matching print. */
+.line-pair.label-collapsed {
+  height: 0;
+  margin: 0;
+}
+
+.line-pair.label-collapsed .chord-lane {
+  height: 0;
+}
+
+.label-side {
   position: absolute;
-  top: 0.15em;
+  right: calc(100% + 4.4rem);
+  top: 0.3em;
+  width: 9.6rem;
+  display: flex;
+  justify-content: flex-end;
+  z-index: 5;
+}
+
+.section-tag {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
+  letter-spacing: 0.03em;
+  padding: 0.16rem 0.65rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
   background: white;
   color: var(--muted);
   cursor: pointer;
-  opacity: 0.45;
+  line-height: 1.3;
+  text-align: right;
+  white-space: normal;
+  max-width: 100%;
 }
 
-.line-pair:hover .mark-pill,
-.mark-pill.pill-red,
-.mark-pill.pill-blue,
-.mark-pill.pill-amber,
-.mark-pill.pill-green {
-  opacity: 1;
+.section-tag .tag-note {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.mark-pill.pill-red { color: #dc2626; border-color: #dc2626; background: rgba(220, 38, 38, 0.08); }
-.mark-pill.pill-blue { color: #2563eb; border-color: #2563eb; background: rgba(37, 99, 235, 0.08); }
-.mark-pill.pill-amber { color: #b45309; border-color: #d97706; background: rgba(217, 119, 6, 0.1); }
-.mark-pill.pill-green { color: #16a34a; border-color: #16a34a; background: rgba(22, 163, 74, 0.08); }
+.section-tag.pill-red { color: #dc2626; border-color: #dc2626; }
+.section-tag.pill-blue { color: #2563eb; border-color: #2563eb; }
+.section-tag.pill-amber { color: #b45309; border-color: #d97706; }
+.section-tag.pill-green { color: #16a34a; border-color: #16a34a; }
 
 .mark-picker {
   flex-wrap: wrap;
