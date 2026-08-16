@@ -642,7 +642,7 @@
   ],
   "keyOverride": null,
   "capo": 1,
+  "notes": "NOTES\nKey of F. A# on the chart = Bb (transposer artifact, same chord).\nCapo 3, D shapes (recommended, no barres):\n  F→D xx0232, C→A x02220, Gm→Em 022000, Bb→G 320003\n  Gm7→Em7 022033, Bbmaj7→Gmaj7 320002\nCapo 1, E shapes (fuller, low position):\n  F→E, C→B x24442, Gm→F#m 244222, Bb→A, Gm7→F#m7 2x2200, Bbmaj7→Amaj7 x02120\nIntro loop is I V vi IV. Chorus swaps in the sevenths (Gm7, Bbmaj7).\nPlay triads in the verse, let the sevenths ring in the chorus. That's the lift.",
   "createdAt": "2026-08-13T23:35:06.879Z",
-  "updatedAt": "2026-08-13T23:37:06.867Z",
-  "notes": "NOTES\nKey of F. A# on the chart = Bb (transposer artifact, same chord).\nCapo 3, D shapes (recommended, no barres):\n  F→D xx0232, C→A x02220, Gm→Em 022000, Bb→G 320003\n  Gm7→Em7 022033, Bbmaj7→Gmaj7 320002\nCapo 1, E shapes (fuller, low position):\n  F→E, C→B x24442, Gm→F#m 244222, Bb→A, Gm7→F#m7 2x2200, Bbmaj7→Amaj7 x02120\nIntro loop is I V vi IV. Chorus swaps in the sevenths (Gm7, Bbmaj7).\nPlay triads in the verse, let the sevenths ring in the chorus. That's the lift."
+  "updatedAt": "2026-08-13T23:37:06.867Z"
 }

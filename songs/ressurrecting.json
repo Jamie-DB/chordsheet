@@ -37,21 +37,21 @@
     "His final breath upon the cross",
     "Is now alive in me",
     "",
-    "[Chorus] x2",
+    "[Chorus]",
     "",
     "Your name, Your name is victory",
     "All praise will rise to Christ our King",
     "Your name, Your name is victory",
     "All praise will rise to Christ our King",
     "",
-    "[Bridge] x2",
+    "[Bridge]",
     "",
     "By Your Spirit I will rise from the ashes of defeat",
     "The resurrected King is resurrecting me",
     "In Your name I come alive to declare Your victory",
     "The resurrected King is resurrecting me",
     "",
-    "[Instrumental] (same as bridge)",
+    "[Instrumental]",
     "",
     "",
     "",
@@ -93,7 +93,7 @@
     "                            (Break On C All In)",
     "The resurrected King is resurrecting me",
     "",
-    "[Bridge] (All In)",
+    "[Bridge]",
     "",
     "By Your Spirit I will rise from the ashes of defeat",
     "The resurrected King is resurrecting me",
@@ -1103,5 +1103,34 @@
   "capo": 1,
   "bpm": 164,
   "createdAt": "2026-08-07T22:41:37.211Z",
-  "updatedAt": "2026-08-14T21:11:25.564Z"
+  "updatedAt": "2026-08-14T21:11:25.564Z",
+  "sectionMarks": [
+    {
+      "section": "[Chorus]",
+      "occurrence": 2,
+      "kind": "custom",
+      "text": "x2",
+      "color": "amber"
+    },
+    {
+      "section": "[Bridge]",
+      "occurrence": 1,
+      "kind": "custom",
+      "text": "x2",
+      "color": "amber"
+    },
+    {
+      "section": "[Instrumental]",
+      "occurrence": 1,
+      "kind": "custom",
+      "text": "(same as bridge)",
+      "color": "amber"
+    },
+    {
+      "section": "[Bridge]",
+      "occurrence": 4,
+      "kind": "full",
+      "text": "(All In)"
+    }
+  ]
 }

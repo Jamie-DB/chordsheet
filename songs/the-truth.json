@@ -1,0 +1,453 @@
+{
+  "version": 1,
+  "id": "the-truth",
+  "title": "The Truth",
+  "artist": "Megan Woods",
+  "lyrics": [
+    "[Intro]",
+    "",
+    "",
+    "[Verse 1]",
+    "How many times can you hear the same lie",
+    "Before you start to believe it",
+    "The enemy keeps whispering to me",
+    "Swear these days it’s all that I’m hearing",
+    "I used to know who I was",
+    "But now I look in the mirror and I’m not so sure",
+    "Lord I don’t wanna listen to the lies anymore",
+    "",
+    "[Chorus]",
+    "The truth is I am my Father’s child",
+    "I make Him proud and I make Him smile",
+    "I was made in the image of a perfect King",
+    "He looks at me and wouldn’t change a thing",
+    "The truth is I am truly loved",
+    "By a God who’s good when I’m not good enough",
+    "I don’t belong to the lies",
+    "I belong to You",
+    "And that’s the truth",
+    "",
+    "[Verse 2]",
+    "When I feel like there’s so much noise",
+    "Living rent free in my head",
+    "Heaven finds me and a still small voice",
+    "And it sounds like grace instead",
+    "You remind who I am",
+    "When I look in the mirror and I’m not so sure",
+    "Lord I don’t want to listen to the lies anymore",
+    "",
+    "[Chorus]",
+    "The truth is I am my Father’s child",
+    "I make Him proud and I make Him smile",
+    "I was made in the image of a perfect King",
+    "He looks at me and wouldn’t change a thing",
+    "The truth is I am truly loved",
+    "By a God who’s good when I’m not good enough",
+    "I don’t belong to the lies",
+    "I belong to You",
+    "And that’s the truth",
+    "",
+    "[Bridge]",
+    "I know who I am",
+    "Because I know who You are",
+    "And I hold Your truth inside of my heart",
+    "I know the lies are always gonna try and find me",
+    "But I’ve never been so sure",
+    "",
+    "[Chorus]",
+    "The truth is I am my Father’s child",
+    "I make Him proud and I make Him smile",
+    "I was made in the image of a perfect King",
+    "He looks at me and wouldn’t change a thing",
+    "The truth is I am truly loved",
+    "By a God who’s good when I’m not good enough",
+    "I don’t belong to the lies",
+    "I belong to You, I belong to you",
+    "And that’s the truth, mm,mm",
+    "And that’s the truth"
+  ],
+  "placements": [
+    {
+      "id": "5cf04ea6-839e-4e13-a56f-1a0f77545065",
+      "line": 1,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "1d66c3cb-ac68-4d96-9c9f-4853bfc4cec6",
+      "line": 1,
+      "col": 8,
+      "chord": "F#m/A"
+    },
+    {
+      "id": "1127425e-bdd5-4a69-846a-4f73d4b0bb7e",
+      "line": 4,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "1cb40de8-b91e-4c39-bec3-a986296ac91c",
+      "line": 5,
+      "col": 0,
+      "chord": "F#m/A"
+    },
+    {
+      "id": "967f291e-f8b4-4ebb-be8c-1477d283d24b",
+      "line": 6,
+      "col": 0,
+      "chord": "Bm"
+    },
+    {
+      "id": "f738278b-6951-4d8a-bff0-b767723e5585",
+      "line": 7,
+      "col": 0,
+      "chord": "G"
+    },
+    {
+      "id": "05201a7e-665c-40ef-b885-19ddb02607ed",
+      "line": 8,
+      "col": 0,
+      "chord": "Em"
+    },
+    {
+      "id": "f3868414-2867-4e93-b430-9d1364528d04",
+      "line": 8,
+      "col": 21,
+      "chord": "Bm"
+    },
+    {
+      "id": "cd75d5cb-4d71-4efa-96fd-acc1a33c898c",
+      "line": 9,
+      "col": 22,
+      "chord": "D"
+    },
+    {
+      "id": "ccd1e9c4-85cb-4b79-8bf6-83a702858937",
+      "line": 9,
+      "col": 44,
+      "chord": "G"
+    },
+    {
+      "id": "ef83b90f-f15c-4f39-88e7-eb094ead2a5e",
+      "line": 10,
+      "col": 0,
+      "chord": "Em"
+    },
+    {
+      "id": "4f903e2f-f704-42fb-99db-a503f895eb79",
+      "line": 10,
+      "col": 19,
+      "chord": "Bm"
+    },
+    {
+      "id": "fd5664f0-a2c0-4d79-be87-a4d4a15d165f",
+      "line": 10,
+      "col": 38,
+      "chord": "G"
+    },
+    {
+      "id": "29e2919c-0493-4021-9065-42dbe570aaaf",
+      "line": 13,
+      "col": 4,
+      "chord": "D"
+    },
+    {
+      "id": "00623399-6d36-4512-b1aa-f104fb5bb47d",
+      "line": 14,
+      "col": 2,
+      "chord": "A"
+    },
+    {
+      "id": "ece1bf3f-12a4-46f2-ac4f-58de2b066a1a",
+      "line": 15,
+      "col": 6,
+      "chord": "Bm"
+    },
+    {
+      "id": "9c4db3b7-a5cc-43f0-b2d0-044476a2607f",
+      "line": 16,
+      "col": 3,
+      "chord": "G"
+    },
+    {
+      "id": "570cde97-fe12-4937-b969-fbf24086d67c",
+      "line": 17,
+      "col": 4,
+      "chord": "D"
+    },
+    {
+      "id": "15f4866d-97df-4a16-80be-c9d17d15bcb0",
+      "line": 18,
+      "col": 5,
+      "chord": "A"
+    },
+    {
+      "id": "6cb78fc4-bda1-48ff-808b-423d18df9de6",
+      "line": 19,
+      "col": 2,
+      "chord": "Bm"
+    },
+    {
+      "id": "fc3b70de-1c77-4270-83d6-a7cd68b2b9b7",
+      "line": 20,
+      "col": 12,
+      "chord": "G"
+    },
+    {
+      "id": "a555dd92-5671-49de-afeb-1030a2f96bfc",
+      "line": 21,
+      "col": 15,
+      "chord": "D"
+    },
+    {
+      "id": "21ffce2a-5d0e-4c00-b146-b45d621c03b9",
+      "line": 24,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "3864cbd2-4b79-4441-b279-617997cf1944",
+      "line": 25,
+      "col": 7,
+      "chord": "F#m/A"
+    },
+    {
+      "id": "063da921-6a97-46f0-a144-cf2fec05cb52",
+      "line": 26,
+      "col": 0,
+      "chord": "Bm"
+    },
+    {
+      "id": "dad80a9c-0936-4b82-bb85-e9f6b2ab4893",
+      "line": 27,
+      "col": 7,
+      "chord": "G"
+    },
+    {
+      "id": "59087d61-1eb5-4600-980b-893da4d747fa",
+      "line": 28,
+      "col": 0,
+      "chord": "Em"
+    },
+    {
+      "id": "7985e162-cf51-4902-9d32-931e54059af5",
+      "line": 28,
+      "col": 17,
+      "chord": "Bm"
+    },
+    {
+      "id": "52ff551a-0ff8-4912-8938-356b87fbc52c",
+      "line": 29,
+      "col": 19,
+      "chord": "D"
+    },
+    {
+      "id": "89b5a166-2e87-435d-9540-729304c82811",
+      "line": 29,
+      "col": 41,
+      "chord": "G"
+    },
+    {
+      "id": "2a96a13f-61bb-474d-9e3d-5dc908b5e0c5",
+      "line": 30,
+      "col": 0,
+      "chord": "Em"
+    },
+    {
+      "id": "b4f821fa-5727-4aab-b869-ee0722860a1f",
+      "line": 30,
+      "col": 21,
+      "chord": "Bm"
+    },
+    {
+      "id": "95d0968b-de74-45cf-bc49-8196c71882c0",
+      "line": 30,
+      "col": 40,
+      "chord": "G"
+    },
+    {
+      "id": "e51928e0-271b-48b6-bc79-b3bc23057e93",
+      "line": 33,
+      "col": 4,
+      "chord": "D"
+    },
+    {
+      "id": "a6be1dbe-b253-44b0-b752-74d7cc99dd53",
+      "line": 34,
+      "col": 2,
+      "chord": "A"
+    },
+    {
+      "id": "71f2743d-6d67-4229-837f-43f79b4f90b9",
+      "line": 35,
+      "col": 6,
+      "chord": "Bm"
+    },
+    {
+      "id": "77acf7ad-ca4b-4075-afee-0a314b13e8ff",
+      "line": 36,
+      "col": 3,
+      "chord": "G"
+    },
+    {
+      "id": "dd6a0197-5832-4082-9b3e-3153aea4f943",
+      "line": 37,
+      "col": 4,
+      "chord": "D"
+    },
+    {
+      "id": "b9307a1e-2004-42ef-b238-cedb386578e8",
+      "line": 38,
+      "col": 5,
+      "chord": "A"
+    },
+    {
+      "id": "f19d114b-60cf-467a-bd54-298beaaf838a",
+      "line": 39,
+      "col": 2,
+      "chord": "Bm"
+    },
+    {
+      "id": "3f2178a0-eff8-4df7-814b-1456a86d50f2",
+      "line": 40,
+      "col": 12,
+      "chord": "G"
+    },
+    {
+      "id": "aeb8c1a0-1d30-4e69-bb69-1aa63527c7c4",
+      "line": 41,
+      "col": 15,
+      "chord": "D"
+    },
+    {
+      "id": "29fa97ae-9f30-4129-b875-4a8090d99efd",
+      "line": 44,
+      "col": 13,
+      "chord": "A"
+    },
+    {
+      "id": "2e60971b-ea4b-4861-8845-d92e2d057a65",
+      "line": 45,
+      "col": 23,
+      "chord": "Bm"
+    },
+    {
+      "id": "0e70baaf-521d-44d4-892e-71cd1cba7153",
+      "line": 46,
+      "col": 24,
+      "chord": "D"
+    },
+    {
+      "id": "9142e17b-310f-4838-adee-3c5b0556d51c",
+      "line": 46,
+      "col": 35,
+      "chord": "G"
+    },
+    {
+      "id": "5f92da85-c9ba-4b08-9845-49d14231c29c",
+      "line": 47,
+      "col": 0,
+      "chord": "Em"
+    },
+    {
+      "id": "9eab5c08-7d53-46fb-b7bd-f462f7dc8e8b",
+      "line": 47,
+      "col": 27,
+      "chord": "Bm"
+    },
+    {
+      "id": "71aa0bf7-cec2-46fc-87a3-9642a44390b3",
+      "line": 48,
+      "col": 5,
+      "chord": "D"
+    },
+    {
+      "id": "a7bc21e3-f414-47bf-a8d2-ef66f936426e",
+      "line": 48,
+      "col": 23,
+      "chord": "G"
+    },
+    {
+      "id": "c7dc8578-0efa-4bf5-8f44-2e19468daa00",
+      "line": 51,
+      "col": 4,
+      "chord": "D"
+    },
+    {
+      "id": "37c5c625-028c-4945-8024-a78926881bd2",
+      "line": 52,
+      "col": 2,
+      "chord": "A"
+    },
+    {
+      "id": "ceec6656-4f2f-4a76-808f-eefb93c15d48",
+      "line": 53,
+      "col": 6,
+      "chord": "Bm"
+    },
+    {
+      "id": "77183cda-b2a8-4e9a-aeca-2adf134cf50b",
+      "line": 54,
+      "col": 3,
+      "chord": "G"
+    },
+    {
+      "id": "402aa558-a9fe-4a42-8074-d9978cb9d269",
+      "line": 55,
+      "col": 4,
+      "chord": "D"
+    },
+    {
+      "id": "c98d46a0-218d-4b7e-b901-d1cb99559337",
+      "line": 56,
+      "col": 5,
+      "chord": "A"
+    },
+    {
+      "id": "39d06913-11b8-4a60-8184-f834c5a88802",
+      "line": 57,
+      "col": 2,
+      "chord": "Bm"
+    },
+    {
+      "id": "44321e86-5593-4dc1-9d2b-54b29d637c24",
+      "line": 58,
+      "col": 12,
+      "chord": "G"
+    },
+    {
+      "id": "8b0245e5-2863-41f4-a992-b6e1e763eda9",
+      "line": 58,
+      "col": 29,
+      "chord": "G"
+    },
+    {
+      "id": "b1806bf7-c635-427b-9cab-b2674edeebd1",
+      "line": 59,
+      "col": 15,
+      "chord": "D"
+    },
+    {
+      "id": "aeeba0e9-05f1-4383-8e73-3166913c72df",
+      "line": 59,
+      "col": 22,
+      "chord": "F#m"
+    },
+    {
+      "id": "b57bf52d-2acd-4833-9f80-52a0e3705242",
+      "line": 60,
+      "col": 15,
+      "chord": "Bm"
+    },
+    {
+      "id": "66326ef7-cd31-4d39-882a-61b0050ca167",
+      "line": 60,
+      "col": 25,
+      "chord": "G"
+    }
+  ],
+  "keyOverride": null,
+  "capo": 2,
+  "createdAt": "2026-08-14T22:03:57.982Z",
+  "updatedAt": "2026-08-14T22:03:57.982Z"
+}

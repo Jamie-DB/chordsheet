@@ -63,7 +63,7 @@
     "[Instrumental]",
     "",
     "",
-    "[Bridge] (x4)",
+    "[Bridge]",
     "The veil is torn and the doors fling wide",
     "I see glory as I run inside",
     "The throne room, before you, I",
@@ -791,5 +791,14 @@
   "capo": 1,
   "bpm": 170,
   "createdAt": "2026-08-09T22:39:13.104Z",
-  "updatedAt": "2026-08-09T22:41:24.148Z"
+  "updatedAt": "2026-08-09T22:41:24.148Z",
+  "sectionMarks": [
+    {
+      "section": "[Bridge]",
+      "occurrence": 1,
+      "kind": "custom",
+      "text": "(x4)",
+      "color": "amber"
+    }
+  ]
 }
