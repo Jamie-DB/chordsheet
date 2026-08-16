@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { voicingFor } from "../../engine";
 import { dragCol, dragLine } from "../lib/grid";
 import { ChordDiagram } from "./ChordDiagram";
+import { DiamondOutline } from "./DiamondOutline";
 
 const DRAG_THRESHOLD_PX = 4;
 const HOVER_DELAY_MS = 330;
@@ -107,6 +108,7 @@ export function ChordChip(props: Props) {
       }}
     >
       {label}
+      {hold && <DiamondOutline />}
       {card && shape && (
         <span
           className="chord-hover-card"
