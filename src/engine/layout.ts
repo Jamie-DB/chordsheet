@@ -1,24 +1,48 @@
 import type { ChordPlacement } from "../shared/types";
 
+export interface ChordRowSegment {
+  text: string;
+  /** True on chord segments marked as full-measure holds (diamonds). */
+  hold: boolean;
+}
+
 /**
- * Build the literal chord text row that sits above a lyric line in print and
- * plain-text export. Chords land at their column; collisions shift right,
- * keeping at least one space between adjacent symbols. Never throws, never
- * truncates; a chord past the end of the lyric just extends the row.
+ * Build the chord row as ordered segments (space gaps and chord symbols),
+ * so HTML contexts can style hold chords without disturbing the literal
+ * text layout. Chords land at their column; collisions shift right, keeping
+ * at least one space between adjacent symbols. A chord past the end of the
+ * lyric just extends the row.
  */
+export function buildChordRowSegments(
+  placements: ChordPlacement[],
+  render: (chord: string, hold: boolean) => string = (c) => c,
+): ChordRowSegment[] {
+  const sorted = [...placements].sort((a, b) => a.col - b.col);
+  const segments: ChordRowSegment[] = [];
+  let length = 0;
+  for (const p of sorted) {
+    const hold = p.hold === true;
+    const symbol = render(p.chord, hold);
+    if (symbol.length === 0) continue;
+    const start = length === 0 ? Math.max(0, p.col) : Math.max(p.col, length + 1);
+    if (start > length) {
+      segments.push({ text: " ".repeat(start - length), hold: false });
+      length = start;
+    }
+    segments.push({ text: symbol, hold });
+    length += symbol.length;
+  }
+  return segments;
+}
+
+/** The literal chord text row above a lyric line in print and text export. */
 export function buildChordRow(
   placements: ChordPlacement[],
-  render: (chord: string) => string = (c) => c,
+  render: (chord: string, hold: boolean) => string = (c) => c,
 ): string {
-  const sorted = [...placements].sort((a, b) => a.col - b.col);
-  let row = "";
-  for (const p of sorted) {
-    const symbol = render(p.chord);
-    if (symbol.length === 0) continue;
-    const start = row.length === 0 ? Math.max(0, p.col) : Math.max(p.col, row.length + 1);
-    row = row + " ".repeat(start - row.length) + symbol;
-  }
-  return row;
+  return buildChordRowSegments(placements, render)
+    .map((s) => s.text)
+    .join("");
 }
 
 /**

@@ -93,6 +93,7 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
         line: p.line,
         col: Math.max(0, Math.min(200, p.col)),
         chord: p.chord,
+        ...(p.hold ? { hold: true } : {}),
       });
     } else {
       const col = resolveAnchor(lineText, p.anchor, p.anchorOccurrence ?? 1, p.offsetInAnchor ?? 0);
@@ -104,7 +105,13 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
           reason: `anchor "${p.anchor}" not found in line ${p.line}`,
         });
       } else {
-        placements.push({ id: freshId(), line: p.line, col, chord: p.chord });
+        placements.push({
+          id: freshId(),
+          line: p.line,
+          col,
+          chord: p.chord,
+          ...(p.hold ? { hold: true } : {}),
+        });
       }
     }
   }

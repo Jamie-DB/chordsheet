@@ -427,6 +427,37 @@ textarea {
   background: #fef3c7;
 }
 
+/* Full-measure hold: an elongated diamond outline drawn behind the chord,
+   with zero layout impact so monospace columns never shift. */
+.hold-diamond {
+  position: relative;
+  isolation: isolate;
+}
+
+.hold-diamond::before,
+.hold-diamond::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  clip-path: polygon(0.7ch 0, calc(100% - 0.7ch) 0, 100% 50%, calc(100% - 0.7ch) 100%, 0.7ch 100%, 0 50%);
+  pointer-events: none;
+}
+
+.hold-diamond::before {
+  inset: -0.28em -0.85ch;
+  background: currentColor;
+}
+
+.hold-diamond::after {
+  inset: calc(-0.28em + 1.4px) calc(-0.85ch + 1.4px);
+  background: white;
+}
+
+.chord-chip.hold-diamond:hover::after,
+.chord-chip.hold-diamond.dragging::after {
+  background: var(--accent-soft);
+}
+
 .chord-popover {
   position: absolute;
   top: -0.35em;
@@ -452,6 +483,16 @@ textarea {
 .chord-popover input.invalid {
   border-color: var(--danger);
   color: var(--danger);
+}
+
+.hold-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 1rem;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
 }
 
 button.mini {

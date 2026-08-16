@@ -4,6 +4,8 @@ export interface ChordPlacement {
   col: number;
   /** Canonical SOUNDING chord symbol, e.g. "Bbmaj7", "G/B", "F#m7". */
   chord: string;
+  /** Full-measure hold, drawn as a diamond (Nashville convention). */
+  hold?: boolean;
 }
 
 export interface Song {

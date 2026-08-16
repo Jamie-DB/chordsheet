@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildChordRow, resolveAnchor } from "./layout";
+import { buildChordRow, buildChordRowSegments, resolveAnchor } from "./layout";
 import type { ChordPlacement } from "../shared/types";
 
 const p = (col: number, chord: string): ChordPlacement => ({ id: `${col}-${chord}`, line: 0, col, chord });
@@ -23,6 +23,36 @@ describe("buildChordRow", () => {
   });
   it("returns an empty row for no placements", () => {
     expect(buildChordRow([])).toBe("");
+  });
+});
+
+describe("buildChordRowSegments", () => {
+  it("partitions into gaps and chords, marking holds", () => {
+    const segments = buildChordRowSegments([
+      { id: "1", line: 0, col: 2, chord: "G", hold: true },
+      { id: "2", line: 0, col: 8, chord: "C" },
+    ]);
+    expect(segments).toEqual([
+      { text: "  ", hold: false },
+      { text: "G", hold: true },
+      { text: "     ", hold: false },
+      { text: "C", hold: false },
+    ]);
+  });
+  it("joins back to the exact plain row", () => {
+    const placements = [p(0, "Am7"), p(1, "G"), p(20, "D")];
+    expect(
+      buildChordRowSegments(placements)
+        .map((s) => s.text)
+        .join(""),
+    ).toBe(buildChordRow(placements));
+  });
+  it("passes hold to the render callback", () => {
+    const row = buildChordRow(
+      [{ id: "1", line: 0, col: 3, chord: "C", hold: true }],
+      (chord, hold) => (hold ? `<${chord}>` : chord),
+    );
+    expect(row).toBe("   <C>");
   });
 });
 

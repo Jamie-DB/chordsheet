@@ -29,6 +29,7 @@ Anchor form (preferred for chat models; models miscount characters but quote rel
 - `anchor`: 1 to 3 words copied verbatim from that lyric line, marking where the chord sits.
 - `anchorOccurrence`: which occurrence of the anchor in the line, 1-based, default 1.
 - `offsetInAnchor`: characters into the anchor above which the chord belongs, default 0.
+- `hold` (optional): true when the chart draws the chord inside a diamond (or as `<C>`), meaning a full-measure hold. Works on both placement forms.
 
 Column form (fine when the writer can compute string offsets exactly, e.g. Claude Code running a script):
 

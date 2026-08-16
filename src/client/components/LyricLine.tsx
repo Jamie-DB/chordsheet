@@ -9,6 +9,7 @@ export interface ChipModel {
   id: string;
   col: number;
   label: string;
+  hold: boolean;
 }
 
 export interface EditingModel {
@@ -17,6 +18,7 @@ export interface EditingModel {
   /** null while adding a new chord. */
   id: string | null;
   initial: string;
+  initialHold: boolean;
 }
 
 interface Props {
@@ -37,7 +39,7 @@ interface Props {
   onPlace(line: number, col: number): void;
   onCommitMove(id: string, line: number, col: number): void;
   onOpenEdit(id: string): void;
-  onCommitEdit(text: string): void;
+  onCommitEdit(text: string, hold: boolean): void;
   onCancelEdit(): void;
   onAcceptProposal(id: string): void;
   onCommitLine(index: number, text: string): void;
@@ -97,6 +99,7 @@ export function LyricLine(props: Props) {
               line={index}
               col={chip.col}
               label={chip.label}
+              hold={chip.hold}
               charWidth={charWidth}
               pairHeight={pairHeight}
               lineCount={lineCount}
@@ -124,6 +127,7 @@ export function LyricLine(props: Props) {
           <ChordEditPopover
             col={editing.col}
             initial={editing.initial}
+            initialHold={editing.initialHold}
             isNew={editing.id === null}
             validate={props.validate}
             onCommit={props.onCommitEdit}
