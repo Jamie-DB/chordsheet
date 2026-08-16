@@ -53,7 +53,6 @@
     "I will not fear, I will not fear",
     "There’s an army of angels here",
     "I’m protected on all sides",
-    "       A2                   (F#m7)",
     "By the blood of Jesus Christ",
     "",
     "[Chorus]",
@@ -489,188 +488,200 @@
     },
     {
       "id": "7a115139-fce5-4420-af8a-4be59d190b2d",
-      "line": 54,
+      "line": 53,
       "col": 22,
       "chord": "Ab2"
     },
     {
       "id": "9ac0e226-6206-4123-a5c7-28cd815a24ef",
-      "line": 54,
+      "line": 53,
       "col": 29,
       "chord": "Cm"
     },
     {
       "id": "7b720692-e763-4f45-8c62-91b90e645640",
-      "line": 54,
+      "line": 53,
       "col": 33,
       "chord": "Bb"
     },
     {
       "id": "22b89b19-947f-4931-99ed-934d60feee67",
-      "line": 55,
+      "line": 54,
       "col": 24,
       "chord": "Eb/G"
     },
     {
       "id": "5d03b0f3-b239-4e9f-82af-6aff8eeba4c8",
-      "line": 55,
+      "line": 54,
       "col": 34,
       "chord": "Bb"
     },
     {
       "id": "7506d036-3583-4f10-a8b7-378917aa9127",
-      "line": 55,
+      "line": 54,
       "col": 38,
       "chord": "Ab2"
     },
     {
       "id": "87fa51f8-2b4d-482f-b348-a7689b0b03cc",
-      "line": 56,
+      "line": 55,
       "col": 21,
       "chord": "Ab2"
     },
     {
       "id": "1e640120-9505-4a08-83b7-616afe33b930",
-      "line": 56,
+      "line": 55,
       "col": 31,
       "chord": "Cm"
     },
     {
       "id": "4b23e93c-bdb8-46f4-86ff-291beb95ace7",
-      "line": 56,
+      "line": 55,
       "col": 36,
       "chord": "Bb"
     },
     {
       "id": "35c5356b-76d0-495d-af25-ee15a99888cd",
-      "line": 57,
+      "line": 56,
       "col": 22,
       "chord": "Eb/G"
     },
     {
       "id": "ab0f3b39-cad8-4b0a-a955-6d1caa7a79e1",
-      "line": 57,
+      "line": 56,
       "col": 27,
       "chord": "Bb"
     },
     {
       "id": "bc76f8f5-a614-47f7-99af-ccb0215ffd52",
-      "line": 57,
+      "line": 56,
       "col": 29,
       "chord": "Ab2"
     },
     {
       "id": "dadd2baa-2b5b-48bb-a4a0-6666eb512c90",
-      "line": 58,
+      "line": 57,
       "col": 22,
       "chord": "Ab2"
     },
     {
       "id": "b3823526-cfff-4a58-9b38-ba8545cd59c4",
-      "line": 58,
+      "line": 57,
       "col": 29,
       "chord": "Cm"
     },
     {
       "id": "4a8bb5cb-0cdd-4152-93b2-7ea68ba91289",
-      "line": 58,
+      "line": 57,
       "col": 33,
       "chord": "Bb"
     },
     {
       "id": "23cdebc3-db50-45bd-8c11-95a24188aec9",
-      "line": 59,
+      "line": 58,
       "col": 26,
       "chord": "Eb/G"
     },
     {
       "id": "e63293ab-447e-49c8-93c9-dc4db1d8d777",
-      "line": 59,
+      "line": 58,
       "col": 35,
       "chord": "Bb"
     },
     {
       "id": "9227315a-5811-4e80-9267-8f9894321626",
-      "line": 59,
+      "line": 58,
       "col": 40,
       "chord": "Ab2"
     },
     {
       "id": "42d6284b-678a-40d6-91b9-bdbd3e791620",
-      "line": 60,
+      "line": 59,
       "col": 26,
       "chord": "Cm7"
     },
     {
       "id": "3eac9147-2770-4ed9-bfc3-253d5d5b9383",
-      "line": 60,
+      "line": 59,
       "col": 34,
       "chord": "Eb"
     },
     {
       "id": "e4609f04-12e5-4e7c-bce4-1b78a7206850",
-      "line": 60,
+      "line": 59,
       "col": 36,
       "chord": "Bb/D"
     },
     {
       "id": "d0bf0e6d-32ee-494e-89aa-d7631c1361d3",
-      "line": 61,
+      "line": 60,
       "col": 22,
       "chord": "Eb/G"
     },
     {
       "id": "d0bef3ca-db5e-45e4-9cc4-f5a10e4532ea",
-      "line": 61,
+      "line": 60,
       "col": 27,
       "chord": "Bb"
     },
     {
       "id": "f106a3b1-07fc-4167-b093-89f2fdbe21db",
-      "line": 61,
+      "line": 60,
       "col": 29,
       "chord": "Ab2"
     },
     {
       "id": "0f8f26fc-cad6-494f-8995-fa11b175160f",
-      "line": 65,
+      "line": 64,
       "col": 22,
       "chord": "Ab2"
     },
     {
       "id": "e6356347-6372-4d44-acc5-ca77a8cb71bb",
-      "line": 65,
+      "line": 64,
       "col": 25,
       "chord": "Cm"
     },
     {
       "id": "13b46025-d43e-4d83-97a2-211560fea982",
-      "line": 65,
+      "line": 64,
       "col": 29,
       "chord": "Bb"
     },
     {
       "id": "b55f5142-654f-43fa-9175-0adcd2176241",
-      "line": 66,
+      "line": 65,
       "col": 22,
       "chord": "Eb/G"
     },
     {
       "id": "4e826608-960d-4d8f-ac32-230c55363aab",
-      "line": 66,
+      "line": 65,
       "col": 27,
       "chord": "Bb"
     },
     {
       "id": "1db60665-0c4d-4ef4-901a-ea9be3bd5906",
-      "line": 66,
+      "line": 65,
       "col": 29,
       "chord": "Ab2"
+    },
+    {
+      "id": "9e8c8496-e07e-4d83-a38b-c6ab27fa5565",
+      "line": 49,
+      "col": 7,
+      "chord": "Ab2"
+    },
+    {
+      "id": "124ea05e-df9b-45e0-b0de-588381826d19",
+      "line": 49,
+      "col": 26,
+      "chord": "Fm7"
     }
   ],
   "keyOverride": null,
   "capo": 1,
   "bpm": 150,
   "createdAt": "2026-08-05T17:15:00.224Z",
-  "updatedAt": "2026-08-07T21:52:19.362Z"
+  "updatedAt": "2026-08-12T00:34:30.083Z"
 }

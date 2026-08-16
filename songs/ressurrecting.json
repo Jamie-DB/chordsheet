@@ -1100,8 +1100,8 @@
     }
   ],
   "keyOverride": null,
-  "capo": 6,
+  "capo": 1,
+  "bpm": 164,
   "createdAt": "2026-08-07T22:41:37.211Z",
-  "updatedAt": "2026-08-10T23:03:39.003Z",
-  "bpm": 164
+  "updatedAt": "2026-08-14T21:11:25.564Z"
 }

@@ -16,10 +16,15 @@ export function sheetText(song: Song, soundingKey: string | null, shapedKeyName:
   out.push("");
 
   song.lyrics.forEach((line, i) => {
-    const row = buildChordRow(
-      song.placements.filter((p) => p.line === i),
-      (chord) => displayChord(chord, song.capo, shapedKeyName),
-    );
+    // Holds print as <C>, the ASCII form of the diamond; the opening bracket
+    // borrows the column to the left so the chord letter stays put.
+    const linePlacements = song.placements
+      .filter((p) => p.line === i)
+      .map((p) => (p.hold ? { ...p, col: Math.max(0, p.col - 1) } : p));
+    const row = buildChordRow(linePlacements, (chord, hold) => {
+      const display = displayChord(chord, song.capo, shapedKeyName);
+      return hold ? `<${display}>` : display;
+    });
     if (row.length > 0) out.push(row);
     out.push(line);
   });

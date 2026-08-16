@@ -41,6 +41,18 @@ describe("sheetText", () => {
     expect(text).toContain("Key: G, Capo 3");
     expect(text).toContain("E" + " ".repeat(18) + "A");
   });
+
+  it("wraps hold chords as <C> with the bracket borrowing a column", () => {
+    const held = {
+      ...song,
+      placements: [
+        { id: "1", line: 0, col: 0, chord: "G", hold: true },
+        { id: "2", line: 0, col: 19, chord: "C", hold: true },
+      ],
+    };
+    const text = sheetText(held, "G", "G");
+    expect(text).toContain("<G>" + " ".repeat(15) + "<C>");
+  });
 });
 
 describe("transposeSong", () => {

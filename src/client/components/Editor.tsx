@@ -145,7 +145,7 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
     return displayChord(sounding, song.capo, shaped);
   }
 
-  function commitEdit(text: string) {
+  function commitEdit(text: string, hold: boolean) {
     if (!editing) return;
     if (editing.id === null) {
       if (text.length > 0) {
@@ -153,7 +153,13 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
           ...song,
           placements: [
             ...song.placements,
-            { id: freshId(), line: editing.line, col: editing.col, chord: toSounding(text) },
+            {
+              id: freshId(),
+              line: editing.line,
+              col: editing.col,
+              chord: toSounding(text),
+              ...(hold ? { hold: true } : {}),
+            },
           ],
         });
       }
@@ -163,7 +169,7 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
       onChange({
         ...song,
         placements: song.placements.map((p) =>
-          p.id === editing.id ? { ...p, chord: toSounding(text) } : p,
+          p.id === editing.id ? { ...p, chord: toSounding(text), hold: hold || undefined } : p,
         ),
       });
     }
@@ -392,17 +398,19 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
               chips={song.placements
                 .filter((p) => p.line === i)
                 .sort((a, b) => a.col - b.col)
-                .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord) }))}
+                .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
               proposals={(review?.fresh ?? [])
                 .filter((p) => p.line === i)
-                .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord) }))}
+                .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
               charWidth={charWidth}
               pairHeight={pairHeight}
               lineCount={song.lyrics.length}
               editing={editing}
               maxColForLine={maxColForLine}
               validate={isChordSymbol}
-              onPlace={(line2, col) => setEditing({ line: line2, col, id: null, initial: "" })}
+              onPlace={(line2, col) =>
+                setEditing({ line: line2, col, id: null, initial: "", initialHold: false })
+              }
               onCommitMove={(id, line2, col) =>
                 onChange({
                   ...song,
@@ -413,7 +421,15 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
               }
               onOpenEdit={(id) => {
                 const p = song.placements.find((pl) => pl.id === id);
-                if (p) setEditing({ line: p.line, col: p.col, id, initial: toShape(p.chord) });
+                if (p) {
+                  setEditing({
+                    line: p.line,
+                    col: p.col,
+                    id,
+                    initial: toShape(p.chord),
+                    initialHold: p.hold === true,
+                  });
+                }
               }}
               onCommitEdit={commitEdit}
               onCancelEdit={() => setEditing(null)}

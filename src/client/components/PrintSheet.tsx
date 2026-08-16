@@ -1,4 +1,4 @@
-import { buildChordRow, displayChord } from "../../engine";
+import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
 import { isSectionLabel } from "../lib/lineOps";
 import { ChordChartRow } from "./ChordChartRow";
@@ -19,15 +19,17 @@ const TWO_COLUMN_MAX_CHARS = 38;
 
 export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
   const rows = song.lyrics.map((_, i) =>
-    buildChordRow(
+    buildChordRowSegments(
       song.placements.filter((p) => p.line === i),
       (chord) => displayChord(chord, song.capo, shapedKeyName),
     ),
   );
+  const rowLength = (segments: (typeof rows)[number]) =>
+    segments.reduce((n, s) => n + s.text.length, 0);
   const widest = Math.max(
     0,
     ...song.lyrics.map((l) => l.length),
-    ...rows.map((r) => r.length),
+    ...rows.map(rowLength),
   );
   const twoCol = widest > 0 && widest <= TWO_COLUMN_MAX_CHARS;
 
@@ -53,7 +55,19 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
           }
           return (
             <div className="print-pair" key={i}>
-              {row.length > 0 && <pre className="print-chords">{row}</pre>}
+              {row.length > 0 && (
+                <pre className="print-chords">
+                  {row.map((s, j) =>
+                    s.hold ? (
+                      <span key={j} className="hold-diamond">
+                        {s.text}
+                      </span>
+                    ) : (
+                      s.text
+                    ),
+                  )}
+                </pre>
+              )}
               <pre className={`print-lyric${isSectionLabel(line) ? " section-label" : ""}`}>
                 {line || " "}
               </pre>

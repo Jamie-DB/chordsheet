@@ -1,0 +1,648 @@
+{
+  "version": 1,
+  "id": "make-room",
+  "title": "Make Room",
+  "artist": "The Worship Initiative",
+  "lyrics": [
+    "[Intro]",
+    "",
+    "",
+    "[Verse 1]",
+    "  Here is where I lay it down",
+    "Every burden, every crown",
+    "",
+    "This is my surrender",
+    "  This is my surrender",
+    "  Here is where I lay it down",
+    "Every lie and every doubt",
+    "This is my surrender",
+    "",
+    "[Chorus]",
+    "And I will make room for You",
+    "  To do whatever You want to",
+    "To do whatever You want to",
+    "And I will make room for You",
+    "  To do whatever You want to",
+    "To do whatever You want to, oh",
+    "",
+    "[Instrumental]",
+    "",
+    "",
+    "[Verse 1]",
+    "  Here is where I lay it down",
+    "Every burden, every crown",
+    "",
+    "This is my surrender",
+    "  This is my surrender",
+    "  Here is where I lay it down",
+    "Every lie and every doubt",
+    "This is my surrender",
+    "",
+    "[Chorus]",
+    "And I will make room for You",
+    "  To do whatever You want to",
+    "To do whatever You want to, Jesus",
+    "And I will make room for You",
+    "  To do whatever You want to",
+    "To do whatever You want to, sing it again",
+    "",
+    "Oh, I will make room for You",
+    "  To do whatever You want to",
+    "To do whatever You want to",
+    "Oh, I will make room for You",
+    "  To do whatever You want to",
+    "To do whatever You want to, Jesus",
+    "",
+    "[Instrumental]",
+    "",
+    "",
+    "[Bridge]",
+    "Shake up the ground of all my tradition",
+    "Break down the walls of all my religion",
+    "Your way is better",
+    "Oh, Your way is better",
+    "Shake up the ground of all my tradition",
+    "Break down the walls of all my religion",
+    "Your way is better, Jesus",
+    "Oh, Your way is better",
+    "",
+    "Shake up the ground of all my tradition",
+    "Break down the walls of all my religion",
+    "Your way is better, Jesus",
+    "Your way is better",
+    "Shake up the ground of all my tradition",
+    "Break down the walls of all my religion",
+    "Your way is better",
+    "Oh, Your way is better",
+    "",
+    "[Chorus]",
+    "And I will make room for You",
+    "  To do whatever You want to",
+    "To do whatever You want to",
+    "And I will make room for You",
+    "  To do whatever You want to",
+    "To do whatever You want to, oh",
+    "",
+    "[Instrumental]",
+    "",
+    "",
+    "[Verse 2]",
+    "  Here is where I lay it down",
+    "You are all I'm chasing now",
+    "",
+    "This is my surrender",
+    "  This is my surrender",
+    "  Here is where I lay it down",
+    "You are all I'm chasing now",
+    "",
+    "This is my surrender",
+    "  This is my surrender"
+  ],
+  "placements": [
+    {
+      "id": "ebbe32d1-e5d0-48ac-9843-d60fafd44c1d",
+      "line": 1,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "872a0e04-ac28-4f90-8eb9-df440e19702d",
+      "line": 1,
+      "col": 3,
+      "chord": "C"
+    },
+    {
+      "id": "9572a330-6a57-42b2-986e-9707903cc968",
+      "line": 1,
+      "col": 6,
+      "chord": "Gm"
+    },
+    {
+      "id": "02824cd3-61c2-442f-aca6-4fa12f02c311",
+      "line": 1,
+      "col": 10,
+      "chord": "A#"
+    },
+    {
+      "id": "68bc41e5-2e39-4c67-90ae-1f137bc6c946",
+      "line": 4,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "1dbd3298-addd-43f5-ba54-8cbce62668ae",
+      "line": 4,
+      "col": 26,
+      "chord": "C"
+    },
+    {
+      "id": "08a0b367-b99e-4cd5-bcf4-373abfcc076e",
+      "line": 5,
+      "col": 20,
+      "chord": "Gm"
+    },
+    {
+      "id": "d0a1326f-d74b-46bd-ae24-489ce5d882b2",
+      "line": 8,
+      "col": 0,
+      "chord": "A#"
+    },
+    {
+      "id": "36aa08bd-6da6-477a-99fe-8b62cc7fce74",
+      "line": 9,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "eac937c9-9067-4441-b475-e69d91a2f469",
+      "line": 9,
+      "col": 26,
+      "chord": "C"
+    },
+    {
+      "id": "bce4c8c2-e73c-4085-91e4-ba972410f679",
+      "line": 10,
+      "col": 21,
+      "chord": "Gm"
+    },
+    {
+      "id": "e6f2c516-9959-4ff5-b349-a15913855d6d",
+      "line": 11,
+      "col": 20,
+      "chord": "A#"
+    },
+    {
+      "id": "4e573dbf-cbb7-4b4e-8f54-798e3d089913",
+      "line": 14,
+      "col": 16,
+      "chord": "F"
+    },
+    {
+      "id": "ac7495af-8d94-4721-a1bd-05010bff72d9",
+      "line": 15,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "cb0b6f1c-ca55-4d73-9e93-2ab4f0e10113",
+      "line": 15,
+      "col": 21,
+      "chord": "Gm7"
+    },
+    {
+      "id": "c15341b1-964d-4535-a4e5-b2bfbb82dcd9",
+      "line": 16,
+      "col": 19,
+      "chord": "A#maj7"
+    },
+    {
+      "id": "e9d00d53-c7e5-4458-98c2-fcea440107d3",
+      "line": 17,
+      "col": 17,
+      "chord": "F"
+    },
+    {
+      "id": "5311f4f9-df59-40a2-91e3-ab1fd3c661d2",
+      "line": 18,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "dfa0cb97-18a2-46c0-830f-c8cbe12ece37",
+      "line": 18,
+      "col": 22,
+      "chord": "Gm"
+    },
+    {
+      "id": "e9fb66cb-be7f-48db-ba7b-df6a2568a32f",
+      "line": 19,
+      "col": 20,
+      "chord": "A#"
+    },
+    {
+      "id": "12e826a6-0ac8-416c-94ae-6326dabb401a",
+      "line": 22,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "4b9dce9c-0298-4e1c-8398-4f75336668d9",
+      "line": 22,
+      "col": 3,
+      "chord": "C"
+    },
+    {
+      "id": "414ae995-3a23-4d2a-91a4-b56ef745ba4d",
+      "line": 22,
+      "col": 6,
+      "chord": "Gm"
+    },
+    {
+      "id": "102c9ee9-1453-4684-8956-cc20f0809b4a",
+      "line": 22,
+      "col": 10,
+      "chord": "A#"
+    },
+    {
+      "id": "d290bb3b-b2be-4c64-a6d4-1547afff81f3",
+      "line": 25,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "712de2d1-9a2e-4b5b-9a48-95ce2256d940",
+      "line": 25,
+      "col": 26,
+      "chord": "C"
+    },
+    {
+      "id": "77a58919-72d5-4823-afc0-46a3abdaf56c",
+      "line": 26,
+      "col": 20,
+      "chord": "Gm"
+    },
+    {
+      "id": "125075f4-9de5-4ae7-a9e5-50124a2a84e2",
+      "line": 29,
+      "col": 0,
+      "chord": "A#"
+    },
+    {
+      "id": "11319d5d-c7b9-4e4d-aecb-316036a0beaa",
+      "line": 30,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "dbcd3d0e-c1c2-4107-a4bb-8aa93fef17bc",
+      "line": 30,
+      "col": 27,
+      "chord": "C"
+    },
+    {
+      "id": "06cfe07d-efe2-4cb2-9c85-19b0318a3d28",
+      "line": 31,
+      "col": 21,
+      "chord": "Gm"
+    },
+    {
+      "id": "875b06e7-8bf4-44a8-87aa-4f31db14263e",
+      "line": 32,
+      "col": 20,
+      "chord": "A#maj7"
+    },
+    {
+      "id": "409ebe8d-66f0-493e-9ba4-0ba3d58775c4",
+      "line": 32,
+      "col": 27,
+      "chord": "A#"
+    },
+    {
+      "id": "9454f0ce-61d1-4509-9ec6-164385a95fe1",
+      "line": 35,
+      "col": 16,
+      "chord": "F"
+    },
+    {
+      "id": "2fd602c1-c27b-4b18-936a-b1656576fb84",
+      "line": 36,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "c4a74a4f-e70d-4c51-b005-42df4590f3c2",
+      "line": 36,
+      "col": 21,
+      "chord": "Gm"
+    },
+    {
+      "id": "485a133f-fc2d-4d5b-a3ff-f5d54d8eaf33",
+      "line": 37,
+      "col": 19,
+      "chord": "A#"
+    },
+    {
+      "id": "036e14ae-548a-49b3-9878-d42ef523c6b2",
+      "line": 38,
+      "col": 17,
+      "chord": "F"
+    },
+    {
+      "id": "551f51b0-6756-4ba7-9781-08b350f0ed68",
+      "line": 39,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "2e423843-86ba-46ab-ad96-04babdca7241",
+      "line": 39,
+      "col": 22,
+      "chord": "Gm"
+    },
+    {
+      "id": "ace4fdeb-48a8-4a02-a163-265ed89d1057",
+      "line": 40,
+      "col": 20,
+      "chord": "A#maj7"
+    },
+    {
+      "id": "c81d28e0-74f2-4229-8b3c-49fe09355ca7",
+      "line": 42,
+      "col": 16,
+      "chord": "F"
+    },
+    {
+      "id": "e6adf09b-b8a0-4187-abf3-501b5c37bd21",
+      "line": 43,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "2c9059f6-4558-48ea-aa7b-2a902b14df47",
+      "line": 43,
+      "col": 21,
+      "chord": "Gm"
+    },
+    {
+      "id": "9182ffa2-f5c5-49cf-be0f-16998ad4f91c",
+      "line": 44,
+      "col": 19,
+      "chord": "A#"
+    },
+    {
+      "id": "2b3c5d50-1cfd-46d3-9516-71de1c94d0da",
+      "line": 45,
+      "col": 17,
+      "chord": "F"
+    },
+    {
+      "id": "ac1a6c1a-22ea-44d3-97aa-fea90fe3cfea",
+      "line": 46,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "5df2c14c-32f2-4800-b0ef-673598ac4bf7",
+      "line": 46,
+      "col": 22,
+      "chord": "Gm"
+    },
+    {
+      "id": "fa190ffa-be2f-42f0-b19a-55c7b5ece155",
+      "line": 47,
+      "col": 20,
+      "chord": "A#maj7"
+    },
+    {
+      "id": "28a24224-87e3-4dde-9011-8b64f35853b3",
+      "line": 50,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "26dba3bd-0cb7-4ad1-918e-e080cea76cd4",
+      "line": 50,
+      "col": 3,
+      "chord": "C"
+    },
+    {
+      "id": "2fe1a381-8e55-447d-a473-9e6718000789",
+      "line": 50,
+      "col": 6,
+      "chord": "Gm"
+    },
+    {
+      "id": "a6dcb651-95e8-4cae-b221-0b9c83d5b197",
+      "line": 50,
+      "col": 10,
+      "chord": "A#"
+    },
+    {
+      "id": "4c251fae-d84c-4e81-92b1-67e24936f41e",
+      "line": 53,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "ba906ed8-0f74-483b-9b3e-7db6bd1d2d8f",
+      "line": 54,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "b2954dc4-5451-4f51-9586-daf60be5dc37",
+      "line": 55,
+      "col": 0,
+      "chord": "Gm"
+    },
+    {
+      "id": "226ff8a2-03c0-4b85-be4a-8d177f979613",
+      "line": 56,
+      "col": 4,
+      "chord": "A#"
+    },
+    {
+      "id": "48f7537b-2826-4fad-90a2-c9e7e23e305a",
+      "line": 57,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "a7e703f8-a4e5-442a-8eb7-0f9f979511d1",
+      "line": 58,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "03234530-35a0-4623-a6ed-c99500c89b9d",
+      "line": 59,
+      "col": 0,
+      "chord": "Gm"
+    },
+    {
+      "id": "2b1cb108-299e-4cce-9e1d-6ef053304f8d",
+      "line": 60,
+      "col": 4,
+      "chord": "A#"
+    },
+    {
+      "id": "61308abf-b222-441f-890e-833d02f7c4a4",
+      "line": 62,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "c6cbce77-624c-4847-9ac9-d105d3d2d6c3",
+      "line": 63,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "e2f163f5-71ef-4686-a3cf-f387fc295289",
+      "line": 64,
+      "col": 0,
+      "chord": "Gm"
+    },
+    {
+      "id": "ddabf4a5-d409-4b4a-8675-3eaf5a51e995",
+      "line": 65,
+      "col": 0,
+      "chord": "A#"
+    },
+    {
+      "id": "d56038d4-da4a-4cbc-8229-8d285243949e",
+      "line": 66,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "0c2bb37b-4412-42e7-81f0-ed670e930ebc",
+      "line": 67,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "9380cc34-2e41-475f-9dfd-c02b232ad986",
+      "line": 68,
+      "col": 0,
+      "chord": "Gm"
+    },
+    {
+      "id": "06cdc392-3af5-4732-a50a-e52c660e678d",
+      "line": 69,
+      "col": 4,
+      "chord": "A#"
+    },
+    {
+      "id": "14bc69e6-4d75-4e47-986e-2abd58962247",
+      "line": 72,
+      "col": 17,
+      "chord": "F"
+    },
+    {
+      "id": "40a03226-8c02-4654-a763-8fc46cf9f907",
+      "line": 73,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "cb40e45b-2013-4773-8a7f-b5344967575a",
+      "line": 73,
+      "col": 21,
+      "chord": "Gm"
+    },
+    {
+      "id": "0d4690e8-c0a0-4be9-b974-684fc9677c34",
+      "line": 74,
+      "col": 20,
+      "chord": "A#"
+    },
+    {
+      "id": "b860b58f-e9c1-4df4-8622-f0053f5f1cc4",
+      "line": 75,
+      "col": 17,
+      "chord": "F"
+    },
+    {
+      "id": "bb48f324-acd0-434f-b440-f2fb107c43d6",
+      "line": 76,
+      "col": 0,
+      "chord": "C"
+    },
+    {
+      "id": "2fa8502d-b7e8-4a37-810b-b030481ff2c6",
+      "line": 76,
+      "col": 21,
+      "chord": "Gm"
+    },
+    {
+      "id": "1469f2f5-3ecf-4230-888e-b0b9f48c2eef",
+      "line": 77,
+      "col": 20,
+      "chord": "A#"
+    },
+    {
+      "id": "65cc56ef-1ff8-4c36-aa77-453c4fff312b",
+      "line": 80,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "22b7a3f1-ba66-4a57-b883-f93de9161093",
+      "line": 80,
+      "col": 3,
+      "chord": "C"
+    },
+    {
+      "id": "066b5e55-9fea-4a6c-bae9-44c442844a03",
+      "line": 80,
+      "col": 6,
+      "chord": "Gm7"
+    },
+    {
+      "id": "b1440686-1b46-4e87-a42b-b677fcbcfdd4",
+      "line": 80,
+      "col": 11,
+      "chord": "A#"
+    },
+    {
+      "id": "1e782ed3-e5c5-4454-94e9-4e397dcefc28",
+      "line": 83,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "5c504e51-d872-4c3f-a948-882a7969c1ae",
+      "line": 83,
+      "col": 26,
+      "chord": "C"
+    },
+    {
+      "id": "98b44966-e75a-46a2-b63e-fd4c7519cf66",
+      "line": 84,
+      "col": 24,
+      "chord": "Gm"
+    },
+    {
+      "id": "1317f894-e700-469a-9869-bd1ae14d9f30",
+      "line": 87,
+      "col": 0,
+      "chord": "A#"
+    },
+    {
+      "id": "e52dab92-6a22-4c95-9406-3ec7359ef87e",
+      "line": 88,
+      "col": 0,
+      "chord": "F"
+    },
+    {
+      "id": "53c78bf3-678b-4077-be8a-7b96e4ccab76",
+      "line": 88,
+      "col": 26,
+      "chord": "C"
+    },
+    {
+      "id": "d06ed7db-8143-4eae-b0d8-73fba72b5f1b",
+      "line": 89,
+      "col": 24,
+      "chord": "Gm"
+    },
+    {
+      "id": "f4638123-5cff-424c-9718-1a2e69f3218a",
+      "line": 92,
+      "col": 0,
+      "chord": "A#"
+    },
+    {
+      "id": "b2c2bd1d-756e-4816-8781-17e9643fb538",
+      "line": 92,
+      "col": 21,
+      "chord": "F"
+    }
+  ],
+  "keyOverride": null,
+  "capo": 1,
+  "createdAt": "2026-08-13T23:35:06.879Z",
+  "updatedAt": "2026-08-13T23:37:06.867Z",
+  "notes": "NOTES\nKey of F. A# on the chart = Bb (transposer artifact, same chord).\nCapo 3, D shapes (recommended, no barres):\n  F→D xx0232, C→A x02220, Gm→Em 022000, Bb→G 320003\n  Gm7→Em7 022033, Bbmaj7→Gmaj7 320002\nCapo 1, E shapes (fuller, low position):\n  F→E, C→B x24442, Gm→F#m 244222, Bb→A, Gm7→F#m7 2x2200, Bbmaj7→Amaj7 x02120\nIntro loop is I V vi IV. Chorus swaps in the sevenths (Gm7, Bbmaj7).\nPlay triads in the verse, let the sevenths ring in the chorus. That's the lift."
+}

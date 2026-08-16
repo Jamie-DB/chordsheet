@@ -50,7 +50,6 @@
     "Holy, Holy, Holy is The Lord, God Almighty.",
     "Who was and is and is to come.",
     "With all creation I sing, \"Praise to The King of Kings,",
-    "C2                         G                  (D2)",
     "You are my everything. And I will adore You\".",
     "(repeat)",
     "",
@@ -437,63 +436,81 @@
     },
     {
       "id": "c72f17df-af84-47fb-a3a9-afc46e16155a",
-      "line": 52,
+      "line": 51,
       "col": 0,
       "chord": "F#2"
     },
     {
       "id": "610991c0-e8a4-408f-9ad8-420fb27b0342",
-      "line": 52,
+      "line": 51,
       "col": 11,
       "chord": "C#m7"
     },
     {
       "id": "9449ae0f-1dd9-4b3a-a135-8f4877d0b8e2",
-      "line": 52,
+      "line": 51,
       "col": 23,
       "chord": "E2"
     },
     {
       "id": "050b266a-5c0d-48d0-bdd7-a3292615dca3",
-      "line": 52,
+      "line": 51,
       "col": 34,
       "chord": "B"
     },
     {
       "id": "d887cc18-16fe-44f7-bd18-004168b1f440",
-      "line": 56,
+      "line": 55,
       "col": 0,
       "chord": "F#2"
     },
     {
       "id": "4eae98a6-33e7-47f7-a57a-05c55043e3bc",
-      "line": 56,
+      "line": 55,
       "col": 11,
       "chord": "C#m7"
     },
     {
       "id": "0c3f08c3-2222-43cc-b191-136acb96ceff",
-      "line": 56,
+      "line": 55,
       "col": 17,
       "chord": "E2"
     },
     {
       "id": "2f292d00-733c-4797-986f-867b2e777405",
-      "line": 56,
+      "line": 55,
       "col": 32,
       "chord": "B"
     },
     {
       "id": "516edeae-8893-40d4-90bb-297e417435d3",
-      "line": 56,
+      "line": 55,
       "col": 39,
       "chord": "F#"
+    },
+    {
+      "id": "797811d7-6ced-4b9c-8c86-03f2dd0c73b7",
+      "line": 46,
+      "col": 0,
+      "chord": "E2"
+    },
+    {
+      "id": "1f750316-554e-4922-80c0-4ce0968894ad",
+      "line": 46,
+      "col": 27,
+      "chord": "B"
+    },
+    {
+      "id": "87c47df6-9b72-4063-bc93-69f8932e6c99",
+      "line": 46,
+      "col": 46,
+      "chord": "F#2"
     }
   ],
   "keyOverride": null,
   "capo": 4,
+  "bpm": 166,
   "notes": "NOTES\nRevelation Song. This chart: capo 4, G shapes, sounds in B (PC&D studio key).\nKari Jobe / Gateway version is in D: drop the capo, play A, Em7, G, D\n(same functions as D2, Am7, C2, G). All open, no barres.\nWhole song is one 4-chord loop, verse and chorus identical.\nDynamics are the arrangement: build texture across cycles, never coast.\nRolling 6/8-style feel, long pulses, let strings ring.",
   "createdAt": "2026-08-07T22:13:38.149Z",
-  "updatedAt": "2026-08-10T23:04:51.117Z",
-  "bpm": 166
+  "updatedAt": "2026-08-13T00:23:10.304Z"
 }

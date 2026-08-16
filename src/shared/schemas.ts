@@ -5,6 +5,7 @@ export const chordPlacementSchema = z.object({
   line: z.number().int().min(0),
   col: z.number().int().min(0),
   chord: z.string().min(1),
+  hold: z.boolean().optional(),
 });
 
 export const songSchema = z.object({
@@ -37,6 +38,7 @@ export const importedColPlacementSchema = z.object({
   line: z.number().int().min(0),
   col: z.number().int().min(0),
   chord: z.string().min(1),
+  hold: z.boolean().optional(),
 });
 
 /**
@@ -49,6 +51,7 @@ export const importedAnchorPlacementSchema = z.object({
   anchor: z.string().min(1),
   anchorOccurrence: z.number().int().min(1).optional(),
   offsetInAnchor: z.number().int().min(0).optional(),
+  hold: z.boolean().optional(),
 });
 
 export const importedPlacementSchema = z.union([

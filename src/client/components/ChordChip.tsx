@@ -12,6 +12,8 @@ interface Props {
   col: number;
   /** Display text: the shape the hands play under the current capo. */
   label: string;
+  /** Full-measure hold; drawn with a diamond enclosure. */
+  hold: boolean;
   charWidth: number;
   pairHeight: number;
   lineCount: number;
@@ -27,7 +29,7 @@ interface HoverCard {
 }
 
 export function ChordChip(props: Props) {
-  const { id, line, col, label, charWidth, pairHeight, lineCount, maxColForLine } = props;
+  const { id, line, col, label, hold, charWidth, pairHeight, lineCount, maxColForLine } = props;
   const start = useRef<{ x: number; y: number } | null>(null);
   const [offset, setOffset] = useState<{ dx: number; dy: number } | null>(null);
   const el = useRef<HTMLSpanElement>(null);
@@ -52,7 +54,7 @@ export function ChordChip(props: Props) {
   return (
     <span
       ref={el}
-      className={`chord-chip${offset ? " dragging" : ""}`}
+      className={`chord-chip${hold ? " hold-diamond" : ""}${offset ? " dragging" : ""}`}
       style={{
         left: `${col}ch`,
         transform: offset ? `translate(${offset.dx}px, ${offset.dy}px)` : undefined,

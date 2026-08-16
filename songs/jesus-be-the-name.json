@@ -1003,7 +1003,7 @@
     {
       "id": "b9435045-de95-453a-a40c-8e9487b6f51b",
       "line": 103,
-      "col": 30,
+      "col": 33,
       "chord": "A#m"
     },
     {
@@ -1033,7 +1033,7 @@
     {
       "id": "9ac3a7e6-588f-476f-b082-55fd89cafdc9",
       "line": 105,
-      "col": 30,
+      "col": 33,
       "chord": "A#m"
     },
     {
@@ -1135,18 +1135,18 @@
     {
       "id": "bb3237ba-b466-4695-b6dd-61e566ef2ec3",
       "line": 123,
-      "col": 14,
+      "col": 19,
       "chord": "G#"
     },
     {
       "id": "ae3dfd56-1259-4317-a07e-54fc9bec8799",
       "line": 123,
-      "col": 19,
+      "col": 26,
       "chord": "F#"
     }
   ],
   "keyOverride": null,
   "capo": 1,
   "createdAt": "2026-08-05T23:22:45.895Z",
-  "updatedAt": "2026-08-06T21:46:26.181Z"
+  "updatedAt": "2026-08-14T15:57:48.270Z"
 }

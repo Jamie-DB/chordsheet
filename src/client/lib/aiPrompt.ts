@@ -16,7 +16,8 @@ Rules:
 4. Chords go in exactly as printed in the image, including slash basses.
 5. If the image's wording or line breaks differ from my lyrics, align each chord to the best-matching line below; skip chords over words that do not exist in my lyrics.
 6. Ignore section labels, tablature, and chord diagram graphics; capture chord symbols only.
-7. If and only if you can compute exact character offsets reliably (for example by running code), you may use {"line", "col", "chord"} instead of the anchor form.
+7. A chord printed inside a diamond (or angle brackets like <C>) is a full-measure hold: add "hold": true to that placement.
+8. If and only if you can compute exact character offsets reliably (for example by running code), you may use {"line", "col", "chord"} instead of the anchor form.
 
 My song JSON:
 

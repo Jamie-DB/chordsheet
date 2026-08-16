@@ -890,5 +890,7 @@
   "keyOverride": null,
   "capo": 0,
   "createdAt": "2026-08-05T22:50:59.415Z",
-  "updatedAt": "2026-08-06T21:46:26.170Z"
+  "updatedAt": "2026-08-13T23:48:59.924Z",
+  "bpm": 104,
+  "notes": "NOTES\nKey of G, no capo, all first position. Anchor ring + pinky on 3rd fret\nof B and e strings for most of the song. Only the bass hand moves.\n\nVerse bass climbs: G, then E (C2/E), A (Am7), B (G/B), C (C2).\nPlay it as one line, not five separate chords.\n\nIntro: hold G 3x0033, walk the D string 4, 2, open for Gmaj7sus, G6sus, G5.\nD/C = x30232, keeps the bass descending out of C.\nDadd4 = Dsus4 xx0233. Cmaj9/E = C2/E shape, let the top strings ring.\nEm7 = 022033 to keep the anchor. Use Cadd9/C2 x32033, skip plain C.\n\nVerse fingerpicked and soft. Chorus opens up. Dynamics carry this song."
 }
