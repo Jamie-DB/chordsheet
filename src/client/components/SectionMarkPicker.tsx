@@ -10,35 +10,40 @@ interface Props {
   onClose(): void;
 }
 
+/**
+ * Style and term are separate: a preset button gives color and behavior
+ * (Tacet shrinks the section); the note field, when filled, replaces the
+ * preset's word on the tag. The color dots plus Set make a custom mark.
+ */
 export function SectionMarkPicker({ col, current, onPick, onClear, onClose }: Props) {
-  const [customText, setCustomText] = useState(current?.kind === "custom" ? (current.text ?? "") : "");
+  const [note, setNote] = useState(current?.text ?? "");
   const [customColor, setCustomColor] = useState<MarkColor>(
     current?.kind === "custom" ? (current.color ?? "amber") : "amber",
   );
+  const trimmed = note.trim();
 
   return (
     <span className="chord-popover mark-picker" style={{ left: `${col}ch` }} onClick={(e) => e.stopPropagation()}>
+      <input
+        value={note}
+        size={16}
+        placeholder="note (replaces the term)"
+        onChange={(e) => setNote(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") onClose();
+        }}
+      />
       {(Object.keys(PRESETS) as Array<keyof typeof PRESETS>).map((kind) => (
         <button
           key={kind}
           className={`mini mark-btn mark-${PRESETS[kind].color}`}
-          onClick={() => onPick(kind)}
-          title={`${PRESETS[kind].name} section`}
+          onClick={() => onPick(kind, trimmed || undefined)}
+          title={`${PRESETS[kind].name} behavior and color${trimmed ? `, shown as "${trimmed}"` : ""}`}
         >
           {PRESETS[kind].name}
         </button>
       ))}
       <span className="mark-custom">
-        <input
-          value={customText}
-          size={7}
-          placeholder="custom"
-          onChange={(e) => setCustomText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && customText.trim()) onPick("custom", customText.trim(), customColor);
-            if (e.key === "Escape") onClose();
-          }}
-        />
         {MARK_COLORS.map((color) => (
           <button
             key={color}
@@ -50,8 +55,9 @@ export function SectionMarkPicker({ col, current, onPick, onClear, onClose }: Pr
         ))}
         <button
           className="mini"
-          disabled={!customText.trim()}
-          onClick={() => onPick("custom", customText.trim(), customColor)}
+          disabled={!trimmed}
+          onClick={() => onPick("custom", trimmed, customColor)}
+          title="Just the note in the chosen color, no preset behavior"
         >
           Set
         </button>

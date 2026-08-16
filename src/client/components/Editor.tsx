@@ -5,7 +5,15 @@ import { buildAiPrompt } from "../lib/aiPrompt";
 import { parseImport } from "../lib/exchange";
 import { chordsOnLine, deleteLine, editLine, insertLine } from "../lib/lineOps";
 import { normalizeSections } from "../lib/normalize";
-import { markColor, markFor, markName, sectionRanges, withMark, withoutMark } from "../lib/sectionMarks";
+import {
+  markColor,
+  markFor,
+  markName,
+  sectionRanges,
+  stripBrackets,
+  withMark,
+  withoutMark,
+} from "../lib/sectionMarks";
 import { sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
@@ -470,8 +478,9 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
                 if (!range) return undefined;
                 const current = markFor(marks, range.label, range.occurrence);
                 return {
-                  pillName: current ? markName(current) : null,
-                  pillColor: current ? markColor(current) : null,
+                  title: stripBrackets(range.label),
+                  name: current ? markName(current) : null,
+                  color: current ? markColor(current) : null,
                   pickerOpen: markPickerLine === i,
                   current,
                   onOpen: () => setMarkPickerLine(i),
@@ -480,7 +489,8 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
                       section: range.label,
                       occurrence: range.occurrence,
                       kind,
-                      ...(kind === "custom" ? { text, color } : {}),
+                      ...(text ? { text } : {}),
+                      ...(kind === "custom" ? { color } : {}),
                     });
                     onChange({ ...song, sectionMarks: next });
                     setMarkPickerLine(null);

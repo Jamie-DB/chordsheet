@@ -10,8 +10,16 @@ export const PRESETS: Record<Exclude<MarkKind, "custom">, { name: string; color:
 
 export const MARK_COLORS: MarkColor[] = ["red", "blue", "amber", "green"];
 
+/** The displayed term: a free-text note overrides any preset's name. */
 export function markName(mark: SectionMark): string {
-  return mark.kind === "custom" ? mark.text?.trim() || "Custom" : PRESETS[mark.kind].name;
+  const note = mark.text?.trim();
+  if (note) return note;
+  return mark.kind === "custom" ? "Custom" : PRESETS[mark.kind].name;
+}
+
+/** "[Verse 1]" to "Verse 1" for tags and sidebars. */
+export function stripBrackets(label: string): string {
+  return label.trim().replace(/^\[|\]$/g, "");
 }
 
 export function markColor(mark: SectionMark): MarkColor {

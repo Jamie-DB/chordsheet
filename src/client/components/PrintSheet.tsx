@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
-import { markColor, markFor, markName, sectionRanges } from "../lib/sectionMarks";
+import { markColor, markFor, markName, sectionRanges, stripBrackets } from "../lib/sectionMarks";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
 
@@ -48,7 +48,6 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
       if (mark.kind === "tacet") tacetLines.add(i);
     }
   }
-  const stripBrackets = (label: string) => label.trim().replace(/^\[|\]$/g, "");
 
   return (
     <div className={`print-sheet${twoCol ? "" : " with-sidebar"}`}>
