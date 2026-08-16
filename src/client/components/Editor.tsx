@@ -64,11 +64,15 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
   const sectionClassByLine = new Map<number, string>();
+  const tacetLines = new Set<number>();
   for (const r of ranges) {
     const mark = markFor(marks, r.label, r.occurrence);
     if (!mark) continue;
     const cls = `sec-${markColor(mark)}`;
-    for (let i = r.start; i <= r.end; i++) sectionClassByLine.set(i, cls);
+    for (let i = r.start; i <= r.end; i++) {
+      sectionClassByLine.set(i, mark.kind === "tacet" ? `${cls} tacet-small` : cls);
+      if (mark.kind === "tacet") tacetLines.add(i);
+    }
   }
   const [notesOpen, setNotesOpen] = useState(() => Boolean(song.notes?.trim()));
 
@@ -416,7 +420,7 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
               proposals={(review?.fresh ?? [])
                 .filter((p) => p.line === i)
                 .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
-              charWidth={charWidth}
+              charWidth={tacetLines.has(i) ? charWidth * 0.67 : charWidth}
               pairHeight={pairHeight}
               lineCount={song.lyrics.length}
               editing={editing}

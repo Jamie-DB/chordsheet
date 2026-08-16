@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
-import { isSectionLabel } from "../lib/lineOps";
 import { markColor, markFor, markName, sectionRanges } from "../lib/sectionMarks";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
@@ -39,15 +39,19 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
   const sectionClassByLine = new Map<number, string>();
+  const tacetLines = new Set<number>();
   for (const r of ranges) {
     const mark = markFor(marks, r.label, r.occurrence);
     if (!mark) continue;
-    const cls = ` sec-${markColor(mark)}`;
-    for (let i = r.start; i <= r.end; i++) sectionClassByLine.set(i, cls);
+    for (let i = r.start; i <= r.end; i++) {
+      sectionClassByLine.set(i, ` sec-${markColor(mark)}`);
+      if (mark.kind === "tacet") tacetLines.add(i);
+    }
   }
+  const stripBrackets = (label: string) => label.trim().replace(/^\[|\]$/g, "");
 
   return (
-    <div className="print-sheet">
+    <div className={`print-sheet${twoCol ? "" : " with-sidebar"}`}>
       <div className="print-header">
         <h1>{song.title}</h1>
         {song.artist && <div className="print-artist">{song.artist}</div>}
@@ -61,31 +65,14 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
         <ChordChartRow song={song} shapedKeyName={shapedKeyName} />
       </div>
       <div className={twoCol ? "print-body two-col" : "print-body"}>
-        {song.lyrics.map((line, i) => {
-          const row = rows[i];
-          if (line.length === 0 && row.length === 0) {
-            return <div className="print-gap" key={i} />;
-          }
-          const range = rangeByStart.get(i);
-          const mark = range ? markFor(marks, range.label, range.occurrence) : null;
-          return (
-            <div className={`print-pair${sectionClassByLine.get(i) ?? ""}`} key={i}>
-              {row.length > 0 && (
-                <pre className="print-chords">
-                  {row.map((s, j) =>
-                    s.hold ? (
-                      <span key={j} className="hold-diamond">
-                        {s.text}
-                        <DiamondOutline />
-                      </span>
-                    ) : (
-                      s.text
-                    ),
-                  )}
-                </pre>
-              )}
-              <pre className={`print-lyric${isSectionLabel(line) ? " section-label" : ""}`}>
-                {line || " "}
+        {(() => {
+          const body: ReactNode[] = [];
+          let pendingSidebar: { title: string; mark: ReturnType<typeof markFor> } | null = null;
+
+          const compactLabel = (key: React.Key, title: string, mark: ReturnType<typeof markFor>) => (
+            <div className={`print-pair print-label-compact`} key={key}>
+              <pre className="print-lyric">
+                {title}
                 {mark && (
                   <span className={`print-mark-name name-${markColor(mark)}`}>
                     {"  " + markName(mark).toUpperCase()}
@@ -94,7 +81,71 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
               </pre>
             </div>
           );
-        })}
+
+          song.lyrics.forEach((line, i) => {
+            const range = rangeByStart.get(i);
+            if (range) {
+              const mark = markFor(marks, range.label, range.occurrence);
+              if (pendingSidebar) {
+                // Empty section before this one: fall back to a compact row.
+                body.push(compactLabel(`orphan-${i}`, pendingSidebar.title, pendingSidebar.mark));
+                pendingSidebar = null;
+              }
+              if (twoCol) {
+                body.push(compactLabel(i, stripBrackets(range.label), mark));
+              } else {
+                // The title leaves the flow and rides the next content pair.
+                pendingSidebar = { title: stripBrackets(range.label), mark };
+              }
+              return;
+            }
+            const row = rows[i];
+            if (line.length === 0 && row.length === 0) {
+              body.push(<div className="print-gap" key={i} />);
+              return;
+            }
+            const sidebar = pendingSidebar;
+            pendingSidebar = null;
+            body.push(
+              <div
+                className={`print-pair${sectionClassByLine.get(i) ?? ""}${tacetLines.has(i) ? " tacet-small" : ""}`}
+                key={i}
+              >
+                {sidebar && (
+                  <span className="print-side-label">
+                    {sidebar.title}
+                    {sidebar.mark && (
+                      <span className={`print-mark-name name-${markColor(sidebar.mark)}`}>
+                        {markName(sidebar.mark).toUpperCase()}
+                      </span>
+                    )}
+                  </span>
+                )}
+                {row.length > 0 && (
+                  <pre className="print-chords">
+                    {row.map((s, j) =>
+                      s.hold ? (
+                        <span key={j} className="hold-diamond">
+                          {s.text}
+                          <DiamondOutline />
+                        </span>
+                      ) : (
+                        s.text
+                      ),
+                    )}
+                  </pre>
+                )}
+                <pre className="print-lyric">{line || " "}</pre>
+              </div>,
+            );
+          });
+          // TS cannot see the callback writes; re-widen before the last check.
+          const leftover = pendingSidebar as { title: string; mark: ReturnType<typeof markFor> } | null;
+          if (leftover) {
+            body.push(compactLabel("orphan-end", leftover.title, leftover.mark));
+          }
+          return body;
+        })()}
       </div>
     </div>
   );

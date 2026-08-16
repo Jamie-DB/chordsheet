@@ -53,27 +53,67 @@
     font-weight: 700;
   }
 
-  /* Section dynamics: tint (forced to print), left bar (borders always
-     print), and the small-caps name; margin/padding cancel so columns hold. */
+  /* Section titles live in a left sidebar gutter (single-column layout). */
+  .print-sheet.with-sidebar {
+    padding-left: 21mm;
+  }
+
+  .print-pair {
+    position: relative;
+  }
+
+  .print-side-label {
+    position: absolute;
+    right: calc(100% + 3.5mm);
+    top: 0.15em;
+    width: 17mm;
+    text-align: right;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 8pt;
+    font-weight: 600;
+    color: #6b7280;
+    line-height: 1.25;
+  }
+
+  .print-side-label .print-mark-name {
+    display: block;
+  }
+
+  /* Compact in-flow label: two-column layout and empty-section fallback. */
+  .print-label-compact .print-lyric {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 8pt;
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  /* Section dynamics: no backgrounds; a thin colored edge bar (borders
+     always print) plus the tag name. Margin/padding cancel so columns hold. */
   .print-pair.sec-red,
   .print-pair.sec-blue,
   .print-pair.sec-amber,
   .print-pair.sec-green {
     margin-left: -8pt;
-    padding-left: 6pt;
-    border-left-width: 2pt;
+    padding-left: 6.5pt;
+    border-left-width: 1.5pt;
     border-left-style: solid;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  .print-pair.sec-red { background: rgba(220, 38, 38, 0.07); border-left-color: #dc2626; }
-  .print-pair.sec-blue { background: rgba(37, 99, 235, 0.07); border-left-color: #2563eb; }
-  .print-pair.sec-amber { background: rgba(217, 119, 6, 0.09); border-left-color: #d97706; }
-  .print-pair.sec-green { background: rgba(22, 163, 74, 0.07); border-left-color: #16a34a; }
+  .print-pair.sec-red { border-left-color: #dc2626; }
+  .print-pair.sec-blue { border-left-color: #2563eb; }
+  .print-pair.sec-amber { border-left-color: #d97706; }
+  .print-pair.sec-green { border-left-color: #16a34a; }
+
+  /* Tacet sections tighten up and move out of the way. */
+  .print-pair.tacet-small {
+    font-size: 67%;
+  }
 
   .print-mark-name {
-    font-size: 8pt;
+    font-size: 6.5pt;
+    font-weight: 700;
     letter-spacing: 0.08em;
   }
 

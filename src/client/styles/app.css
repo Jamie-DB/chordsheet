@@ -367,24 +367,31 @@ textarea {
 
 .lyric-row.section-label {
   font-weight: 700;
+  font-size: 0.85em;
+  color: var(--muted);
 }
 
-/* Section dynamics marks: tint plus left bar; margin/padding cancel so
-   character columns never shift between marked and unmarked sections. */
+/* Section dynamics marks: no backgrounds, just a thin edge bar and the
+   pill tag; margin/padding cancel so character columns never shift. */
 .line-pair.sec-red,
 .line-pair.sec-blue,
 .line-pair.sec-amber,
 .line-pair.sec-green {
-  margin-left: -11px;
+  margin-left: -10px;
   padding-left: 8px;
-  border-left-width: 3px;
+  border-left-width: 2px;
   border-left-style: solid;
 }
 
-.line-pair.sec-red { background: rgba(220, 38, 38, 0.06); border-left-color: #dc2626; }
-.line-pair.sec-blue { background: rgba(37, 99, 235, 0.06); border-left-color: #2563eb; }
-.line-pair.sec-amber { background: rgba(217, 119, 6, 0.08); border-left-color: #d97706; }
-.line-pair.sec-green { background: rgba(22, 163, 74, 0.06); border-left-color: #16a34a; }
+.line-pair.sec-red { border-left-color: #dc2626; }
+.line-pair.sec-blue { border-left-color: #2563eb; }
+.line-pair.sec-amber { border-left-color: #d97706; }
+.line-pair.sec-green { border-left-color: #16a34a; }
+
+/* Tacet sections tighten up; chips and clicks scale with the em grid. */
+.line-pair.tacet-small {
+  font-size: 67%;
+}
 
 .mark-pill {
   position: absolute;
