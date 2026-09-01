@@ -434,25 +434,22 @@
       "id": "8c8c31a1-dd27-4537-bdee-9322e8426ec2",
       "line": 48,
       "col": 0,
-      "chord": "G/B"
-    },
-    {
-      "id": "d6350308-7e45-4fa0-8b81-9111e219b636",
-      "line": 49,
-      "col": 0,
-      "chord": "C2"
+      "chord": "G/B",
+      "hold": true
     },
     {
       "id": "d0d288c9-25fb-4cbf-8df7-fefe21e7f3d3",
       "line": 50,
       "col": 0,
-      "chord": "Em7"
+      "chord": "Em7",
+      "hold": true
     },
     {
       "id": "a2a6f82c-2196-4690-bffb-446c781096d8",
       "line": 51,
       "col": 0,
-      "chord": "Dadd4"
+      "chord": "Dadd4",
+      "hold": true
     },
     {
       "id": "c5ac22a4-b15b-43b1-b3e3-7a4b968271c7",
@@ -885,6 +882,13 @@
       "line": 147,
       "col": 0,
       "chord": "D"
+    },
+    {
+      "id": "c0ce5c17-cf38-40a2-bcb1-af4ee722acce",
+      "line": 49,
+      "col": 0,
+      "chord": "C2",
+      "hold": true
     }
   ],
   "keyOverride": null,
@@ -892,7 +896,7 @@
   "bpm": 104,
   "notes": "NOTES\nKey of G, no capo, all first position. Anchor ring + pinky on 3rd fret\nof B and e strings for most of the song. Only the bass hand moves.\n\nVerse bass climbs: G, then E (C2/E), A (Am7), B (G/B), C (C2).\nPlay it as one line, not five separate chords.\n\nIntro: hold G 3x0033, walk the D string 4, 2, open for Gmaj7sus, G6sus, G5.\nD/C = x30232, keeps the bass descending out of C.\nDadd4 = Dsus4 xx0233. Cmaj9/E = C2/E shape, let the top strings ring.\nEm7 = 022033 to keep the anchor. Use Cadd9/C2 x32033, skip plain C.\n\nVerse fingerpicked and soft. Chorus opens up. Dynamics carry this song.",
   "createdAt": "2026-08-05T22:50:59.415Z",
-  "updatedAt": "2026-08-13T23:48:59.924Z",
+  "updatedAt": "2026-08-16T19:21:59.939Z",
   "sectionMarks": [
     {
       "section": "[Verse 1]",

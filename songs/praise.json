@@ -791,5 +791,12 @@
   "capo": 2,
   "bpm": 152,
   "createdAt": "2026-08-10T22:44:48.714Z",
-  "updatedAt": "2026-08-14T01:15:26.019Z"
+  "updatedAt": "2026-08-17T19:09:59.341Z",
+  "sectionMarks": [
+    {
+      "section": "[Intro]",
+      "occurrence": 1,
+      "kind": "tacet"
+    }
+  ]
 }

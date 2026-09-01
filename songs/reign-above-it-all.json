@@ -116,7 +116,7 @@
       "id": "8668d204-ee30-4306-b929-76316fc54146",
       "line": 11,
       "col": 31,
-      "chord": "E4"
+      "chord": "E"
     },
     {
       "id": "fafffbb6-612e-4071-9b9b-0ef2b12ea583",
@@ -134,7 +134,7 @@
       "id": "036126c9-a270-4eeb-be38-6dbca5a3af1e",
       "line": 13,
       "col": 18,
-      "chord": "E4"
+      "chord": "E"
     },
     {
       "id": "465223ae-d67e-4696-8031-d192eb408e28",
@@ -152,7 +152,7 @@
       "id": "2801f6cb-d8bf-4dc0-b450-1b13ace21190",
       "line": 14,
       "col": 19,
-      "chord": "E4"
+      "chord": "E"
     },
     {
       "id": "4bed578a-60b5-4076-a09c-da345654de70",
@@ -224,7 +224,7 @@
       "id": "e87e291e-9ce7-4028-b6e0-c2c259e82dd8",
       "line": 25,
       "col": 30,
-      "chord": "E4"
+      "chord": "E"
     },
     {
       "id": "a94f178d-852b-43b7-ad06-ad0e7f2b143a",
@@ -494,7 +494,7 @@
       "id": "6250dce2-4434-4f90-9653-2e98d23c643d",
       "line": 63,
       "col": 17,
-      "chord": "C#m"
+      "chord": "A/C#"
     },
     {
       "id": "94f8ec12-d521-4a02-b74c-fd5043e27e00",
@@ -578,7 +578,7 @@
       "id": "51797d6d-379f-45e4-a68d-5b282ea42b92",
       "line": 74,
       "col": 46,
-      "chord": "C#m"
+      "chord": "A/C#"
     },
     {
       "id": "c031248e-947b-4655-981c-187fcefa7292",
@@ -698,7 +698,7 @@
       "id": "1acf8a23-cce9-4c96-a82e-2cfffd9b3e14",
       "line": 90,
       "col": 46,
-      "chord": "C#m"
+      "chord": "A/C#"
     },
     {
       "id": "31f58987-e6fd-4071-abe0-87faa7b19cb6",
@@ -734,7 +734,7 @@
       "id": "repair-8-12",
       "line": 8,
       "col": 12,
-      "chord": "E4"
+      "chord": "E"
     },
     {
       "id": "repair-9-1",
@@ -752,7 +752,7 @@
       "id": "repair-9-12",
       "line": 9,
       "col": 12,
-      "chord": "E4"
+      "chord": "E"
     },
     {
       "id": "repair-76-2",
@@ -777,11 +777,17 @@
       "line": 77,
       "col": 44,
       "chord": "A/C#"
+    },
+    {
+      "id": "159d3849-1103-4d5d-8483-12145b27c94f",
+      "line": 93,
+      "col": 11,
+      "chord": "D"
     }
   ],
   "keyOverride": null,
   "capo": 0,
   "bpm": 196,
   "createdAt": "2026-08-05T23:59:23.830Z",
-  "updatedAt": "2026-08-06T22:45:23.837Z"
+  "updatedAt": "2026-08-17T20:06:28.933Z"
 }
