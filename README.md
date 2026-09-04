@@ -32,7 +32,7 @@ The library lists songs alphabetically by default, with a search box (title and 
 
 ## Storage
 
-Songs autosave to browser localStorage. "Save all to folder" in the library writes every song as `<id>.json` straight into a folder you pick once (choose `songs/` here); it checks the disk first and skips files that are already up to date, so repeated saves are idempotent. Commit `songs/` when you want the backup in git (this repo is private). Note for Brave: it disables the File System Access API by default; enable it at brave://flags (search "File System Access API") and relaunch, or use "Download backup", which saves the whole library as one chordsheet-library.json in any browser and restores through Import. Per-song "Export" and "Import JSON" remain for one-offs. `songs/amazing-grace.json` is the public domain seed used by tests.
+Songs autosave to browser localStorage. "Save all to folder" in the library writes every song as `<id>.json` straight into a folder you pick once; it checks the disk first and skips files that are already up to date, so repeated saves are idempotent. Point it at a folder outside this repo (`~/Documents/chordsheet-library/`), never at `songs/`: the personal library holds copyrighted lyrics and stays out of git entirely. `songs/` in the repo is only the public domain demo set. Note for Brave: it disables the File System Access API by default; enable it at brave://flags (search "File System Access API") and relaunch, or use "Download backup", which saves the whole library as one chordsheet-library.json in any browser and restores through Import. Per-song "Export" and "Import JSON" remain for one-offs. `songs/amazing-grace.json` is the public domain seed used by tests.
 
 ## Layout model
 
