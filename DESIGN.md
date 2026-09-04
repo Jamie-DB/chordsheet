@@ -95,4 +95,4 @@ A CHORDS row shows SVG fretboard grids for the song's unique displayed shapes (p
 4. AI altering lyrics: import review accepts only placements; lyric changes rejected by design.
 5. Lyrics edited after placement: clamp and warn.
 6. Two-tab autosave races: last-write-wins, documented.
-7. Copyright hygiene: private repo, public domain seed lyrics, screenshots never enter the tool or repo, model output is chords and positions only.
+7. Copyright hygiene: only public domain lyrics in the repo, the personal library kept outside it, screenshots never enter the tool or repo, model output is chords and positions only.
