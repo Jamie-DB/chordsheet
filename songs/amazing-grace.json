@@ -4,6 +4,7 @@
   "title": "Amazing Grace",
   "artist": "John Newton (1779, public domain)",
   "lyrics": [
+    "[Verse 1]",
     "Amazing grace, how sweet the sound",
     "That saved a wretch like me",
     "I once was lost, but now am found",
@@ -12,55 +13,55 @@
   "placements": [
     {
       "id": "ag-1",
-      "line": 0,
+      "line": 1,
       "col": 0,
       "chord": "G"
     },
     {
       "id": "ag-2",
-      "line": 0,
+      "line": 1,
       "col": 19,
       "chord": "C"
     },
     {
       "id": "ag-3",
-      "line": 0,
+      "line": 1,
       "col": 29,
       "chord": "G"
     },
     {
       "id": "ag-4",
-      "line": 1,
+      "line": 2,
       "col": 25,
       "chord": "D"
     },
     {
       "id": "ag-5",
-      "line": 2,
+      "line": 3,
       "col": 2,
       "chord": "G"
     },
     {
       "id": "ag-6",
-      "line": 2,
+      "line": 3,
       "col": 21,
       "chord": "C"
     },
     {
       "id": "ag-7",
-      "line": 2,
+      "line": 3,
       "col": 28,
       "chord": "G"
     },
     {
       "id": "ag-8",
-      "line": 3,
+      "line": 4,
       "col": 15,
       "chord": "D"
     },
     {
       "id": "ag-9",
-      "line": 3,
+      "line": 4,
       "col": 21,
       "chord": "G"
     }
@@ -68,5 +69,12 @@
   "keyOverride": null,
   "capo": 0,
   "createdAt": "2026-08-05T12:00:00.000Z",
-  "updatedAt": "2026-08-06T21:46:26.157Z"
+  "updatedAt": "2026-08-06T21:46:26.157Z",
+  "sectionMarks": [
+    {
+      "section": "[Verse 1]",
+      "occurrence": 1,
+      "kind": "soft"
+    }
+  ]
 }
