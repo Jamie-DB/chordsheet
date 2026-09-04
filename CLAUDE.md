@@ -33,7 +33,9 @@ Fully static SPA: Vite + React 19 + TypeScript. No backend, no API keys, no .env
 - Public writing style, for README, BUILDLOG, issues, commit messages, and UI copy: no semicolons in prose, no LLM-isms, no hype adjectives, metrics instead of claims, shortcomings stated plainly.
 - A wall-clock number appears only next to its verification cost (issue count, review trail, correction loop). Never a speed claim on its own.
 - In anything public, song titles are fine. Lyric lines and chord annotations on copyrighted songs never are. Use the demo set for every example, including in issues and commit messages.
-- Work happens on a branch in a Conductor workspace, one issue per branch, target `origin/main`. Every change lands through a PR, even a one commit change, for the paper trail: `gh pr create --base main`, then merge with a merge commit, never a squash, so the checkpoint commits survive. A commit closes its issue with "closes #N". Nothing is real until it is merged and pushed.
+- Work happens on a branch in a Conductor workspace, one issue per branch, target `origin/main`.
+- Every change lands through a PR, even a one commit change, for the paper trail: `gh pr create --base main`. Merge with a merge commit so the checkpoint commits survive. Squash and rebase merge are disabled on the repo, so the merge commit is the only button.
+- A commit closes its issue with "closes #N". Nothing is real until it is merged and pushed.
 - Never use bare `git stash` or `git stash pop`, because the stash stack is shared across every worktree. Prefer a temporary WIP commit. If a stash is unavoidable, use `git stash push -u -m "<tag>"` and restore with `git stash apply <sha>`.
 - The engine stays pure: no DOM, no React, no side effects; every branch table-tested.
 - Lyrics in the repo must be public domain. The demo set is the only lyric content that belongs here.
