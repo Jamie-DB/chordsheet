@@ -77,3 +77,7 @@ Note for Brave: it disables the File System Access API by default. Enable it at 
 ## Layout model
 
 Everything is character cells in one monospace font. A chord at column N renders at `left: N * 1ch` in the editor, and the print sheet is built by `buildChordRow` as literal text (spaces plus symbols, collisions shifted right). Stored chords are always sounding chords, and capo is a pure display transform. See CLAUDE.md for the full invariants and DESIGN.md for the design.
+
+## License
+
+MIT, see LICENSE. The demo songs in `songs/` are public domain.
