@@ -15,7 +15,7 @@ Fully static SPA: Vite + React 19 + TypeScript. No backend, no API keys, no .env
 - `src/engine/` pure TypeScript chord/music engine, zero dependencies, fully unit tested. UI code never does pitch math itself.
 - `src/shared/` Song types and zod schemas (used for import validation).
 - `src/client/` React app: one useReducer store, no router, no state library.
-- `songs/` exported song JSON files, committed to this private repo. The browser's localStorage holds the working copy; export/import moves songs between the two.
+- `songs/` public domain demo songs only, committed. The personal library lives outside the repo at `~/Documents/chordsheet-library/` and is never committed. The browser's localStorage holds the working copy; export/import moves songs between the two.
 - `docs/AI-PLACEMENT.md` instructions handed to a Claude instance during the placement round trip.
 
 ## Core invariants
