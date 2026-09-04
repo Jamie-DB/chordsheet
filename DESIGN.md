@@ -50,7 +50,7 @@ Section spacing is normalized everywhere (src/client/lib/normalize.ts): runs of 
 ## Storage and exchange
 
 - localStorage key `chordsheet.songs.v1` holds the library. Autosave debounced 800 ms. Last-write-wins across tabs (accepted limitation).
-- Export downloads `<id>.json`, pretty-printed. Jamie files these under `songs/` and commits when wanted.
+- Export downloads `<id>.json`, pretty-printed. Jamie files these under the private library outside the repo (`~/Documents/chordsheet-library/`). `songs/` in the repo carries only the public domain demo set.
 - Import via file picker, drag-drop, or paste. zod-validated. Col-form placements clamped; anchor-form placements resolved via `resolveAnchor`; unresolved entries listed, never silently dropped. Importing over an existing song requires confirm; imported placements arrive as review proposals (accept all, accept per line, discard), not an instant overwrite.
 
 ## AI round trip (v1: no AI in the tool)

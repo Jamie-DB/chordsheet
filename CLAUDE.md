@@ -15,7 +15,7 @@ Fully static SPA: Vite + React 19 + TypeScript. No backend, no API keys, no .env
 - `src/engine/` pure TypeScript chord/music engine, zero dependencies, fully unit tested. UI code never does pitch math itself.
 - `src/shared/` Song types and zod schemas (used for import validation).
 - `src/client/` React app: one useReducer store, no router, no state library.
-- `songs/` the public domain demo set as exported song JSON, committed here: Amazing Grace, Holy Holy Holy, and It Is Well with My Soul. The browser's localStorage holds the working copy; export/import moves songs between the two. Jamie's personal library is not in this repo at all, it lives in `~/Documents/chordsheet-library/` outside the working tree, and that is the folder "Save all to folder" points at. `npm run repair-songs` sweeps `songs/*.json` only, so it covers the demo set and never the personal library.
+- `songs/` the public domain demo set, committed: Amazing Grace, Holy Holy Holy, and It Is Well with My Soul. The personal library lives outside the repo at `~/Documents/chordsheet-library/` and is never committed, and that is the folder "Save all to folder" points at. The browser's localStorage holds the working copy; export/import moves songs between the two. `npm run repair-songs` sweeps `songs/*.json` only, so it covers the demo set and never the personal library.
 - `docs/AI-PLACEMENT.md` instructions handed to a Claude instance during the placement round trip.
 
 ## Core invariants
