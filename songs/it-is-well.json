@@ -1,0 +1,491 @@
+{
+  "version": 1,
+  "id": "it-is-well",
+  "title": "It Is Well with My Soul",
+  "artist": "Horatio Spafford (1873), tune by Philip Bliss (1876), public domain",
+  "lyrics": [
+    "[Verse 1]",
+    "When peace like a river attendeth my way,",
+    "When sorrows like sea billows roll;",
+    "Whatever my lot, Thou hast taught me to say,",
+    "It is well, it is well with my soul.",
+    "",
+    "[Chorus]",
+    "It is well (it is well),",
+    "With my soul (with my soul),",
+    "It is well, it is well with my soul.",
+    "",
+    "[Verse 2]",
+    "Though Satan should buffet, though trials should come,",
+    "Let this blest assurance control,",
+    "That Christ hath regarded my helpless estate,",
+    "And hath shed His own blood for my soul.",
+    "",
+    "[Verse 3]",
+    "My sin, oh the bliss of this glorious thought!",
+    "My sin, not in part but the whole,",
+    "Is nailed to the cross, and I bear it no more,",
+    "Praise the Lord, praise the Lord, O my soul!",
+    "",
+    "[Verse 4]",
+    "And Lord, haste the day when my faith shall be sight,",
+    "The clouds be rolled back as a scroll;",
+    "The trump shall resound, and the Lord shall descend,",
+    "Even so, it is well with my soul."
+  ],
+  "placements": [
+    {
+      "id": "iiw-1",
+      "line": 1,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-2",
+      "line": 1,
+      "col": 18,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-3",
+      "line": 1,
+      "col": 24,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-4",
+      "line": 1,
+      "col": 37,
+      "chord": "Bb"
+    },
+    {
+      "id": "iiw-5",
+      "line": 2,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-6",
+      "line": 2,
+      "col": 18,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-7",
+      "line": 2,
+      "col": 22,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-8",
+      "line": 2,
+      "col": 30,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-9",
+      "line": 3,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-10",
+      "line": 3,
+      "col": 17,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-11",
+      "line": 3,
+      "col": 27,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-12",
+      "line": 3,
+      "col": 40,
+      "chord": "Bb"
+    },
+    {
+      "id": "iiw-13",
+      "line": 4,
+      "col": 0,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-14",
+      "line": 4,
+      "col": 6,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-15",
+      "line": 4,
+      "col": 23,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-16",
+      "line": 4,
+      "col": 31,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-17",
+      "line": 7,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-18",
+      "line": 7,
+      "col": 11,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-19",
+      "line": 8,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-20",
+      "line": 8,
+      "col": 13,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-21",
+      "line": 9,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-22",
+      "line": 9,
+      "col": 12,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-23",
+      "line": 9,
+      "col": 23,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-24",
+      "line": 9,
+      "col": 31,
+      "chord": "Eb",
+      "hold": true
+    },
+    {
+      "id": "iiw-25",
+      "line": 12,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-26",
+      "line": 12,
+      "col": 7,
+      "chord": "Cm"
+    },
+    {
+      "id": "iiw-27",
+      "line": 12,
+      "col": 35,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-28",
+      "line": 12,
+      "col": 49,
+      "chord": "Bb"
+    },
+    {
+      "id": "iiw-29",
+      "line": 13,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-30",
+      "line": 13,
+      "col": 15,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-31",
+      "line": 13,
+      "col": 25,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-32",
+      "line": 14,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-33",
+      "line": 14,
+      "col": 17,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-34",
+      "line": 14,
+      "col": 29,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-35",
+      "line": 14,
+      "col": 38,
+      "chord": "Bb"
+    },
+    {
+      "id": "iiw-36",
+      "line": 15,
+      "col": 0,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-37",
+      "line": 15,
+      "col": 18,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-38",
+      "line": 15,
+      "col": 28,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-39",
+      "line": 15,
+      "col": 35,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-40",
+      "line": 18,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-41",
+      "line": 18,
+      "col": 15,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-42",
+      "line": 18,
+      "col": 29,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-43",
+      "line": 18,
+      "col": 38,
+      "chord": "Bb"
+    },
+    {
+      "id": "iiw-44",
+      "line": 19,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-45",
+      "line": 19,
+      "col": 15,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-46",
+      "line": 19,
+      "col": 20,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-47",
+      "line": 19,
+      "col": 28,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-48",
+      "line": 20,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-49",
+      "line": 20,
+      "col": 17,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-50",
+      "line": 20,
+      "col": 30,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-51",
+      "line": 20,
+      "col": 41,
+      "chord": "Bb"
+    },
+    {
+      "id": "iiw-52",
+      "line": 21,
+      "col": 0,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-53",
+      "line": 21,
+      "col": 17,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-54",
+      "line": 21,
+      "col": 34,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-55",
+      "line": 21,
+      "col": 39,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-56",
+      "line": 24,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-57",
+      "line": 24,
+      "col": 10,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-58",
+      "line": 24,
+      "col": 32,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-59",
+      "line": 24,
+      "col": 47,
+      "chord": "Bb"
+    },
+    {
+      "id": "iiw-60",
+      "line": 25,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-61",
+      "line": 25,
+      "col": 14,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-62",
+      "line": 25,
+      "col": 26,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-63",
+      "line": 25,
+      "col": 31,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-64",
+      "line": 26,
+      "col": 0,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-65",
+      "line": 26,
+      "col": 16,
+      "chord": "Cm"
+    },
+    {
+      "id": "iiw-66",
+      "line": 26,
+      "col": 33,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-67",
+      "line": 26,
+      "col": 44,
+      "chord": "Bb"
+    },
+    {
+      "id": "iiw-68",
+      "line": 27,
+      "col": 0,
+      "chord": "Ab"
+    },
+    {
+      "id": "iiw-69",
+      "line": 27,
+      "col": 15,
+      "chord": "Eb"
+    },
+    {
+      "id": "iiw-70",
+      "line": 27,
+      "col": 20,
+      "chord": "Bb7"
+    },
+    {
+      "id": "iiw-71",
+      "line": 27,
+      "col": 28,
+      "chord": "Eb",
+      "hold": true
+    }
+  ],
+  "keyOverride": null,
+  "capo": 3,
+  "bpm": 72,
+  "notes": "Capo 3, C shapes. Chorus after every verse.",
+  "sectionMarks": [
+    {
+      "section": "[Verse 1]",
+      "occurrence": 1,
+      "kind": "soft"
+    },
+    {
+      "section": "[Chorus]",
+      "occurrence": 1,
+      "kind": "custom",
+      "text": "Sing out",
+      "color": "amber"
+    },
+    {
+      "section": "[Verse 4]",
+      "occurrence": 1,
+      "kind": "build"
+    }
+  ],
+  "createdAt": "2026-09-04T12:00:00.000Z",
+  "updatedAt": "2026-09-04T12:00:00.000Z"
+}

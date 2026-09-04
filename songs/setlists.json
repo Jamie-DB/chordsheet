@@ -1,4 +1,17 @@
 {
   "chordsheetSetlists": 1,
-  "setlists": []
+  "setlists": [
+    {
+      "version": 1,
+      "id": "demo-set",
+      "name": "Demo Set",
+      "songIds": [
+        "amazing-grace",
+        "holy-holy-holy",
+        "it-is-well"
+      ],
+      "createdAt": "2026-09-04T12:00:00.000Z",
+      "updatedAt": "2026-09-04T12:00:00.000Z"
+    }
+  ]
 }

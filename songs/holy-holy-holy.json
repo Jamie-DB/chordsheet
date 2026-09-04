@@ -1,0 +1,502 @@
+{
+  "version": 1,
+  "id": "holy-holy-holy",
+  "title": "Holy, Holy, Holy",
+  "artist": "Reginald Heber (1826), public domain",
+  "lyrics": [
+    "[Verse 1]",
+    "Holy, holy, holy! Lord God Almighty!",
+    "Early in the morning our song shall rise to Thee;",
+    "Holy, holy, holy! Merciful and mighty!",
+    "God in three Persons, blessed Trinity!",
+    "",
+    "[Verse 2]",
+    "Holy, holy, holy! All the saints adore Thee,",
+    "Casting down their golden crowns around the glassy sea;",
+    "Cherubim and seraphim falling down before Thee,",
+    "Which wert, and art, and evermore shalt be.",
+    "",
+    "[Verse 3]",
+    "Holy, holy, holy! Though the darkness hide Thee,",
+    "Though the eye of sinful man Thy glory may not see;",
+    "Only Thou art holy; there is none beside Thee,",
+    "Perfect in power, in love, and purity.",
+    "",
+    "[Verse 4]",
+    "Holy, holy, holy! Lord God Almighty!",
+    "All Thy works shall praise Thy Name, in earth, and sky, and sea;",
+    "Holy, holy, holy! Merciful and mighty!",
+    "God in three Persons, blessed Trinity!"
+  ],
+  "placements": [
+    {
+      "id": "hhh-1",
+      "line": 1,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-2",
+      "line": 1,
+      "col": 12,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-3",
+      "line": 1,
+      "col": 18,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-4",
+      "line": 1,
+      "col": 27,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-5",
+      "line": 2,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-6",
+      "line": 2,
+      "col": 13,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-7",
+      "line": 2,
+      "col": 25,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-8",
+      "line": 2,
+      "col": 36,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-9",
+      "line": 2,
+      "col": 44,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-10",
+      "line": 3,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-11",
+      "line": 3,
+      "col": 6,
+      "chord": "Bm"
+    },
+    {
+      "id": "hhh-12",
+      "line": 3,
+      "col": 12,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-13",
+      "line": 3,
+      "col": 18,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-14",
+      "line": 3,
+      "col": 31,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-15",
+      "line": 4,
+      "col": 0,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-16",
+      "line": 4,
+      "col": 7,
+      "chord": "D/F#"
+    },
+    {
+      "id": "hhh-17",
+      "line": 4,
+      "col": 13,
+      "chord": "Em7"
+    },
+    {
+      "id": "hhh-18",
+      "line": 4,
+      "col": 22,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-19",
+      "line": 4,
+      "col": 30,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-20",
+      "line": 7,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-21",
+      "line": 7,
+      "col": 12,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-22",
+      "line": 7,
+      "col": 18,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-23",
+      "line": 7,
+      "col": 33,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-24",
+      "line": 8,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-25",
+      "line": 8,
+      "col": 19,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-26",
+      "line": 8,
+      "col": 26,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-27",
+      "line": 8,
+      "col": 44,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-28",
+      "line": 8,
+      "col": 51,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-29",
+      "line": 9,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-30",
+      "line": 9,
+      "col": 13,
+      "chord": "Bm"
+    },
+    {
+      "id": "hhh-31",
+      "line": 9,
+      "col": 22,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-32",
+      "line": 9,
+      "col": 35,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-33",
+      "line": 9,
+      "col": 42,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-34",
+      "line": 10,
+      "col": 0,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-35",
+      "line": 10,
+      "col": 16,
+      "chord": "D/F#"
+    },
+    {
+      "id": "hhh-36",
+      "line": 10,
+      "col": 25,
+      "chord": "Em7"
+    },
+    {
+      "id": "hhh-37",
+      "line": 10,
+      "col": 34,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-38",
+      "line": 10,
+      "col": 40,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-39",
+      "line": 13,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-40",
+      "line": 13,
+      "col": 12,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-41",
+      "line": 13,
+      "col": 18,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-42",
+      "line": 13,
+      "col": 38,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-43",
+      "line": 14,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-44",
+      "line": 14,
+      "col": 18,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-45",
+      "line": 14,
+      "col": 29,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-46",
+      "line": 14,
+      "col": 39,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-47",
+      "line": 14,
+      "col": 47,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-48",
+      "line": 15,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-49",
+      "line": 15,
+      "col": 10,
+      "chord": "Bm"
+    },
+    {
+      "id": "hhh-50",
+      "line": 15,
+      "col": 20,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-51",
+      "line": 15,
+      "col": 34,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-52",
+      "line": 15,
+      "col": 41,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-53",
+      "line": 16,
+      "col": 0,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-54",
+      "line": 16,
+      "col": 11,
+      "chord": "D/F#"
+    },
+    {
+      "id": "hhh-55",
+      "line": 16,
+      "col": 21,
+      "chord": "Em7"
+    },
+    {
+      "id": "hhh-56",
+      "line": 16,
+      "col": 27,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-57",
+      "line": 16,
+      "col": 31,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-58",
+      "line": 19,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-59",
+      "line": 19,
+      "col": 12,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-60",
+      "line": 19,
+      "col": 18,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-61",
+      "line": 19,
+      "col": 27,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-62",
+      "line": 20,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-63",
+      "line": 20,
+      "col": 20,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-64",
+      "line": 20,
+      "col": 31,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-65",
+      "line": 20,
+      "col": 51,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-66",
+      "line": 20,
+      "col": 60,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-67",
+      "line": 21,
+      "col": 0,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-68",
+      "line": 21,
+      "col": 6,
+      "chord": "Bm"
+    },
+    {
+      "id": "hhh-69",
+      "line": 21,
+      "col": 12,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-70",
+      "line": 21,
+      "col": 18,
+      "chord": "D"
+    },
+    {
+      "id": "hhh-71",
+      "line": 21,
+      "col": 31,
+      "chord": "A"
+    },
+    {
+      "id": "hhh-72",
+      "line": 22,
+      "col": 0,
+      "chord": "G"
+    },
+    {
+      "id": "hhh-73",
+      "line": 22,
+      "col": 7,
+      "chord": "D/F#"
+    },
+    {
+      "id": "hhh-74",
+      "line": 22,
+      "col": 22,
+      "chord": "Em7/A"
+    },
+    {
+      "id": "hhh-75",
+      "line": 22,
+      "col": 30,
+      "chord": "D",
+      "hold": true
+    }
+  ],
+  "keyOverride": null,
+  "capo": 0,
+  "bpm": 76,
+  "notes": "Verse 3 unaccompanied, everyone back in on verse 4.",
+  "sectionMarks": [
+    {
+      "section": "[Verse 3]",
+      "occurrence": 1,
+      "kind": "tacet"
+    },
+    {
+      "section": "[Verse 4]",
+      "occurrence": 1,
+      "kind": "full"
+    }
+  ],
+  "createdAt": "2026-09-04T12:00:00.000Z",
+  "updatedAt": "2026-09-04T12:00:00.000Z"
+}
