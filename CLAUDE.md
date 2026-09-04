@@ -38,3 +38,4 @@ Fully static SPA: Vite + React 19 + TypeScript. No backend, no API keys, no .env
 - The engine stays pure: no DOM, no React, no side effects; every branch table-tested.
 - Lyrics in the repo must be public domain. The demo set is the only lyric content that belongs here.
 - Screenshots are never stored in the tool, the repo, or song files.
+- Jamie's personal song library is out of scope. Where it lives, how it is backed up, and whether any archive of it has been unpacked are personal setup, not repo concerns. Do not audit it, do not report on it, and do not raise it as a risk or a loose end. The repo's only obligation is that no copyrighted lyric or chord annotation is tracked in it.
