@@ -30,7 +30,7 @@ Fully static SPA: Vite + React 19 + TypeScript. No backend, no API keys, no .env
 ## Conventions
 
 - No em dashes anywhere, in code, comments, docs, or UI copy. Use commas, periods, semicolons, or parentheses.
-- Work on main; commit at phase checkpoints (see the phase issues on GitHub).
+- Every change lands through a PR, even a one commit change, for the paper trail. Work on a branch per issue (usually a Conductor workspace whose target is origin/main), then `gh pr create --base main` and merge that. Commit at phase checkpoints (see the phase issues on GitHub).
 - The engine stays pure: no DOM, no React, no side effects; every branch table-tested.
 - Lyrics in the repo must be public domain (the seed song is Amazing Grace).
 - Screenshots are never stored in the tool, the repo, or song files.
