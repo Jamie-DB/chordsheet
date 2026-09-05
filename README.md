@@ -4,6 +4,10 @@ A personal tool for making play-along guitar chord sheets. Paste lyrics you have
 
 Built to route around a real annoyance: asking an AI to lay out a chord-over-lyrics sheet trips copyright refusals because of the lyric text. Here, you supply the lyrics and control every placement. When AI helps, it only ever emits chord names and positions anchored to your own pasted text (see docs/AI-PLACEMENT.md), never lyric content.
 
+![The chordsheet editor showing It Is Well with My Soul, chord symbols aligned over the lyric syllables](docs/screenshot.png)
+
+The editor with one of the public domain demo songs. The song is stored in Eb, capo 3 displays the C shapes you actually play, and every chord sits over the exact character it lands on.
+
 ## How it was built
 
 Built with Claude Code in a plan-first loop. The first commit is a conventions file and a design doc, not code. Everything after that is an issue, a commit that closes it, and a test wherever the logic is testable. 47 commits, 44 issues, 248 tests across 17 files. The first 29 commits and 31 issues landed in twelve days, August 5 to 16, 2026, from a one-paragraph idea to weekly rehearsal use. BUILDLOG.md has the day-by-day account.
