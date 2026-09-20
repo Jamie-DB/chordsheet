@@ -129,6 +129,18 @@ describe("ingestChart", () => {
     expect(r.log).toContain("line 1: C sits past the end of the lyric");
   });
 
+  it("packs several chords that sit before an indented lyric", () => {
+    const r = ingest([
+      ...header(),
+      ...label(140, "V1", "VERSE 1"),
+      box(LEFT, 180 - 11.35, "G"),
+      box(LEFT + 14, 180 - 11.35, "Em", BODY, 14),
+      box(LEFT + 40, 180 - 11.35, "C"),
+      ...lyric(180, "Was blind, but now I see", LEFT + 60),
+    ]);
+    expect(chordsOn(r, 1)).toEqual([[0, "G"], [2, "Em"], [5, "C"]]);
+  });
+
   it("turns a chord row with no lyric under it into an instrumental line", () => {
     const r = ingest([
       ...header(),
@@ -151,7 +163,9 @@ describe("ingestChart", () => {
     ["lone chord at its natural width is left alone", [box(LEFT, 170, "Bm", BODY, 16.6)], "D", ["Bm"], null],
     ["bare slash bass follows the key signature", [box(LEFT, 170, "D/F", BODY, 16.8)], "D", ["D/F#"], "bass accidental restored from key: D/F to D/F#"],
     ["bass outside the key signature stays natural", [box(LEFT, 170, "D/A", BODY, 18.2)], "D", ["D/A"], null],
-    ["flat keys restore flats and warn", [box(LEFT, 170, "Gm/B", BODY, 27)], "F", ["Gm/Bb"], "flat key F: accidental restoring is untested on flat charts, check every chord"],
+    ["flat keys restore flats and warn", [box(LEFT, 170, "Gm/B", BODY, 27)], "F", ["Gm/Bb"], "flat key F: flat glyphs leave no trace, they are restored from the key signature, check every chord"],
+    ["flat keys restore a bare root", [box(LEFT, 170, "F", BODY, 5.45), box(LEFT + 14, 170, "B", BODY, 6.9)], "F", ["F", "Bb"], "root accidental restored from key: B to Bb"],
+    ["sharp keys only flag a bare altered root", [box(LEFT, 170, "G", BODY, 7.4)], "A", ["G"], "bare G kept natural, the chart may print G#: check it"],
     ["slash inside a quality is rewritten", [box(LEFT, 170, "D"), box(LEFT + 7.4, 169, "6/9", SMALL, 11), box(LEFT + 18.2, 170, "/A", BODY, 10.8)], "D", ["D69/A"], "rewritten for the chord grammar: D6/9/A to D69/A"],
     ["superscript 1 is dropped", [box(LEFT, 170, "A", BODY, 6.85), box(LEFT + 6.9, 169, "1", SMALL, 4.2)], "D", ["A"], "superscript 1 dropped from A"],
     ["two separate chords stay separate", [box(LEFT, 170, "G", BODY, 7), box(LEFT + 15.5, 170, "C", BODY, 6.4)], "G", ["G", "C"], null],

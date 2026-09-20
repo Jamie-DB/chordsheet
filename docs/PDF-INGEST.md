@@ -23,7 +23,8 @@ Flags: `--key Bb` overrides the key read from the header. `--force` overwrites. 
 ## Review checklist
 
 - Every line under "corrections and judgment calls". Each one is a place where the script changed what the text layer said.
-- Accidentals on every chord. The text layer drops sharp and flat glyphs, and the script restores them three ways: from a gap inside the symbol, from unexplained width in a one-word symbol, and from the key signature for a slash bass at the end of a symbol. The third is a guess. A chart that uses a natural bass note against the key signature will come out wrong.
+- Accidentals on every chord. The text layer drops sharp and flat glyphs, and the script restores them three ways: from a gap inside the symbol, from unexplained width in a one-word symbol, and from the key signature when the accidental was the last glyph of the symbol (a slash bass, or a chord that is only a root letter). The third is a guess. A chart that uses a natural note against the key signature will come out wrong.
+- Bare root letters in sharp keys. A lone G in the key of A is left natural, because the borrowed G major is more common than G sharp major, and the log flags each one. In flat keys the flat is restored (a lone B in F becomes Bb).
 - The key itself. The header loses its accidental too, so a chart in Bb reads as B. Pass `--key` when the key has an accidental.
 - Chords the engine cannot hold as printed. A slash inside a quality (6/9 over a bass note) is rewritten without the inner slash. A superscript 1 is dropped.
 - Chords the chart prints over a rest between words. They are placed on the space before the next word.
@@ -38,6 +39,6 @@ The module is pure and table tested. Its fixtures are synthetic word boxes built
 ## Known limits
 
 - Tuned to one chart vendor's layout: two columns, fixed glyph heights per role, a small bubble glyph before each section label. Another vendor's charts will need new constants at the top of `chartPdf.ts`.
-- Verified on 2 real charts, both in the key of A. Flat keys run but have never been checked against a real chart, and the script says so in its log.
-- The glyph width table covers only the letters seen so far (A, B, D, E, F, m, and the slash). A one-word chord made of other letters skips the width check.
+- Verified on 3 real charts: 2 in the key of A and 1 in F. The F chart used a single flat chord (Bb), so flats inside longer symbols and flat slash basses are still unchecked against a real chart.
+- The glyph width table covers only the letters seen so far (A through G, m, and the slash). A one-word chord made of other letters skips the width check.
 - Repeat counts on the roadmap bubbles at the top of the chart are ignored.

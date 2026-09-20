@@ -44,7 +44,7 @@ const H_TOLERANCE = 0.3;
 /** Words whose tops sit within this many points share a row (superscripts ride 1pt high). */
 const ROW_TOLERANCE = 3;
 /** Advance widths of the bold chord face at body size, for spotting a dropped glyph. */
-const GLYPH: Record<string, number> = { A: 6.85, B: 6.9, D: 7.35, E: 5.55, F: 5.45, m: 9.7, "/": 4.0 };
+const GLYPH: Record<string, number> = { A: 6.85, B: 6.9, C: 6.25, D: 7.35, E: 5.55, F: 5.45, G: 7.4, m: 9.7, "/": 4.0 };
 /** A dropped accidental leaves about 5.3pt; anything past this is not kerning. */
 const MISSING_GLYPH = 3.5;
 /** Average lyric character width, for spacing chord-only rows. */
@@ -145,7 +145,7 @@ function keyRule(key: string, log: string[]): KeyRule {
   if (sharp >= 0) return { accidental: "#", altered: new Set(SHARP_ORDER.slice(0, sharp + 1)) };
   const flat = FLAT_KEYS.indexOf(tonic);
   if (flat >= 0) {
-    log.push(`flat key ${tonic}: accidental restoring is untested on flat charts, check every chord`);
+    log.push(`flat key ${tonic}: flat glyphs leave no trace, they are restored from the key signature, check every chord`);
     return { accidental: "b", altered: new Set(FLAT_ORDER.slice(0, flat + 1)) };
   }
   return { accidental: "#", altered: new Set() };
@@ -192,6 +192,16 @@ function assembleChords(row: Row, rule: KeyRule, log: string[]): RawChord[] {
     if (bass && rule.altered.has(bass)) {
       log.push(`bass accidental restored from key: ${c.symbol} to ${c.symbol + rule.accidental}`);
       c.symbol += rule.accidental;
+    }
+    // Same for a chord that is only a root letter. A flat there is near certain (a bare B in F is Bb).
+    // A sharp is not (a bare G in A is often the borrowed G major), so that case is only flagged.
+    if (/^[A-G]$/.test(c.symbol) && rule.altered.has(c.symbol)) {
+      if (rule.accidental === "b") {
+        log.push(`root accidental restored from key: ${c.symbol} to ${c.symbol}b`);
+        c.symbol += "b";
+      } else {
+        log.push(`bare ${c.symbol} kept natural, the chart may print ${c.symbol}#: check it`);
+      }
     }
     // The engine grammar reserves "/" for the bass note, so "6/9" becomes "69".
     if (!parseChord(c.symbol)) {
@@ -330,6 +340,11 @@ export function ingestChart(words: WordBox[], options: IngestOptions = {}): Inge
       let end = -1;
       for (const c of pending ?? []) {
         let col = columnFor(c.x, row, starts);
+        // Several chords over the rest before an indented line would all land on cell 0.
+        if (col !== null && c.x < row[0].xMin - 0.5 && end >= 0) {
+          col = end + 2;
+          log.push(`line ${line}: ${c.symbol} sits before the lyric, packed after the previous chord`);
+        }
         if (col === null) {
           const tight = c.x - row[row.length - 1].xMax < 6;
           col = Math.max(text.length + (tight ? 1 : 2), end + 2);
