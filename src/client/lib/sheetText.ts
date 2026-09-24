@@ -13,6 +13,27 @@ export function headerKeyLine(soundingKey: string | null, capo: number): string 
 }
 
 /**
+ * The @page rule that puts the song name on the left of every printed page's
+ * footer and "Page 1 of 3" on the right, so loose pages sort back into songs
+ * and order. The name is embedded as a CSS string, since margin boxes cannot
+ * read it from the DOM.
+ */
+export function printFooterCss(title: string, versionName?: string): string {
+  const name = versionName?.trim() ? `${title.trim()} (${versionName.trim()})` : title.trim();
+  return (
+    "@page {" +
+    ` @bottom-left { content: ${cssString(name)}; }` +
+    ` @bottom-right { content: "Page " counter(page) " of " counter(pages); }` +
+    " }"
+  );
+}
+
+/** A CSS string literal; line breaks collapse to spaces. */
+function cssString(s: string): string {
+  return `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\s*[\r\n]+\s*/g, " ")}"`;
+}
+
+/**
  * Plain-text rendering of the sheet. Chord and lyric rows match print because
  * both come from buildChordRow, but section labels stay as bracketed lyric
  * lines, holds render as <C>, and dynamics marks and chord diagrams are left out.
