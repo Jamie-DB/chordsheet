@@ -101,6 +101,39 @@ describe("parseImport", () => {
     }
   });
 
+  describe("versions", () => {
+    const version = {
+      id: "sep-24-version",
+      name: "Sep 24 version",
+      steps: [{ section: "", occurrence: 1, repeat: 2, note: "vamp" }],
+      createdAt: "2026-09-24T00:00:00.000Z",
+      updatedAt: "2026-09-24T00:00:00.000Z",
+    };
+
+    it("a new song keeps the versions it arrives with", () => {
+      const result = parseImport(JSON.stringify({ ...song, arrangements: [version] }));
+      expect(result.ok).toBe(true);
+      if (result.ok) expect(result.song.arrangements).toEqual([version]);
+    });
+
+    it("an existing song keeps its library versions, whatever the file holds", () => {
+      const library = { ...song, arrangements: [version] };
+      const incoming = { ...song, arrangements: [{ ...version, id: "other", name: "Other" }] };
+      const result = parseImport(JSON.stringify(incoming), library);
+      expect(result.ok).toBe(true);
+      if (result.ok) expect(result.song.arrangements).toEqual([version]);
+      const bare = parseImport(JSON.stringify(song), library);
+      if (bare.ok) expect(bare.song.arrangements).toEqual([version]);
+    });
+
+    it("rejects a malformed version with a path", () => {
+      const bad = { ...song, arrangements: [{ ...version, steps: [{ section: "[Chorus]", occurrence: 0 }] }] };
+      const result = parseImport(JSON.stringify(bad));
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.error).toContain("arrangements");
+    });
+  });
+
   it("assigns fresh ids to imported placements that lack one", () => {
     const imported = { ...song, placements: [{ line: 0, col: 3, chord: "Em" }] };
     const result = parseImport(JSON.stringify(imported));
@@ -145,7 +178,7 @@ describe("library backup files", () => {
     version: 1 as const,
     id: "sunday",
     name: "Sunday",
-    songIds: ["test-song"],
+    entries: [{ songId: "test-song" }],
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
   };

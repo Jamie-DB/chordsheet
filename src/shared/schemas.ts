@@ -16,6 +16,22 @@ export const sectionMarkSchema = z.object({
   color: z.enum(["red", "blue", "amber", "green"]).optional(),
 });
 
+export const arrangementStepSchema = z.object({
+  section: z.string(),
+  occurrence: z.number().int().min(1),
+  repeat: z.number().int().min(1).max(16).optional(),
+  note: z.string().optional(),
+  mark: sectionMarkSchema.pick({ kind: true, text: true, color: true }).nullable().optional(),
+});
+
+export const arrangementSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  steps: z.array(arrangementStepSchema),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
 export const songSchema = z.object({
   version: z.literal(1),
   id: z.string().min(1),
@@ -28,18 +44,35 @@ export const songSchema = z.object({
   bpm: z.number().int().min(20).max(400).optional(),
   notes: z.string().optional(),
   sectionMarks: z.array(sectionMarkSchema).optional(),
+  arrangements: z.array(arrangementSchema).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
-export const setlistSchema = z.object({
-  version: z.literal(1),
-  id: z.string().min(1),
-  name: z.string().min(1),
-  songIds: z.array(z.string().min(1)),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+export const setEntrySchema = z.object({
+  songId: z.string().min(1),
+  arrangementId: z.string().min(1).optional(),
 });
+
+/** Sets saved before arrangements stored a bare songIds array; read those as entries. */
+function upgradeLegacySet(raw: unknown): unknown {
+  if (typeof raw !== "object" || raw === null) return raw;
+  const { songIds, ...rest } = raw as { songIds?: unknown; entries?: unknown };
+  if (rest.entries !== undefined || !Array.isArray(songIds)) return raw;
+  return { ...rest, entries: songIds.map((songId) => ({ songId })) };
+}
+
+export const setlistSchema = z.preprocess(
+  upgradeLegacySet,
+  z.object({
+    version: z.literal(1),
+    id: z.string().min(1),
+    name: z.string().min(1),
+    entries: z.array(setEntrySchema),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+);
 
 /** Col-form placement as it may arrive from outside; id is optional there. */
 export const importedColPlacementSchema = z.object({
