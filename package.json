@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "repair-songs": "tsx scripts/repair-songs.mts"
+    "repair-songs": "tsx scripts/repair-songs.mts",
+    "ingest-pdf": "tsx scripts/ingest-pdf.mts"
   },
   "dependencies": {
     "react": "^19.2.8",

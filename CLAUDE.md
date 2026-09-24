@@ -7,6 +7,7 @@ Personal tool for making play-along guitar chord sheets. Jamie pastes lyrics, pl
 - `npm run dev` starts Vite on 5173
 - `npm test` runs Vitest once; `npm run test:watch` watches
 - `npm run build` type-checks and builds; `npm run preview` serves the build
+- `npm run ingest-pdf -- <chart.pdf>` turns a text-layer chart PDF into a library song (see docs/PDF-INGEST.md)
 
 ## Architecture
 
@@ -17,6 +18,7 @@ Fully static SPA: Vite + React 19 + TypeScript. No backend, no API keys, no .env
 - `src/client/` React app: one useReducer store, no router, no state library.
 - `songs/` the public domain demo set, committed: Amazing Grace, Holy Holy Holy, and It Is Well with My Soul. The personal library lives outside the repo at `~/Documents/chordsheet-library/` and is never committed, and that is the folder "Save all to folder" points at. The browser's localStorage holds the working copy; export/import moves songs between the two. `npm run repair-songs` sweeps `songs/*.json` only, so it covers the demo set and never the personal library.
 - `docs/AI-PLACEMENT.md` instructions handed to a Claude instance during the placement round trip.
+- `src/ingest/` pure PDF chart ingest (word boxes to Song), run by `npm run ingest-pdf`. Output goes to the personal library, never the repo. Workflow and review checklist in `docs/PDF-INGEST.md`.
 
 ## Core invariants
 
