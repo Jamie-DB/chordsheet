@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import type { MarkColor, MarkKind, SectionMark } from "../../shared/types";
 import { xToCol } from "../lib/grid";
-import { isSectionLabel } from "../lib/lineOps";
 import { ChordChip } from "./ChordChip";
 import { ChordEditPopover } from "./ChordEditPopover";
 import { SectionMarkPicker } from "./SectionMarkPicker";
@@ -206,7 +205,7 @@ export function LyricLine(props: Props) {
         </div>
       ) : (
         <pre
-          className={`lyric-row${isSectionLabel(text) ? " section-label" : ""}`}
+          className="lyric-row"
           title="Click to place a chord; double-click to edit the words"
           onClick={(e) => props.onPlace(index, colFromEvent(e))}
           onDoubleClick={() => {

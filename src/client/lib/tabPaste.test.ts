@@ -132,10 +132,10 @@ describe("repairChordTextLines", () => {
 
   it("attaches a missed chord row to the chord-free lyric below and deletes the row", () => {
     const result = repairChordTextLines(
-      ["       F/A             C         |C / F/A /|", "Of Your kingdom breaking through"],
+      ["       F/A             C         |C / F/A /|", "Amazing grace, how sweet the sound"],
       [],
     );
-    expect(result.lyrics).toEqual(["Of Your kingdom breaking through"]);
+    expect(result.lyrics).toEqual(["Amazing grace, how sweet the sound"]);
     expect(result.placements.map((x) => `${x.chord}@${x.line}:${x.col}`)).toEqual([
       "F/A@0:7",
       "C@0:23",

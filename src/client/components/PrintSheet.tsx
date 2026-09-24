@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
-import { markColor, markFor, markName, sectionRanges, stripBrackets } from "../lib/sectionMarks";
+import { markColor, markFor, markName, sectionRanges, sectionStyling, stripBrackets } from "../lib/sectionMarks";
+import { headerKeyLine } from "../lib/sheetText";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
 
@@ -11,14 +12,14 @@ interface Props {
   shapedKeyName: string;
 }
 
+/** Widest row (chords or lyric) that still fits a two-column layout. */
+const TWO_COLUMN_MAX_CHARS = 38;
+
 /**
  * The printable sheet: literal text rows only, never positioned elements,
  * so print alignment is exact by construction. Hidden on screen; print CSS
  * hides the app and shows this.
  */
-/** Widest row (chords or lyric) that still fits a two-column layout. */
-const TWO_COLUMN_MAX_CHARS = 38;
-
 export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
   const rows = song.lyrics.map((_, i) =>
     buildChordRowSegments(
@@ -38,26 +39,18 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
   const marks = song.sectionMarks ?? [];
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
-  const sectionClassByLine = new Map<number, string>();
-  const tacetLines = new Set<number>();
-  for (const r of ranges) {
-    const mark = markFor(marks, r.label, r.occurrence);
-    if (!mark) continue;
-    for (let i = r.start; i <= r.end; i++) {
-      sectionClassByLine.set(i, ` sec-${markColor(mark)}`);
-      if (mark.kind === "tacet") tacetLines.add(i);
-    }
-  }
+  const { colorByLine, tacetLines } = sectionStyling(song.lyrics, marks);
+  const pairClass = (i: number): string => {
+    const color = colorByLine.get(i);
+    return `print-pair${color ? ` sec-${color}` : ""}${tacetLines.has(i) ? " tacet-small" : ""}`;
+  };
 
   return (
     <div className={`print-sheet${twoCol ? "" : " with-sidebar"}`}>
       <div className="print-header">
         <h1>{song.title}</h1>
         {song.artist && <div className="print-artist">{song.artist}</div>}
-        <div className="print-key">
-          {soundingKey ? `Key: ${soundingKey}` : ""}
-          {soundingKey && song.capo > 0 ? `, Capo ${song.capo}` : song.capo > 0 ? `Capo ${song.capo}` : ""}
-        </div>
+        <div className="print-key">{headerKeyLine(soundingKey, song.capo)}</div>
       </div>
       {song.notes?.trim() && <pre className="print-notes">{song.notes.trim()}</pre>}
       <div className="print-diagrams">
@@ -65,8 +58,9 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
       </div>
       <div className={twoCol ? "print-body two-col" : "print-body"}>
         {(() => {
+          type Sidebar = { title: string; mark: ReturnType<typeof markFor> };
           const body: ReactNode[] = [];
-          let pendingSidebar: { title: string; mark: ReturnType<typeof markFor> } | null = null;
+          let pendingSidebar: Sidebar | null = null;
 
           const compactLabel = (key: React.Key, title: string, mark: ReturnType<typeof markFor>) => (
             <div className={`print-pair print-label-compact`} key={key}>
@@ -81,35 +75,10 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
             </div>
           );
 
-          song.lyrics.forEach((line, i) => {
-            const range = rangeByStart.get(i);
-            if (range) {
-              const mark = markFor(marks, range.label, range.occurrence);
-              if (pendingSidebar) {
-                // Empty section before this one: fall back to a compact row.
-                body.push(compactLabel(`orphan-${i}`, pendingSidebar.title, pendingSidebar.mark));
-                pendingSidebar = null;
-              }
-              if (twoCol) {
-                body.push(compactLabel(i, stripBrackets(range.label), mark));
-              } else {
-                // The title leaves the flow and rides the next content pair.
-                pendingSidebar = { title: stripBrackets(range.label), mark };
-              }
-              return;
-            }
+          const pair = (key: React.Key, i: number, sidebar: Sidebar | null, lyric: string | null) => {
             const row = rows[i];
-            if (line.length === 0 && row.length === 0) {
-              body.push(<div className="print-gap" key={i} />);
-              return;
-            }
-            const sidebar = pendingSidebar;
-            pendingSidebar = null;
-            body.push(
-              <div
-                className={`print-pair${sectionClassByLine.get(i) ?? ""}${tacetLines.has(i) ? " tacet-small" : ""}`}
-                key={i}
-              >
+            return (
+              <div className={pairClass(i)} key={key}>
                 {sidebar && (
                   <span className="print-side-label">
                     {sidebar.title}
@@ -134,12 +103,45 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
                     )}
                   </pre>
                 )}
-                <pre className="print-lyric">{line || " "}</pre>
-              </div>,
+                {lyric !== null && <pre className="print-lyric">{lyric || " "}</pre>}
+              </div>
             );
+          };
+
+          song.lyrics.forEach((line, i) => {
+            const row = rows[i];
+            const range = rangeByStart.get(i);
+            if (range) {
+              const mark = markFor(marks, range.label, range.occurrence);
+              if (pendingSidebar) {
+                // Empty section before this one: fall back to a compact row.
+                body.push(compactLabel(`orphan-${i}`, pendingSidebar.title, pendingSidebar.mark));
+                pendingSidebar = null;
+              }
+              const title = stripBrackets(range.label);
+              if (twoCol) {
+                // Chords placed on the label line print above the label.
+                if (row.length > 0) body.push(pair(`label-chords-${i}`, i, null, null));
+                body.push(compactLabel(i, title, mark));
+              } else if (row.length > 0) {
+                // Chords on the label line get their own row, which carries the title.
+                body.push(pair(i, i, { title, mark }, null));
+              } else {
+                // The title leaves the flow and rides the next content pair.
+                pendingSidebar = { title, mark };
+              }
+              return;
+            }
+            if (line.length === 0 && row.length === 0) {
+              body.push(<div className="print-gap" key={i} />);
+              return;
+            }
+            const sidebar = pendingSidebar;
+            pendingSidebar = null;
+            body.push(pair(i, i, sidebar, line));
           });
           // TS cannot see the callback writes; re-widen before the last check.
-          const leftover = pendingSidebar as { title: string; mark: ReturnType<typeof markFor> } | null;
+          const leftover = pendingSidebar as Sidebar | null;
           if (leftover) {
             body.push(compactLabel("orphan-end", leftover.title, leftover.mark));
           }

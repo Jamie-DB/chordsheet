@@ -109,11 +109,6 @@ export interface SyncResult {
   skipped: number;
 }
 
-/**
- * Write each song as <id>.json. Disk is checked first: a file whose content
- * already matches is skipped, never rewritten, so repeated saves are
- * idempotent and no duplicate or churned files appear.
- */
 /** Write content into name unless the on-disk copy already matches. */
 async function writeIfChanged(dir: DirHandleLike, name: string, content: string): Promise<boolean> {
   let existing: FileHandleLike | null = null;
@@ -137,6 +132,11 @@ async function writeIfChanged(dir: DirHandleLike, name: string, content: string)
   return true;
 }
 
+/**
+ * Write each song as <id>.json. Disk is checked first: a file whose content
+ * already matches is skipped, never rewritten, so repeated saves are
+ * idempotent and no duplicate or churned files appear.
+ */
 export async function syncSongs(songs: Song[], dir: DirHandleLike): Promise<SyncResult> {
   let written = 0;
   let skipped = 0;

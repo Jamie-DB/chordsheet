@@ -7,6 +7,7 @@ import {
   markFor,
   markName,
   sectionRanges,
+  sectionStyling,
   withMark,
   withoutMark,
 } from "./sectionMarks";
@@ -22,6 +23,40 @@ describe("sectionRanges", () => {
   });
   it("returns nothing for unlabeled songs", () => {
     expect(sectionRanges(["just", "words"])).toEqual([]);
+  });
+});
+
+describe("sectionStyling", () => {
+  const lyrics = [
+    "[Verse]",
+    "Amazing grace, how sweet the sound",
+    "",
+    "[Chorus]",
+    "That saved a wretch like me",
+    "[Chorus]",
+    "I once was lost, but now am found",
+  ];
+
+  it("colors every line of a marked section and flags tacet lines", () => {
+    const marks: SectionMark[] = [
+      { section: "[Verse]", occurrence: 1, kind: "soft" },
+      { section: "[Chorus]", occurrence: 2, kind: "tacet" },
+    ];
+    const { colorByLine, tacetLines } = sectionStyling(lyrics, marks);
+    expect([...colorByLine.entries()]).toEqual([
+      [0, "blue"],
+      [1, "blue"],
+      [2, "blue"],
+      [5, "red"],
+      [6, "red"],
+    ]);
+    expect([...tacetLines]).toEqual([5, 6]);
+  });
+
+  it("leaves unmarked songs unstyled", () => {
+    const { colorByLine, tacetLines } = sectionStyling(lyrics, []);
+    expect(colorByLine.size).toBe(0);
+    expect(tacetLines.size).toBe(0);
   });
 });
 

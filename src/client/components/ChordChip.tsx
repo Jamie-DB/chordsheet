@@ -44,10 +44,36 @@ export function ChordChip(props: Props) {
     setCard(null);
   }
 
-  function targetFor(dxPx: number, dyPx: number) {
-    const newLine = dragLine(line, dyPx, pairHeight, lineCount);
+  /**
+   * The line under the pointer, found by hit-testing the rendered rows.
+   * Rows differ in height (collapsed labels take none, tacet rows are
+   * smaller), so counting uniform row heights lands off by one after the
+   * first such row. dy is the pixel distance between the two rows.
+   */
+  function lineUnderPointer(x: number, y: number): { line: number; dy: number } | null {
+    const own = el.current?.closest("[data-line]");
+    for (const node of document.elementsFromPoint(x, y)) {
+      if (el.current?.contains(node)) continue;
+      const pair = node.closest("[data-line]");
+      if (!(pair instanceof HTMLElement)) continue;
+      const hit = Number(pair.dataset.line);
+      if (!Number.isInteger(hit)) continue;
+      const dy =
+        own instanceof HTMLElement
+          ? pair.getBoundingClientRect().top - own.getBoundingClientRect().top
+          : (hit - line) * pairHeight;
+      return { line: hit, dy };
+    }
+    return null;
+  }
+
+  function targetFor(x: number, y: number, dxPx: number, dyPx: number) {
+    // Uniform row math is only the fallback, for a pointer outside every row.
+    const hit = lineUnderPointer(x, y);
+    const newLine = hit?.line ?? dragLine(line, dyPx, pairHeight, lineCount);
     const newCol = dragCol(col, dxPx, charWidth, maxColForLine(newLine));
-    return { newLine, newCol };
+    const dy = hit?.dy ?? (newLine - line) * pairHeight;
+    return { newLine, newCol, dy };
   }
 
   const shape = card ? voicingFor(label) : null;
@@ -84,8 +110,8 @@ export function ChordChip(props: Props) {
         const dxPx = e.clientX - start.current.x;
         const dyPx = e.clientY - start.current.y;
         if (!offset && Math.hypot(dxPx, dyPx) < DRAG_THRESHOLD_PX) return;
-        const { newLine, newCol } = targetFor(dxPx, dyPx);
-        setOffset({ dx: (newCol - col) * charWidth, dy: (newLine - line) * pairHeight });
+        const { newCol, dy } = targetFor(e.clientX, e.clientY, dxPx, dyPx);
+        setOffset({ dx: (newCol - col) * charWidth, dy });
       }}
       onPointerUp={(e) => {
         if (!start.current) return;
@@ -98,7 +124,7 @@ export function ChordChip(props: Props) {
           props.onOpenEdit(id);
           return;
         }
-        const { newLine, newCol } = targetFor(dxPx, dyPx);
+        const { newLine, newCol } = targetFor(e.clientX, e.clientY, dxPx, dyPx);
         if (newLine !== line || newCol !== col) props.onCommitMove(id, newLine, newCol);
       }}
       onPointerCancel={() => {

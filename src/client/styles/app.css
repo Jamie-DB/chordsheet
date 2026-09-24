@@ -298,11 +298,6 @@ textarea {
   flex: 1;
 }
 
-.editor-key {
-  font-family: var(--mono);
-  font-size: 0.9rem;
-}
-
 .sheet {
   font-family: var(--mono);
   font-size: 0.95rem;
@@ -319,11 +314,6 @@ textarea {
   margin: 0;
   font-family: inherit;
   white-space: pre;
-}
-
-.chord-row {
-  color: var(--accent);
-  font-weight: 700;
 }
 
 .line-pair {
@@ -364,12 +354,6 @@ textarea {
   border-radius: 0;
   background: #fbfcff;
   outline: none;
-}
-
-.lyric-row.section-label {
-  font-weight: 700;
-  font-size: 0.85em;
-  color: var(--muted);
 }
 
 /* Section dynamics marks: no backgrounds, just a thin edge bar and the

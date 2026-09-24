@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Song } from "../../shared/types";
-import { sheetText } from "./sheetText";
+import { headerKeyLine, sheetText } from "./sheetText";
 import { transposeSong } from "./songOps";
 
 const song: Song = {
@@ -18,6 +18,15 @@ const song: Song = {
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
+
+describe("headerKeyLine", () => {
+  it("joins the sounding key and capo", () => {
+    expect(headerKeyLine("Eb", 3)).toBe("Key: Eb, Capo 3");
+    expect(headerKeyLine("G", 0)).toBe("Key: G");
+    expect(headerKeyLine(null, 2)).toBe("Capo 2");
+    expect(headerKeyLine(null, 0)).toBe("");
+  });
+});
 
 describe("sheetText", () => {
   it("interleaves header, chord rows, and lyrics", () => {

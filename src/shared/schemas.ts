@@ -71,6 +71,3 @@ export const importedPlacementSchema = z.union([
 export const importedSongSchema = songSchema.extend({
   placements: z.array(importedPlacementSchema),
 });
-
-export type ImportedPlacement = z.infer<typeof importedPlacementSchema>;
-export type ImportedSong = z.infer<typeof importedSongSchema>;

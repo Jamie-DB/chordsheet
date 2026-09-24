@@ -10,7 +10,7 @@ The editor with one of the public domain demo songs. The song is stored in Eb, c
 
 ## How it was built
 
-Built with Claude Code in a plan-first loop. The first commit is a conventions file and a design doc, not code. Everything after that is an issue, a commit that closes it, and a test wherever the logic is testable. 47 commits, 44 issues, 248 tests across 17 files. The first 29 commits and 31 issues landed in twelve days, August 5 to 16, 2026, from a one-paragraph idea to weekly rehearsal use. BUILDLOG.md has the day-by-day account.
+Built with Claude Code in a plan-first loop. The first commit is a conventions file and a design doc, not code. Everything after that is an issue, a commit that closes it, and a test wherever the logic is testable. 47 commits, 44 issues, 371 tests across 20 files. The first 29 commits and 31 issues landed in twelve days, August 5 to 16, 2026, from a one-paragraph idea to weekly rehearsal use. BUILDLOG.md has the day-by-day account.
 
 The agents wrote nearly all of the code: the scaffold, the chord engine, the placement editor, the AI round-trip kit, the print path, and the test suites. Eight phases were generated in 27 minutes on the first afternoon, which is the cheap part. The eleven days after that, 23 issues of real use breaking real assumptions, are what turned the skeleton into a tool.
 
@@ -32,7 +32,7 @@ Everything here is confirmed by running the app or reading the tree, not guessed
 - **No undo.** Deleting a chord takes effect on the click. Deleting a lyric line asks only when the line holds chords. Song and set deletion ask once. Nothing is recoverable after that except from a backup file.
 - **Unusual chords get approximate shapes.** Voicings come from a curated table plus movable barre forms, and anything outside that walks a simplification ladder to the nearest reasonable shape. The diagram tooltip names the substitution when it happens, so you can see when the grid is not literally the chord.
 - **One browser holds the working copy.** Songs live in that browser's localStorage. Nothing syncs between browsers or machines. Moving a library means folder save, "Download backup", or per-song export and import.
-- **Tests stop at the UI boundary.** 248 tests across 17 files cover the engine (147 of them) and the client lib. There are no component or browser tests, so layout and interaction regressions surface by using the app.
+- **Tests stop at the UI boundary.** 371 tests across 20 files cover the engine (213 of them), the client lib, and the PDF ingest. There are no component or browser tests, so layout and interaction regressions surface by using the app.
 - **One person, one browser, no sharing.** No accounts, no server, no hosting. That is the design, and the product version of it is #9 below.
 
 ## What's next
@@ -51,20 +51,20 @@ npm ci
 npm run dev      # http://localhost:5173
 ```
 
-`npm test` runs the Vitest suite, 248 tests in 17 files. `npm run build` type-checks and builds, 318.76 kB of JavaScript (97.19 kB gzipped) and 13.71 kB of CSS. `npm run preview` serves the build.
+`npm test` runs the Vitest suite, 371 tests in 20 files. `npm run build` type-checks and builds, 319.53 kB of JavaScript (97.57 kB gzipped) and 13.49 kB of CSS. `npm run preview` serves the build. `npm run ingest-pdf -- <chart.pdf>` turns a chord chart PDF that has a text layer into a song file in the personal library folder, outside the repo. It needs poppler, and docs/PDF-INGEST.md has the workflow and the review checklist.
 
 ## Workflow
 
-1. Create a song: paste plain lyrics, or a whole found tab with chord lines above the words. Chord lines are detected (every token parses as a chord) and become placements at their exact columns. Standalone chord rows (intros, instrumentals) keep their own row. If the tab says "Capo N", set "Written for capo" so its symbols are read as shapes at that fret. The song then starts at capo N showing exactly what you pasted, while the header carries the true sounding key.
+1. Create a song: paste plain lyrics, or a whole found tab with chord lines above the words. Chord lines are detected (every token parses as a chord) and become placements at their exact columns. Standalone chord rows (intros, instrumentals) keep their own row. If the tab says "Capo N", set "Written for capo" so its symbols are read as shapes at that fret. The song then starts at capo N showing exactly what you pasted, while the header carries the true sounding key. A chart you already have as a PDF with a text layer can skip the paste: `npm run ingest-pdf` writes the song file, and "Import JSON" brings it in.
 2. Place chords: click a spot to add one, click a chord to edit or delete it, drag to move it (vertically too). Entry validates chord symbols live (Am7, G/B, Bbmaj7, F#m7b5 and so on).
 3. Optional AI assist: click "Copy AI prompt", paste it into Claude (claude.ai or Claude Code) with a screenshot of an existing chart, then "Paste AI reply". Proposed chords show as amber chips, accepted per chip, per line, or all at once. Unresolvable anchors are listed, and lyric changes in the reply are rejected.
 4. Set the key and capo: the key is auto-detected from your chords, with an override available. Capo keeps the song's real key and shows the shapes your hands play, with a header like "Key: Eb, Capo 3". "Suggest capo" ranks frets by open-chord friendliness. Transpose changes the actual key. Both controls exist on purpose.
 5. At-a-glance notation: the chord popover's diamond checkbox marks a full-measure hold, drawn as a diamond around the chord (Nashville style, written as <C> in plain-text export). Each [Section] label carries a small pill for dynamics marks: Tacet, Soft, Build, Full, or a custom word with a color. On the printed page (single-column layout) section titles move out of the flow into a left sidebar with the mark as a colored tag beneath, plus a thin edge bar along marked sections. Tacet sections shrink to about two thirds size so they tighten up and move out of the way. The dense two-column layout keeps compact in-line labels.
 6. Chord diagrams: a CHORDS row shows fretboard grids for the song's displayed shapes (post-capo), on screen in a collapsible panel and at the top of the printed page. Voicings come from a curated open-chord table plus movable barre forms. Unusual chords fall back to the closest reasonable shape and the on-screen tooltip names the substitution.
 7. Play along: the floating Scroll control auto-scrolls the sheet. Speed is in BPM (detected from pasted tabs, default 80, saved per song). Space toggles it.
-8. Print. The printed sheet is literal monospace text rows, so chords land above exactly the right characters and a chord row never separates from its lyric across pages. Short-line songs print in two columns automatically. "Copy text" puts the identical plain-text sheet on the clipboard.
+8. Print. The printed sheet is literal monospace text rows, so chords land above exactly the right characters and a chord row never separates from its lyric across pages. Short-line songs print in two columns automatically. "Copy text" puts a plain-text version on the clipboard with the same chord and lyric rows. It is not identical to print: section labels keep their brackets, holds are written as <C>, and dynamics marks and chord diagrams are left out.
 
-Shortcuts: `+` and `-` transpose, `Space` toggles auto-scroll, `Escape` closes any open popover or panel.
+Shortcuts: `+` and `-` transpose, `Space` toggles auto-scroll, `Escape` closes the chord popover, the mark picker, the Paste AI reply box, and capo suggestions, and stops auto-scroll. The import review and the lyrics editor stay open until you use their own buttons.
 
 ## Library and sets
 
