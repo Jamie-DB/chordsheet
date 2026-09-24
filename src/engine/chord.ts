@@ -28,7 +28,7 @@ const QUALITY_ALIASES: Record<string, string> = {
 // tokenizer cannot consume (like the "x" in "Cx") makes the symbol invalid.
 const SUFFIX_TOKENS = [
   "maj", "min", "dim", "aug", "sus", "add", "alt", "omit", "no",
-  "M", "m", "o", "°", "Δ", "ø", "+", "-", "#", "b", "(", ")", "/",
+  "M", "m", "o", "°", "Δ", "ø", "+", "-", "#", "b", "(", ")",
 ];
 
 function isPlausibleQuality(suffix: string): boolean {
@@ -97,10 +97,15 @@ export function formatChord(
 
 export type ChordFamily = "major" | "minor" | "dominant" | "diminished";
 
-/** Coarse classification used by key detection and capo scoring. */
+/**
+ * Coarse classification used by key detection, capo scoring, and diagram
+ * simplification. A quality that opens on 7, 9, 11, or 13 (or an augmented
+ * seventh, "+7" or "aug7") is dominant whatever alterations follow: "7b9",
+ * "9sus4", "13sus4". "maj7" and "m7" open on letters, so they keep their families.
+ */
 export function chordFamily(quality: string): ChordFamily {
   if (quality === "dim" || quality === "dim7" || quality === "m7b5") return "diminished";
   if (/^m(?!aj)/.test(quality)) return "minor";
-  if (/^(7|9|11|13|7sus4)$/.test(quality)) return "dominant";
+  if (/^(?:\+|aug)?(?:7|9|11|13)(?!\d)/.test(quality)) return "dominant";
   return "major";
 }

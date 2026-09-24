@@ -47,6 +47,16 @@ describe("parseChord", () => {
     ["Co", "dim"],
     ["Co7", "dim7"],
     ["Dsus", "sus4"],
+    ["CM", ""],
+    ["CMAJ7", "maj7"],
+    ["CΔ", "maj7"],
+    ["CΔ7", "maj7"],
+    ["Cmin6", "m6"],
+    ["Cmin9", "m9"],
+    ["C°", "dim"],
+    ["C°7", "dim7"],
+    ["Bø", "m7b5"],
+    ["Bø7", "m7b5"],
   ];
   it.each(aliases)("normalizes %s to quality %s", (symbol, quality) => {
     expect(parseChord(symbol)?.quality).toBe(quality);
@@ -56,9 +66,11 @@ describe("parseChord", () => {
     expect(parseChord("Cmaj9")?.quality).toBe("maj9");
     expect(parseChord("G7b9")?.quality).toBe("7b9");
     expect(parseChord("Dm7add11")?.quality).toBe("m7add11");
+    expect(parseChord("C#b5")?.quality).toBe("b5");
   });
 
-  const invalid = ["H", "Cx", "", "  ", "c", "C##", "G/H", "hello", "1", "/"];
+  // "Bbb" and "C#b" are a root plus a second accidental that opens no degree.
+  const invalid = ["H", "Cx", "", "  ", "c", "C##", "Bbb", "C#b", "G/H", "hello", "1", "/"];
   it.each(invalid)("rejects %s", (symbol) => {
     expect(parseChord(symbol)).toBeNull();
     expect(isChordSymbol(symbol)).toBe(false);
@@ -82,7 +94,11 @@ describe("chordFamily", () => {
     ["", "major"], ["maj7", "major"], ["6", "major"], ["add9", "major"],
     ["sus2", "major"], ["sus4", "major"], ["5", "major"], ["aug", "major"],
     ["m", "minor"], ["m7", "minor"], ["m6", "minor"], ["m9", "minor"],
+    ["69", "major"], ["maj9", "major"], ["maj13", "major"], ["sus24", "major"],
+    ["m11", "minor"], ["m7b9", "minor"], ["min7", "minor"],
     ["7", "dominant"], ["9", "dominant"], ["11", "dominant"], ["13", "dominant"], ["7sus4", "dominant"],
+    ["7b9", "dominant"], ["7#9", "dominant"], ["7(b9)", "dominant"], ["7#5", "dominant"], ["7alt", "dominant"],
+    ["9sus4", "dominant"], ["13sus4", "dominant"], ["+7", "dominant"], ["aug7", "dominant"],
     ["dim", "diminished"], ["dim7", "diminished"], ["m7b5", "diminished"],
   ];
   it.each(cases)("classifies %s as %s", (quality, family) => {

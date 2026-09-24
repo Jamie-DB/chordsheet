@@ -97,7 +97,9 @@ export function detectKey(symbols: string[]): KeyGuess | null {
     }
   }
 
-  if (!best || best.score <= 0) return null;
+  // Unreachable, but TypeScript cannot see that the loop always sets best. The key on any
+  // chord's own root scores at least 1, so best.score is never 0 here.
+  if (!best) return null;
   const confidence = second <= 0 ? 1 : Math.max(0, Math.min(1, (best.score - second) / best.score));
   return { tonicPc: best.tonicPc, mode: best.mode, name: keyName(best.tonicPc, best.mode), confidence };
 }

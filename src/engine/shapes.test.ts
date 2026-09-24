@@ -45,6 +45,24 @@ describe("voicingFor", () => {
     expect(em11.approximated).toBe(true);
   });
 
+  it.each([
+    // [symbol, playedAs, approximated]
+    ["A9sus4", "A7sus4", true],
+    ["G13sus4", "G7sus4", true],
+    ["C7b9", "C7", true],
+    ["E7#9", "E7", true],
+    ["C+7", "C7", true],
+    ["Esus2", "Esus2", false],
+    ["Dsus4add9", "Dsus4", true],
+    ["Dsus2add9", "Dsus2", true],
+    ["Cadd11", "Cadd9", true],
+    ["Dadd9", "D", true],
+  ] as const)("walks the ladder: %s plays as %s", (symbol, playedAs, approximated) => {
+    const shape = voicingFor(symbol)!;
+    expect(shape.playedAs).toBe(playedAs);
+    expect(shape.approximated).toBe(approximated);
+  });
+
   it("uses known slash voicings and drops unknown basses", () => {
     const gOverB = voicingFor("G/B")!;
     expect(gOverB.voicing.frets).toEqual([X, 2, 0, 0, 3, 3]);

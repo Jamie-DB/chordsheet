@@ -39,6 +39,26 @@ describe("soundingFromShape", () => {
   });
 });
 
+describe("suggestCapo scores", () => {
+  // Open shape +3, barre or awkward -1, unparseable 0, then half a point per fret.
+  const scoreAt = (symbols: string[], fret: number) => suggestCapo(symbols, "C").find((s) => s.fret === fret)!.score;
+  it.each([
+    [["???"], 0, 0],
+    [["???"], 2, -1],
+    [["Am"], 0, 3],
+    [["Cm"], 0, -1],
+    [["G"], 0, 3],
+    [["C9"], 0, 3],
+    [["B"], 0, -1],
+    [["Bm"], 0, -1],
+    [["B7"], 0, 3],
+    [["C#7"], 2, 2],
+    [["Bdim"], 0, -1],
+  ] as const)("%j at fret %i scores %d", (symbols, fret, score) => {
+    expect(scoreAt([...symbols], fret)).toBe(score);
+  });
+});
+
 describe("suggestCapo", () => {
   it("ranks open-friendly frets above fret 0 for a flat progression", () => {
     const ranked = suggestCapo(["Eb", "Ab", "Bb", "Cm"], "Eb");

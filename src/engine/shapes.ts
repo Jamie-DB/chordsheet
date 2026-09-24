@@ -109,12 +109,8 @@ function fromTemplate(template: Template, rootFret: number): number[] {
 
 function movableVoicing(pc: number, quality: string): number[] | null {
   const candidates: number[][] = [];
-  if (E_FORM[quality]) {
-    let f = mod12(pc - 4);
-    const minOffset = Math.min(...E_FORM[quality].filter((o): o is number => o !== null));
-    if (f + minOffset < 0) f += 12;
-    candidates.push(fromTemplate(E_FORM[quality], f));
-  }
+  // E-form offsets never go below the root fret, so the open-string root needs no wrap.
+  if (E_FORM[quality]) candidates.push(fromTemplate(E_FORM[quality], mod12(pc - 4)));
   if (A_FORM[quality]) {
     let f = mod12(pc - 9);
     const minOffset = Math.min(...A_FORM[quality].filter((o): o is number => o !== null));
@@ -151,7 +147,7 @@ function simplificationLadder(quality: string): string[] {
     push("m");
   } else {
     if (/^maj/.test(quality)) push("maj7");
-    if (/^sus/.test(quality)) push(quality === "sus2" ? "sus2" : "sus4");
+    if (/^sus/.test(quality)) push(/^sus2/.test(quality) ? "sus2" : "sus4");
     if (/^add/.test(quality)) push("add9");
     push("");
   }

@@ -58,18 +58,7 @@ export function saveSetlists(sets: Setlist[]): void {
   }
 }
 
-export function slugify(title: string, taken: Set<string>): string {
-  const base =
-    title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "song";
-  if (!taken.has(base)) return base;
-  for (let n = 2; ; n++) {
-    const candidate = `${base}-${n}`;
-    if (!taken.has(candidate)) return candidate;
-  }
-}
+export { slugify } from "../../shared/slug";
 
 const UI_KEY = "chordsheet.ui.v1";
 

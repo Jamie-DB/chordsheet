@@ -39,7 +39,7 @@ Column form (fine when the writer can compute string offsets exactly, e.g. Claud
 
 `col` is the 0-based character cell of the lyric line the chord sits above.
 
-The tool resolves anchors deterministically (exact nth occurrence, then case-insensitive, then the anchor's first word) and lists anything unresolvable for manual fixing; nothing is silently dropped.
+The tool resolves anchors deterministically (exact nth occurrence, then case-insensitive, then the nth occurrence of the anchor's first word, dropping the offset if it runs past that word) and lists anything unresolvable for manual fixing. Nothing is silently dropped.
 
 ## Rules given to the AI
 
@@ -52,4 +52,4 @@ The tool resolves anchors deterministically (exact nth occurrence, then case-ins
 
 ## Note for Claude Code in this repo
 
-You can edit `songs/<id>.json` files directly with the same rules, or compute exact `col` values programmatically (`line.indexOf(word)`), which avoids anchor resolution entirely. `src/shared/schemas.ts` holds the validating schema, and `npm test` exercises the import path.
+`songs/` in this repo holds only the public domain demo set. Never write a personal song there. For a personal song, either return the reply JSON for "Paste AI reply" as above, or edit the song's file in the personal library folder outside the repo (`~/Documents/chordsheet-library/<id>.json`) with the same rules and bring it in through "Import JSON" in the app. Editing a file directly lets you compute exact `col` values programmatically (`line.indexOf(word)`), which avoids anchor resolution entirely. `src/shared/schemas.ts` holds the validating schema, and `npm test` exercises the import path.
