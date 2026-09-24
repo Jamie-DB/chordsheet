@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Song } from "../../shared/types";
-import { headerKeyLine, sheetText } from "./sheetText";
+import { headerKeyLine, printFooterCss, sheetText } from "./sheetText";
 import { transposeSong } from "./songOps";
 
 const song: Song = {
@@ -18,6 +18,23 @@ const song: Song = {
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
+
+describe("printFooterCss", () => {
+  it("puts the title bottom left and the page count bottom right", () => {
+    const css = printFooterCss("Amazing Grace");
+    expect(css).toContain('@bottom-left { content: "Amazing Grace"; }');
+    expect(css).toContain('@bottom-right { content: "Page " counter(page) " of " counter(pages); }');
+  });
+
+  it("adds a version name in parentheses and ignores a blank one", () => {
+    expect(printFooterCss("Amazing Grace", " Acoustic ")).toContain('content: "Amazing Grace (Acoustic)";');
+    expect(printFooterCss("Amazing Grace", "  ")).toContain('content: "Amazing Grace";');
+  });
+
+  it("escapes quotes and backslashes and flattens line breaks", () => {
+    expect(printFooterCss('Say "Hi" \\ Bye\nNow')).toContain('content: "Say \\"Hi\\" \\\\ Bye Now";');
+  });
+});
 
 describe("headerKeyLine", () => {
   it("joins the sounding key and capo", () => {

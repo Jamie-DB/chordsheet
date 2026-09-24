@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
 import { markColor, markFor, markName, sectionRanges, sectionStyling, stripBrackets } from "../lib/sectionMarks";
-import { headerKeyLine } from "../lib/sheetText";
+import { headerKeyLine, printFooterCss } from "../lib/sheetText";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
 
@@ -49,6 +49,7 @@ export function PrintSheet({ song, soundingKey, shapedKeyName, versionName }: Pr
 
   return (
     <div className={`print-sheet${twoCol ? "" : " with-sidebar"}`}>
+      <style>{printFooterCss(song.title, versionName)}</style>
       <div className="print-header">
         <h1>{song.title}</h1>
         {song.artist && <div className="print-artist">{song.artist}</div>}
