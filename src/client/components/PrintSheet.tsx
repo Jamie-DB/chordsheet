@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
 import { markColor, markFor, markName, sectionRanges, sectionStyling, stripBrackets } from "../lib/sectionMarks";
+import { collapseRepeats, type PassNote } from "../lib/printRepeats";
 import { headerKeyLine } from "../lib/sheetText";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
@@ -20,9 +21,11 @@ const TWO_COLUMN_MAX_CHARS = 38;
 /**
  * The printable sheet: literal text rows only, never positioned elements,
  * so print alignment is exact by construction. Hidden on screen; print CSS
- * hides the app and shows this.
+ * hides the app and shows this. Back-to-back repeats of a section print
+ * once, with each pass's dynamics under the label.
  */
-export function PrintSheet({ song, soundingKey, shapedKeyName, versionName }: Props) {
+export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName }: Props) {
+  const { song, passNotes } = collapseRepeats(written);
   const rows = song.lyrics.map((_, i) =>
     buildChordRowSegments(
       song.placements.filter((p) => p.line === i),
@@ -61,11 +64,12 @@ export function PrintSheet({ song, soundingKey, shapedKeyName, versionName }: Pr
       </div>
       <div className={twoCol ? "print-body two-col" : "print-body"}>
         {(() => {
-          type Sidebar = { title: string; mark: ReturnType<typeof markFor> };
+          type Sidebar = { title: string; mark: ReturnType<typeof markFor>; passes?: PassNote[] };
+          const passName = (n: PassNote) => `${n.passes}: ${markName(n.mark).toUpperCase()}`;
           const body: ReactNode[] = [];
           let pendingSidebar: Sidebar | null = null;
 
-          const compactLabel = (key: React.Key, title: string, mark: ReturnType<typeof markFor>) => (
+          const compactLabel = (key: React.Key, { title, mark, passes }: Sidebar) => (
             <div className={`print-pair print-label-compact`} key={key}>
               <pre className="print-lyric">
                 {title}
@@ -74,6 +78,11 @@ export function PrintSheet({ song, soundingKey, shapedKeyName, versionName }: Pr
                     {"  " + markName(mark).toUpperCase()}
                   </span>
                 )}
+                {passes?.map((n) => (
+                  <span key={n.passes} className={`print-mark-name name-${markColor(n.mark)}`}>
+                    {"  " + passName(n)}
+                  </span>
+                ))}
               </pre>
             </div>
           );
@@ -90,6 +99,11 @@ export function PrintSheet({ song, soundingKey, shapedKeyName, versionName }: Pr
                         {markName(sidebar.mark).toUpperCase()}
                       </span>
                     )}
+                    {sidebar.passes?.map((n) => (
+                      <span key={n.passes} className={`print-mark-name name-${markColor(n.mark)}`}>
+                        {passName(n)}
+                      </span>
+                    ))}
                   </span>
                 )}
                 {row.length > 0 && (
@@ -115,23 +129,26 @@ export function PrintSheet({ song, soundingKey, shapedKeyName, versionName }: Pr
             const row = rows[i];
             const range = rangeByStart.get(i);
             if (range) {
-              const mark = markFor(marks, range.label, range.occurrence);
+              const label: Sidebar = {
+                title: stripBrackets(range.label),
+                mark: markFor(marks, range.label, range.occurrence),
+                passes: passNotes.get(i),
+              };
               if (pendingSidebar) {
                 // Empty section before this one: fall back to a compact row.
-                body.push(compactLabel(`orphan-${i}`, pendingSidebar.title, pendingSidebar.mark));
+                body.push(compactLabel(`orphan-${i}`, pendingSidebar));
                 pendingSidebar = null;
               }
-              const title = stripBrackets(range.label);
               if (twoCol) {
                 // Chords placed on the label line print above the label.
                 if (row.length > 0) body.push(pair(`label-chords-${i}`, i, null, null));
-                body.push(compactLabel(i, title, mark));
+                body.push(compactLabel(i, label));
               } else if (row.length > 0) {
                 // Chords on the label line get their own row, which carries the title.
-                body.push(pair(i, i, { title, mark }, null));
+                body.push(pair(i, i, label, null));
               } else {
                 // The title leaves the flow and rides the next content pair.
-                pendingSidebar = { title, mark };
+                pendingSidebar = label;
               }
               return;
             }
@@ -146,7 +163,7 @@ export function PrintSheet({ song, soundingKey, shapedKeyName, versionName }: Pr
           // TS cannot see the callback writes; re-widen before the last check.
           const leftover = pendingSidebar as Sidebar | null;
           if (leftover) {
-            body.push(compactLabel("orphan-end", leftover.title, leftover.mark));
+            body.push(compactLabel("orphan-end", leftover));
           }
           return body;
         })()}
