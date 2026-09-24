@@ -49,10 +49,6 @@
     margin: 0 0 6pt;
   }
 
-  .print-lyric.section-label {
-    font-weight: 700;
-  }
-
   /* Section titles live in a left sidebar gutter (single-column layout). */
   .print-sheet.with-sidebar {
     padding-left: 21mm;

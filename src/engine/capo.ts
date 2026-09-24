@@ -39,7 +39,7 @@ function scoreShape(shapeSymbol: string): number {
   return -1; // barre or awkward territory
 }
 
-export function scoreCapoFret(soundingSymbols: string[], fret: number): number {
+function scoreCapoFret(soundingSymbols: string[], fret: number): number {
   let total = 0;
   for (const symbol of soundingSymbols) {
     total += scoreShape(transposeSymbol(symbol, -fret, "sharp"));

@@ -121,14 +121,10 @@ export function parsePastedTab(text: string, writtenForCapo: number = 0): Parsed
     const next = raw[i + 1];
     const nextIsLyric =
       next !== undefined && next.length > 0 && !isChordLine(next) && !isSectionLabel(next);
-    if (nextIsLyric) {
-      // The lyric line will be pushed on the next iteration at this index.
-      addPlacements(notation, lyrics.length);
-    } else {
-      // Standalone chord row: keep it printable over an inserted empty line.
-      addPlacements(notation, lyrics.length);
-      lyrics.push("");
-    }
+    // A lyric line below is pushed on the next iteration at this index.
+    addPlacements(notation, lyrics.length);
+    // A standalone chord row stays printable over an inserted empty line.
+    if (!nextIsLyric) lyrics.push("");
   }
 
   const normalized = normalizeSections(lyrics, placements);

@@ -107,6 +107,37 @@ describe("parseImport", () => {
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.song.placements[0].id).toBeTruthy();
   });
+
+  it("gives a fresh id to a reply placement whose id the library uses elsewhere", () => {
+    const imported = {
+      ...song,
+      placements: [
+        { id: "p1", line: 0, col: 0, chord: "G" },
+        { id: "p1", line: 1, col: 4, chord: "D" },
+        { id: "p2", line: 0, col: 9, chord: "C" },
+        { id: "p2", line: 1, col: 12, chord: "G" },
+      ],
+    };
+    const result = parseImport(JSON.stringify(imported), song);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const ids = result.song.placements.map((p) => p.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    // The unchanged chord keeps its id, the moved or repeated ones do not.
+    expect(ids[0]).toBe("p1");
+    expect(ids[1]).not.toBe("p1");
+    expect(ids[2]).toBe("p2");
+    expect(ids[3]).not.toBe("p2");
+  });
+
+  it("gives a fresh id when the library chord with that id sits elsewhere", () => {
+    const imported = { ...song, placements: [{ id: "p1", line: 1, col: 0, chord: "D" }] };
+    const result = parseImport(JSON.stringify(imported), song);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const accepted = [...song.placements, ...result.song.placements];
+    expect(new Set(accepted.map((p) => p.id)).size).toBe(2);
+  });
 });
 
 describe("library backup files", () => {

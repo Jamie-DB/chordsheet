@@ -47,8 +47,10 @@ export function buildChordRow(
 
 /**
  * Resolve an anchor substring to a column in a lyric line.
- * Tries the nth exact occurrence, then case-insensitive, then the anchor's
- * first word. Returns null when nothing matches; callers surface that.
+ * Tries the nth exact occurrence, then case-insensitive, then the nth
+ * occurrence of the anchor's first word. On that last fallback an offset past
+ * the first word is dropped, since the rest of the anchor did not match.
+ * Returns null when nothing matches; callers surface that.
  */
 export function resolveAnchor(
   line: string,
@@ -68,16 +70,19 @@ export function resolveAnchor(
     return idx;
   };
 
-  let found = nth(line, target, Math.max(1, occurrence));
-  if (found === -1) found = nth(line.toLowerCase(), target.toLowerCase(), Math.max(1, occurrence));
+  const n = Math.max(1, occurrence);
+  let shift = Math.max(0, offset);
+  let found = nth(line, target, n);
+  if (found === -1) found = nth(line.toLowerCase(), target.toLowerCase(), n);
   if (found === -1) {
     const firstWord = target.split(/\s+/)[0];
-    if (firstWord && firstWord !== target) {
-      found = nth(line, firstWord, 1);
-      if (found === -1) found = nth(line.toLowerCase(), firstWord.toLowerCase(), 1);
+    if (firstWord !== target) {
+      found = nth(line, firstWord, n);
+      if (found === -1) found = nth(line.toLowerCase(), firstWord.toLowerCase(), n);
+      if (shift > firstWord.length) shift = 0;
     }
   }
   if (found === -1) return null;
 
-  return Math.max(0, Math.min(line.length, found + Math.max(0, offset)));
+  return Math.min(line.length, found + shift);
 }

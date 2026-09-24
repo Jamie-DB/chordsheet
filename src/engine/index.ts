@@ -19,7 +19,6 @@ export {
 } from "./key";
 export {
   displayChord,
-  scoreCapoFret,
   shapedKey,
   soundingFromShape,
   suggestCapo,

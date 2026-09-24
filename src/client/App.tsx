@@ -29,6 +29,7 @@ export function App() {
       const backToSet = view.setId;
       return (
         <Editor
+          key={`${song.id}:${view.setIndex ?? ""}`}
           song={song}
           onBack={backToSet !== undefined ? () => actions.openSet(backToSet) : actions.close}
           onChange={actions.replaceSong}

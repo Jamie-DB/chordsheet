@@ -10,6 +10,13 @@ describe("parseKeyName", () => {
   });
 });
 
+describe("invalid key names", () => {
+  it.each(["X", "", "H", "Cmaj", "c"])("%j prefers sharps and transposes to itself", (k) => {
+    expect(keyPrefersFlat(k)).toBe(false);
+    expect(transposeKeyName(k, 2)).toBe(k);
+  });
+});
+
 describe("keyPrefersFlat", () => {
   const flat = ["F", "Bb", "Eb", "Ab", "Db", "Dm", "Gm", "Cm", "Fm", "Bbm", "Ebm"];
   const sharp = ["C", "G", "D", "A", "E", "B", "F#", "Am", "Em", "Bm", "F#m", "C#m", "G#m"];
@@ -48,6 +55,17 @@ describe("detectKey", () => {
   it("handles sevenths and slash chords", () => {
     expect(detectKey(["Cmaj7", "Am7", "Dm7", "G7"])?.name).toBe("C");
     expect(detectKey(["G", "D/F#", "Em", "C"])?.name).toBe("G");
+  });
+  it("breaks a tie between relative keys toward major", () => {
+    // C and Am both score 9 on C Am: the tie goes to C with zero confidence.
+    expect(detectKey(["C", "Am"])).toEqual({ tonicPc: 0, mode: "major", name: "C", confidence: 0 });
+  });
+  it("hears an altered dominant as a dominant, not a tonic", () => {
+    // G7b9 is dominant family, so G major loses its tonic bonuses: C scores 10,
+    // the runner-up is Am at 6 (G major drops from 9 to 4).
+    const guess = detectKey(["G7b9", "C"])!;
+    expect(guess.name).toBe("C");
+    expect(guess.confidence).toBeCloseTo(0.4);
   });
   it("returns null with nothing to score", () => {
     expect(detectKey([])).toBeNull();

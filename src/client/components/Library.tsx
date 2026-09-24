@@ -21,7 +21,8 @@ interface Props {
   onOpen(id: string): void;
   onRename(id: string, title: string): void;
   onDelete(id: string): void;
-  onImport(song: Song, open: boolean): void;
+  /** keepUpdatedAt: restoring a backup keeps the file's timestamp. */
+  onImport(song: Song, open: boolean, keepUpdatedAt?: boolean): void;
   onCreateSet(name: string): void;
   onOpenSet(id: string): void;
   onImportSetlists(sets: Setlist[]): void;
@@ -87,60 +88,61 @@ export function Library({
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
-    for (const file of Array.from(files)) {
-      const text = await file.text();
+    try {
+      for (const file of Array.from(files)) {
+        const text = await file.text();
 
-      const library = parseLibraryFile(text);
-      if (library) {
-        const clashes = library.songs.filter((s) => songs.some((e) => e.id === s.id)).length;
-        if (
-          clashes > 0 &&
-          !window.confirm(`${file.name} contains ${library.songs.length} song(s); ${clashes} will replace songs already in the library. Continue?`)
-        ) {
+        const library = parseLibraryFile(text);
+        if (library) {
+          const clashes = library.songs.filter((s) => songs.some((e) => e.id === s.id)).length;
+          if (
+            clashes > 0 &&
+            !window.confirm(`${file.name} contains ${library.songs.length} song(s), and ${clashes} will replace songs already in the library. Continue?`)
+          ) {
+            continue;
+          }
+          // A restore keeps each song's saved updatedAt, so it is not marked as just edited.
+          for (const s of library.songs) onImport(s, false, true);
+          if (library.setlists.length > 0) onImportSetlists(library.setlists);
+          const setsNote = library.setlists.length > 0 ? ` and ${library.setlists.length} set(s)` : "";
+          setStatus(
+            `Restored ${library.songs.length} song(s)${setsNote} from ${file.name}.` +
+              (library.invalid > 0 ? ` ${library.invalid} invalid entr${library.invalid === 1 ? "y was" : "ies were"} skipped.` : ""),
+          );
           continue;
         }
-        for (const s of library.songs) onImport(s, false);
-        if (library.setlists.length > 0) onImportSetlists(library.setlists);
-        const setsNote = library.setlists.length > 0 ? ` and ${library.setlists.length} set(s)` : "";
-        setStatus(
-          `Restored ${library.songs.length} song(s)${setsNote} from ${file.name}.` +
-            (library.invalid > 0 ? ` ${library.invalid} invalid entr${library.invalid === 1 ? "y was" : "ies were"} skipped.` : ""),
-        );
-        continue;
-      }
 
-      let probableId: string | null = null;
-      try {
-        probableId = (JSON.parse(text) as { id?: string }).id ?? null;
-      } catch {
-        // parseImport reports the JSON error below.
-      }
-      const existing = songs.find((s) => s.id === probableId);
-      const result = parseImport(text, existing);
-      if (!result.ok) {
-        setStatus(`${file.name}: ${result.error}`);
-        return;
-      }
-      if (result.ok && result.lyricsRejected) {
+        let probableId: string | null = null;
+        try {
+          probableId = (JSON.parse(text) as { id?: string }).id ?? null;
+        } catch {
+          // parseImport reports the JSON error below.
+        }
+        const existing = songs.find((s) => s.id === probableId);
+        const result = parseImport(text, existing);
+        if (!result.ok) {
+          setStatus(`${file.name}: ${result.error}`);
+          continue;
+        }
+        if (result.lyricsRejected) {
+          setStatus(
+            `${file.name}: its lyrics differ from your library copy, so its chord positions would land on the wrong lines. Delete "${existing?.title}" here first, then import the file fresh.`,
+          );
+          continue;
+        }
+        if (existing && !window.confirm(`Replace placements of "${existing.title}" with ${file.name}?`)) {
+          continue;
+        }
+        onImport(result.song, files.length === 1);
         setStatus(
-          `${file.name}: its lyrics differ from your library copy, so its chord positions would land on the wrong lines. Delete "${existing?.title}" here first, then import the file fresh.`,
+          result.unresolved.length > 0
+            ? `Imported ${file.name}, but ${result.unresolved.length} placement(s) could not be resolved: ${result.unresolved.map((u) => `${u.chord} (${u.reason})`).join("; ")}.`
+            : `Imported ${file.name}.`,
         );
-        continue;
       }
-      if (existing && !window.confirm(`Replace placements of "${existing.title}" with ${file.name}?`)) {
-        continue;
-      }
-      onImport(result.song, files.length === 1);
-      const notes: string[] = [];
-      if (result.unresolved.length > 0) {
-        notes.push(`${result.unresolved.length} placement(s) could not be resolved: ${result.unresolved.map((u) => `${u.chord} (${u.reason})`).join("; ")}`);
-      }
-      if (result.lyricsRejected) {
-        notes.push("the file tried to change lyrics; kept the library's lyrics");
-      }
-      setStatus(notes.length > 0 ? `Imported ${file.name}, but ${notes.join("; ")}.` : `Imported ${file.name}.`);
+    } finally {
+      if (fileRef.current) fileRef.current.value = "";
     }
-    if (fileRef.current) fileRef.current.value = "";
   }
 
   return (
@@ -275,7 +277,7 @@ export function Library({
               )}
               <button
                 onClick={() => downloadLibrary(songs, setlists)}
-                title="Download every song and set in one chordsheet-library.json file; works in any browser. Import it to restore."
+                title="Download every song and set in one chordsheet-library.json file. Works in any browser. Import it to restore."
               >
                 Download backup
               </button>

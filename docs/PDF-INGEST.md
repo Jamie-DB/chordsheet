@@ -23,7 +23,10 @@ Flags: `--key Bb` overrides the key read from the header. `--force` overwrites. 
 ## Review checklist
 
 - Every line under "corrections and judgment calls". Each one is a place where the script changed what the text layer said.
-- Accidentals on every chord. The text layer drops sharp and flat glyphs, and the script restores them three ways: from a gap inside the symbol, from unexplained width in a one-word symbol, and from the key signature when the accidental was the last glyph of the symbol (a slash bass, or a chord that is only a root letter). The third is a guess. A chart that uses a natural note against the key signature will come out wrong.
+- Accidentals on every chord. The text layer drops sharp and flat glyphs, and the script restores them three ways: from a gap inside the symbol, from unexplained width in a one-word symbol, and from the key signature when the accidental was the last glyph of the symbol (a slash bass, or a chord that is only a root letter).
+  - The gap and width checks show that a glyph is missing but not which one, so they take the key's direction: flat in the flat keys, sharp in C and the sharp keys. Where that would spell B#, E#, Cb, or Fb they use the other accidental and log it, so a B in C with a missing glyph becomes Bb, and an F in Bb becomes F#. A borrowed chord against that direction still comes out wrong (an Ab in C comes out as A#).
+  - The key signature check is a guess. A chart that uses a natural note against the key signature will come out wrong.
+  - A minor key takes its relative major's signature, so D minor restores like F major (Bb) and B minor like D major (F# and C#).
 - Bare root letters in sharp keys. A lone G in the key of A is left natural, because the borrowed G major is more common than G sharp major, and the log flags each one. In flat keys the flat is restored (a lone B in F becomes Bb).
 - The key itself. The header loses its accidental too, so a chart in Bb reads as B. Pass `--key` when the key has an accidental.
 - Chords the engine cannot hold as printed. A slash inside a quality (6/9 over a bass note) is rewritten without the inner slash. A superscript 1 is dropped.
@@ -32,7 +35,7 @@ Flags: `--key Bb` overrides the key read from the header. `--force` overwrites. 
 
 ## How it works
 
-`pdftotext -bbox` reports every word with its bounding box. `src/ingest/chartPdf.ts` groups the boxes into rows per column and page, then sorts rows into labels, band notes, chord rows, and lyric rows by glyph height and content. A chord row belongs to the lyric row under it. The chord's x position maps to a character cell: proportionally inside a word, or the space before the next word when it sits in a gap. A chord row with no lyric under it becomes an instrumental line. Band notes under a section label become section marks through the same `extractLabelNotes` the app uses, and the output is validated with `songSchema`.
+`pdftotext -bbox` reports every word with its bounding box. `src/ingest/chartPdf.ts` groups the boxes into rows per column and page, then sorts rows into labels, band notes, chord rows, and lyric rows by glyph height and content. A chord row belongs to the lyric row under it. The chord's x position maps to a character cell: proportionally inside a word, or the space before the next word when it sits in a gap. A chord row with no lyric under it becomes an instrumental line. Band notes directly under a section label become section marks through the same `extractLabelNotes` the app uses. A note further down a section, after a chord or lyric row, has no line to ride on, so it goes to the song's notes as "Chart note in [Section]: ..." and the log says so. The output is validated with `songSchema`.
 
 The module is pure and table tested. Its fixtures are synthetic word boxes built from the demo set. No real chart is stored in the repo, as a PDF or as a fixture.
 

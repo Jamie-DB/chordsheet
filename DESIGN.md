@@ -13,8 +13,13 @@ Static SPA (Vite + React 19 + TS + Vitest + zod). No server, no API keys. Print-
 ## Data model
 
 ```ts
-interface ChordPlacement { id: string; line: number; col: number; chord: string }
-// chord is the canonical SOUNDING symbol, e.g. "Bbmaj7", "G/B", "F#m7"
+interface ChordPlacement {
+  id: string;
+  line: number;
+  col: number;
+  chord: string;         // canonical SOUNDING symbol, e.g. "Bbmaj7", "G/B", "F#m7"
+  hold?: boolean;        // full-measure hold, drawn as a diamond
+}
 
 interface Song {
   version: 1;
@@ -25,7 +30,27 @@ interface Song {
   placements: ChordPlacement[];
   keyOverride: string | null;   // "Eb", "Cm", ...; null = auto-detect
   capo: number;          // 0-9
+  bpm?: number;          // auto-scroll tempo; absent = 80
+  notes?: string;        // free text under the header
+  sectionMarks?: SectionMark[];
   createdAt: string;     // ISO 8601
+  updatedAt: string;
+}
+
+interface SectionMark {
+  section: string;       // label line text, e.g. "[Verse 1]"
+  occurrence: number;    // which of the identical labels, 1-based
+  kind: "tacet" | "soft" | "build" | "full" | "custom";
+  text?: string;         // custom word shown in place of the preset name
+  color?: "red" | "blue" | "amber" | "green";   // custom marks only
+}
+
+interface Setlist {
+  version: 1;
+  id: string;            // slug from the name
+  name: string;
+  songIds: string[];     // ordered; repeats allowed
+  createdAt: string;
   updatedAt: string;
 }
 ```
@@ -38,8 +63,8 @@ Import additionally accepts placements in anchor form `{line, chord, anchor, anc
 - `chord.ts` `parseChord` / `isChordSymbol` / `formatChord`. Root `[A-G](#|b)?`, normalized quality set (m, 7, maj7, m7, m7b5, dim, dim7, aug, sus2, sus4, 7sus4, 6, m6, 9, m9, add9, 11, 13, 5), optional slash bass. Unknown suffixes preserved verbatim as opaque quality; transpose still works on root and bass.
 - `transpose.ts` `transposeSymbol(symbol, semitones, prefer)`.
 - `key.ts` `detectKey(symbols)` scores all 24 keys: diatonic triad match +3, root-in-scale +1, first and last chord tonic +3 each, dominant present +1. Also `keyPrefersFlat`, `transposeKeyName`.
-- `capo.ts` `displayChord`, `shapedKey` (key minus capo), `soundingFromShape` (entry while capo > 0), `scoreCapoFret`, `suggestCapo` (frets 0-9 ranked by open-shape friendliness: open majors and 7ths of C A G E D plus B7 score +3, open minors Am Em Dm +3, barre-only roots -1, weighted by occurrence count; ties break toward the lower fret).
-- `layout.ts` `buildChordRow` (print and export row builder; chords padded to their columns, collisions shifted right keeping one space between symbols) and `resolveAnchor` (nth-occurrence substring search: exact, then case-insensitive, then first word).
+- `capo.ts` `displayChord`, `shapedKey` (key minus capo), `soundingFromShape` (entry while capo > 0), `suggestCapo` (frets 0-9 ranked by open-shape friendliness: open majors and 7ths of C A G E D plus B7 score +3, open minors Am Em Dm +3, barre-only roots -1, weighted by occurrence count, with ties broken toward the lower fret).
+- `layout.ts` `buildChordRow` (print and export row builder: chords padded to their columns, collisions shifted right keeping one space between symbols) and `resolveAnchor` (nth-occurrence substring search: exact, then case-insensitive, then the nth occurrence of the first word, where an offset past that word is dropped).
 
 ## Paste ingestion (src/client/lib/tabPaste.ts)
 
@@ -49,19 +74,21 @@ Section spacing is normalized everywhere (src/client/lib/normalize.ts): runs of 
 
 ## Storage and exchange
 
-- localStorage key `chordsheet.songs.v1` holds the library. Autosave debounced 800 ms. Last-write-wins across tabs (accepted limitation).
-- Export downloads `<id>.json`, pretty-printed. Jamie files these under the private library outside the repo (`~/Documents/chordsheet-library/`). `songs/` in the repo carries only the public domain demo set.
-- Import via file picker, drag-drop, or paste. zod-validated. Col-form placements clamped; anchor-form placements resolved via `resolveAnchor`; unresolved entries listed, never silently dropped. Importing over an existing song requires confirm; imported placements arrive as review proposals (accept all, accept per line, discard), not an instant overwrite.
+- localStorage key `chordsheet.songs.v1` holds the library and `chordsheet.setlists.v1` the sets. Autosave debounced 800 ms. Last-write-wins across tabs (accepted limitation).
+- Per-song "Export" in the library downloads `<id>.json`, pretty-printed. "Save all to folder" writes every song plus `setlists.json` into a folder picked once, and "Download backup" saves everything as one `chordsheet-library.json`. Jamie keeps the private library outside the repo (`~/Documents/chordsheet-library/`). `songs/` in the repo carries only the public domain demo set.
+- "Import JSON" in the library is a file picker that takes several files at once. There is no drag-drop and no paste import on the library. Files are zod-validated. A backup file restores every song and set, with one confirm when ids clash. A single song file with a new id is added as a new song. Over an existing song, lyrics must match the library copy or the file is refused, and after a confirm its placements replace the song's placements outright, with no review step.
+- Placements in either path: col-form values are bounded to 0-200, anchor-form values are resolved via `resolveAnchor`, and unresolved entries are listed, never silently dropped.
+- The only review flow is "Paste AI reply" in the editor, which pastes JSON for the open song. Its placements arrive as amber proposals (accept per chip, per line, or all at once, or discard them), not an instant overwrite.
 
 ## AI round trip (v1: no AI in the tool)
 
 - `docs/AI-PLACEMENT.md`: self-contained instructions for any Claude instance. Schema, anchor form, sounding-chords rule (chords entered exactly as printed in the chart image), and hard rules: only add or modify the placements array; never alter lyrics or any other field; never output lyric text beyond short anchor substrings quoted from the provided JSON; skip chords over lyrics not present in the JSON; ignore section labels, tablature, and chord diagrams in the image.
-- "Copy AI prompt" button copies one paste-ready prompt containing those instructions plus the current song JSON. Workflow: paste into Claude Code or claude.ai with the screenshot attached, take the returned JSON, import, review chips, accept.
+- "Copy AI prompt" button copies one paste-ready prompt containing those instructions plus the current song JSON. Workflow: paste into Claude Code or claude.ai with the screenshot attached, paste the returned JSON through "Paste AI reply", review chips, accept.
 - Claude Code running in this repo may instead compute exact cols programmatically (string indexOf); both forms import fine.
 
 ## Client
 
-One `useReducer` store (`state/songStore.ts`) with dirty flag and autosave timer. Components: `Library` (list, create with paste-lyrics textarea, rename, delete, import, export), `Editor` (monospace grid), `LyricLine` (chord row above a `pre` lyric row; click computes col from measured char width), `ChordChip` (absolutely positioned at `col`ch; pointer-capture drag with snap-to-cell; vertical drag crosses lines; click to edit), `ChordEditPopover` (live parse validation, delete, shape-space entry under capo), `Toolbar` (transpose, key readout and override, capo 0-9, header preview, Copy AI prompt, Export, Print), `CapoSuggestions`, `ImportReview`, `PrintSheet` (header plus interleaved chord and lyric text rows).
+One `useReducer` store (`state/songStore.ts`) with dirty flag and autosave timer. Components: `Library` (list, create with paste-lyrics textarea, rename, delete, import, export), `Editor` (monospace grid), `LyricLine` (chord row above a `pre` lyric row, click computes col from measured char width), `ChordChip` (absolutely positioned at `col`ch, pointer-capture drag with snap-to-cell, vertical drag crosses lines, click to edit), `ChordEditPopover` (live parse validation, delete, shape-space entry under capo), `Toolbar` (transpose, key readout and override, capo 0-9 and Suggest capo, header preview, Copy text, Print), an editor bar above it (Copy AI prompt, Paste AI reply, Edit lyrics), `CapoSuggestions`, `ImportReview`, `PrintSheet` (header plus interleaved chord and lyric text rows).
 
 Print CSS: `@media print` hides everything except `.print-sheet`; `@page { margin: 15mm }`; roughly 10.5 pt monospace, about 90 columns; `white-space: pre`; each chord and lyric pair wrapped in `.line-pair { break-inside: avoid }`. The editor warns on lines over 90 characters.
 
@@ -75,11 +102,15 @@ Print CSS: `@media print` hides everything except `.print-sheet`; `@page { margi
 6. Transpose, key, and capo controls.
 7. Print-first output.
 8. Polish: plain-text export, keyboard shortcuts, warnings, README.
-9. Deferred, optional: full buildout for other users. Minimal Hono API server; songs CRUD moves to disk with atomic writes; in-app screenshot upload consumed in memory; POST /api/ai/place calls the Anthropic API server-side (@anthropic-ai/sdk, structured output, claude-sonnet-5 default, key in .env) with the same anchor protocol; client downscales images to 2576 px long edge, 5 MB cap. Everything from v1 (schema, engine, review UI) is reused as-is.
+9. Deferred, optional: full buildout for other users. Minimal Hono API server. Songs CRUD moves to disk with atomic writes. In-app screenshot upload consumed in memory. POST /api/ai/place calls the Anthropic API server-side (@anthropic-ai/sdk, structured output, the strongest available model as the default, key in .env) with the same anchor protocol. The client downscales images to 2576 px long edge, 5 MB cap. Everything from v1 (schema, engine, review UI) is reused as-is.
+
+## PDF chart ingest (src/ingest/)
+
+`npm run ingest-pdf -- <chart.pdf>` reads a chord chart PDF that carries a text layer and writes a library song outside the repo. `src/ingest/chartPdf.ts` is pure (word boxes in, Song and a correction log out) and table tested on synthetic boxes built from the demo set. The script in `scripts/ingest-pdf.mts` does the file and process work. Workflow, review checklist, and known limits are in docs/PDF-INGEST.md.
 
 ## Chord diagrams (src/engine/shapes.ts, ChordDiagram.tsx, ChordChartRow.tsx)
 
-A CHORDS row shows SVG fretboard grids for the song's unique displayed shapes (post-capo) in first-appearance order: collapsible panel on screen, a row under the print header spanning both columns. Voicings resolve in order: curated open-chord table, known slash voicings, movable E-form and A-form templates (lower position wins). Chords outside the dictionary walk a simplification ladder (drop slash bass; maj9 to maj7; 13/9/11 to 7; m11 to m7 to m; dim family to m7b5/dim7; 2 to sus2 as a pure alias) so every parseable chord gets the closest reasonable shape, labeled with the song's own symbol; screen tooltips name the substitution. Dots only, no fingering numbers, by Jamie's choice. Hovering a chord chip in the editor for 330 ms pops the same diagram in a fixed-position card (above the chip, below for the top line); it hides on pointer-out, never appears mid-drag, and approximated shapes carry a "shows X" note.
+A CHORDS row shows SVG fretboard grids for the song's unique displayed shapes (post-capo) in first-appearance order: collapsible panel on screen, a row under the print header spanning both columns. Voicings resolve in order: curated open-chord table, known slash voicings, movable E-form and A-form templates (lower position wins). Chords outside the dictionary walk a simplification ladder (drop slash bass, maj9 to maj7, 13/9/11 and altered dominants like 7b9 or +7 to 7, 9sus4 and 13sus4 to 7sus4, m11 to m7 to m, dim family to m7b5/dim7, 2 to sus2 as a pure alias) so every parseable chord gets the closest reasonable shape, labeled with the song's own symbol, and screen tooltips name the substitution. Dots only, no fingering numbers, by Jamie's choice. Hovering a chord chip in the editor for 330 ms pops the same diagram in a fixed-position card (above the chip, below for the top line). It hides on pointer-out, never appears mid-drag, and approximated shapes carry a "shows X" note.
 
 ## Later ideas (not scheduled)
 

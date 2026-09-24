@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { songSchema } from "../shared/schemas";
-import { ingestChart, parseBboxHtml, slugify, type WordBox } from "./chartPdf";
+import { ingestChart, parseBboxHtml, type WordBox } from "./chartPdf";
 
 // Synthetic word boxes in the chart layout, built from the demo set only.
 const CW = 5; // points per lyric character
@@ -70,14 +70,6 @@ describe("parseBboxHtml", () => {
   it("returns nothing for a PDF with no text layer", () => {
     expect(parseBboxHtml('<doc><page width="612" height="792"></page></doc>')).toEqual([]);
   });
-});
-
-describe("slugify", () => {
-  it.each([
-    ["Amazing Grace", "amazing-grace"],
-    ["It Is Well (with My Soul)", "it-is-well-with-my-soul"],
-    ["Grace's Song", "graces-song"],
-  ])("%s", (title, slug) => expect(slugify(title)).toBe(slug));
 });
 
 describe("ingestChart", () => {
@@ -169,6 +161,20 @@ describe("ingestChart", () => {
     ["slash inside a quality is rewritten", [box(LEFT, 170, "D"), box(LEFT + 7.4, 169, "6/9", SMALL, 11), box(LEFT + 18.2, 170, "/A", BODY, 10.8)], "D", ["D69/A"], "rewritten for the chord grammar: D6/9/A to D69/A"],
     ["superscript 1 is dropped", [box(LEFT, 170, "A", BODY, 6.85), box(LEFT + 6.9, 169, "1", SMALL, 4.2)], "D", ["A"], "superscript 1 dropped from A"],
     ["two separate chords stay separate", [box(LEFT, 170, "G", BODY, 7), box(LEFT + 15.5, 170, "C", BODY, 6.4)], "G", ["G", "C"], null],
+    ["width restore never spells B# in C", [box(LEFT, 170, "B", BODY, 12.2)], "C", ["Bb"], "B# is not a chord spelling, restored as Bb: check it"],
+    ["width restore never spells E# in G", [box(LEFT, 170, "Em", BODY, 20.6)], "G", ["Ebm"], "accidental restored from width: Em to Ebm"],
+    ["width restore never spells Cb in F", [box(LEFT, 170, "C", BODY, 11.6)], "F", ["C#"], "Cb is not a chord spelling, restored as C#: check it"],
+    ["width restore never spells Fb in Bb", [box(LEFT, 170, "Fm", BODY, 20.5)], "Bb", ["F#m"], "Fb is not a chord spelling, restored as F#: check it"],
+    ["gap restore never spells E# in D", [box(LEFT, 170, "E", BODY, 5.55), box(LEFT + 10.9, 170, "m", BODY, 9.7)], "D", ["Ebm"], "accidental restored from gap: E to Eb"],
+    ["gap restore never spells B# in C", [box(LEFT, 170, "B", BODY, 6.9), box(LEFT + 12.2, 170, "m", BODY, 9.7)], "C", ["Bbm"], "B# is not a chord spelling, restored as Bb: check it"],
+    ["gap restore keeps the key's sharp where it spells a real note", [box(LEFT, 170, "C", BODY, 6.25), box(LEFT + 11.6, 170, "m", BODY, 9.7)], "D", ["C#m"], "accidental restored from gap: C to C#"],
+    ["a minor key takes its relative major's signature", [box(LEFT, 170, "Gm/F", BODY, 27.8), box(LEFT + 40, 170, "B", BODY, 6.9)], "Dm", ["Gm/F", "Bb"], "flat key Dm: flat glyphs leave no trace, they are restored from the key signature, check every chord"],
+    ["a minor key restores flats by width too", [box(LEFT, 170, "E", BODY, 10.9)], "Gm", ["Eb"], "accidental restored from width: E to Eb"],
+    ["B minor does not take B major's sharps", [box(LEFT, 170, "Em/D", BODY, 29.9)], "Bm", ["Em/D"], null],
+    ["E minor restores an F# bass", [box(LEFT, 170, "D/F", BODY, 16.8)], "Em", ["D/F#"], "bass accidental restored from key: D/F to D/F#"],
+    ["D# minor takes F# major's six sharps", [box(LEFT, 170, "B/D", BODY, 18.25)], "D#m", ["B/D#"], "bass accidental restored from key: B/D to B/D#"],
+    ["Bb minor takes Db major's five flats", [box(LEFT, 170, "G", BODY, 7.4)], "Bbm", ["Gb"], "root accidental restored from key: G to Gb"],
+    ["A minor alters nothing", [box(LEFT, 170, "G/B", BODY, 18.3)], "Am", ["G/B"], null],
   ] as const)("chord assembly: %s", (_name, row, key, symbols, logged) => {
     const r = ingest([...header(), ...label(140, "I", "INTRO"), ...row], key);
     expect(r.song.placements.map((p) => p.chord)).toEqual(symbols);
@@ -213,6 +219,36 @@ describe("ingestChart", () => {
       ...lyric(280, "Amazing grace"),
     ]);
     expect(r.song.sectionMarks).toEqual([{ section: "[Chorus]", occurrence: 2, kind: "build", text: "Full band in, Build" }]);
+  });
+
+  it("moves a note that sits mid-section to the song notes, not onto a lyric line", () => {
+    const r = ingest([
+      ...header(),
+      ...label(140, "V1", "VERSE 1"),
+      ...lyric(180, "Amazing grace, how sweet the sound"),
+      ...note(195, "Soft piano only"),
+      ...lyric(220, "That saved a wretch like me"),
+    ]);
+    expect(r.song.lyrics).toEqual(["[Verse 1]", "Amazing grace, how sweet the sound", "That saved a wretch like me"]);
+    expect(r.song.sectionMarks).toBeUndefined();
+    expect(r.song.notes?.split("\n").at(-1)).toBe("Chart note in [Verse 1]: Soft piano only");
+    expect(r.log).toContain('note "Soft piano only" sits mid-section in [Verse 1], moved to the song notes');
+  });
+
+  it("keeps a note after an instrumental chord row off the instrumental line", () => {
+    const r = ingest([
+      ...header(),
+      ...label(140, "I", "INTRO"),
+      box(LEFT, 170, "G"),
+      box(LEFT + 36, 170, "C"),
+      ...note(185, "Hold"),
+      ...label(220, "V1", "VERSE 1"),
+      ...lyric(260, "Was blind, but now I see"),
+    ]);
+    expect(r.song.lyrics).toEqual(["[Intro]", "", "", "[Verse 1]", "Was blind, but now I see"]);
+    expect(chordsOn(r, 1)).toEqual([[0, "G"], [6, "C"]]);
+    expect(r.song.notes?.split("\n").at(-1)).toBe("Chart note in [Intro]: Hold");
+    expect(r.log).toContain('note "Hold" sits mid-section in [Intro], moved to the song notes');
   });
 
   it("straightens curly apostrophes and lets the key option win over the header", () => {

@@ -1,5 +1,6 @@
 import { keyName, shapedKey } from "../../engine";
 import type { Song } from "../../shared/types";
+import { headerKeyLine } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 
 interface Props {
@@ -72,8 +73,7 @@ export function Toolbar(props: Props) {
       </span>
 
       <span className="toolbar-header-preview">
-        {soundingKey ? `Key: ${soundingKey}` : "Key: unknown"}
-        {song.capo > 0 && `, Capo ${song.capo}`}
+        {headerKeyLine(soundingKey ?? "unknown", song.capo)}
         {song.capo > 0 && shaped && ` (play ${shaped} shapes)`}
       </span>
 

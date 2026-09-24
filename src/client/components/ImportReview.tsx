@@ -34,7 +34,7 @@ export function ImportReviewPanel({ review, renderChord, onAcceptAll, onAcceptLi
         <button onClick={onDiscard}>Discard</button>
       </div>
       {review.lyricsRejected && (
-        <p className="status">The reply tried to change lyrics; those changes were rejected. Only placements are considered.</p>
+        <p className="status">The reply tried to change lyrics, and those changes were rejected. Only placements are considered.</p>
       )}
       {lines.length > 0 && (
         <ul className="review-lines">

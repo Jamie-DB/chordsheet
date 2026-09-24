@@ -1,6 +1,7 @@
 import { resolveAnchor } from "../../engine";
 import { importedSongSchema, setlistSchema, songSchema } from "../../shared/schemas";
 import type { ChordPlacement, Setlist, Song } from "../../shared/types";
+import { freshId } from "./ids";
 import { normalizeSections } from "./normalize";
 
 export interface UnresolvedPlacement {
@@ -24,12 +25,6 @@ export interface ImportFailure {
 }
 
 export type ImportResult = ImportSuccess | ImportFailure;
-
-function freshId(): string {
-  return typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : `p-${Math.random().toString(36).slice(2, 10)}`;
-}
 
 /**
  * Parse imported song JSON. Only the placements array is ever accepted from
@@ -73,6 +68,25 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
     existing !== undefined &&
     JSON.stringify(imported.lyrics) !== JSON.stringify(existing.lyrics);
 
+  // A reply may reuse an id the library already holds for a chord somewhere
+  // else, or repeat an id. Either would give two placements one id once
+  // accepted, so those get a fresh id. An unchanged placement keeps its id.
+  const existingById = new Map((existing?.placements ?? []).map((p) => [p.id, p]));
+  const usedIds = new Set<string>();
+  const idFor = (candidate: string | undefined, line: number, col: number, chord: string): string => {
+    if (candidate !== undefined && !usedIds.has(candidate)) {
+      const prior = existingById.get(candidate);
+      if (!prior || (prior.line === line && prior.col === col && prior.chord === chord)) {
+        usedIds.add(candidate);
+        return candidate;
+      }
+    }
+    let id = freshId();
+    while (usedIds.has(id) || existingById.has(id)) id = freshId();
+    usedIds.add(id);
+    return id;
+  };
+
   const placements: ChordPlacement[] = [];
   const unresolved: UnresolvedPlacement[] = [];
   for (const p of imported.placements) {
@@ -89,10 +103,11 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
     if ("col" in p) {
       // Past-end columns are legitimate (between-phrase progressions);
       // only an absurd value gets bounded.
+      const col = Math.max(0, Math.min(200, p.col));
       placements.push({
-        id: p.id ?? freshId(),
+        id: idFor(p.id, p.line, col, p.chord),
         line: p.line,
-        col: Math.max(0, Math.min(200, p.col)),
+        col,
         chord: p.chord,
         ...(p.hold ? { hold: true } : {}),
       });
@@ -107,7 +122,7 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
         });
       } else {
         placements.push({
-          id: freshId(),
+          id: idFor(undefined, p.line, col, p.chord),
           line: p.line,
           col,
           chord: p.chord,

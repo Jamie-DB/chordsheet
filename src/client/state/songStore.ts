@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import type { Setlist, Song } from "../../shared/types";
-import { normalizeSections, stripPageLines } from "../lib/normalize";
-import { extractLabelNotes } from "../lib/sectionMarks";
+import { cleanSong } from "../lib/cleanSong";
 import {
   addSongToSet,
   createSetlist,
@@ -16,7 +15,7 @@ import {
   saveSetlists,
   slugify,
 } from "../lib/storage";
-import { parsePastedTab, repairChordTextLines } from "../lib/tabPaste";
+import { parsePastedTab } from "../lib/tabPaste";
 
 export type View =
   | { name: "library" }
@@ -51,26 +50,16 @@ function stamp(song: Song): Song {
 }
 
 /**
- * One-time fix-up of stored songs on load: page artifacts stripped, chord
- * rows stuck as text repaired, section spacing normalized. updatedAt is
+ * One-time fix-up of stored songs on load (see cleanSong). updatedAt is
  * deliberately untouched so cleaned browser and disk copies stay identical
  * and folder sync keeps skipping them.
  */
 function migrate(songs: Song[]): Song[] {
   let anyChanged = false;
   const migrated = songs.map((song) => {
-    const stripped = stripPageLines(song.lyrics, song.placements);
-    const repaired = repairChordTextLines(stripped.lyrics, stripped.placements);
-    const n = normalizeSections(repaired.lyrics, repaired.placements);
-    const extracted = extractLabelNotes(n.lyrics, song.sectionMarks ?? []);
-    if (!stripped.changed && !repaired.changed && !n.changed && !extracted.changed) return song;
-    anyChanged = true;
-    return {
-      ...song,
-      lyrics: extracted.lyrics,
-      placements: n.placements,
-      sectionMarks: extracted.sectionMarks.length > 0 ? extracted.sectionMarks : song.sectionMarks,
-    };
+    const result = cleanSong(song);
+    if (result.changed) anyChanged = true;
+    return result.song;
   });
   if (anyChanged) saveLibrary(migrated);
   return migrated;
@@ -163,7 +152,8 @@ function reducer(state: AppState, action: Action): AppState {
 export interface SongActions {
   /** writtenForCapo: the pasted tab's capo; symbols are read as shapes at that fret. */
   createSong(title: string, artist: string, lyricsText: string, writtenForCapo: number): void;
-  importSong(song: Song, open: boolean): void;
+  /** keepUpdatedAt: a backup restore keeps the file's timestamp; any other import stamps now. */
+  importSong(song: Song, open: boolean, keepUpdatedAt?: boolean): void;
   open(id: string): void;
   openInSet(setId: string, setIndex: number): void;
   openSet(id: string): void;
@@ -190,22 +180,40 @@ export function useSongStore(): [AppState, SongActions] {
     };
   });
 
-  // Autosave library and setlists, debounced.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  // Autosave library and setlists, debounced. pending marks a change the
+  // timer has not written yet.
   const first = useRef(true);
+  const pending = useRef(false);
   useEffect(() => {
     if (first.current) {
       first.current = false;
       return;
     }
+    pending.current = true;
     const t = setTimeout(() => {
       saveLibrary(state.songs);
       saveSetlists(state.setlists);
+      pending.current = false;
     }, 800);
     return () => clearTimeout(t);
   }, [state.songs, state.setlists]);
 
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  // Closing the tab inside the debounce window would lose the last edit, so
+  // write it on the way out. Only a pending edit is written: a tab with
+  // nothing unsaved must not overwrite what another tab saved since.
+  useEffect(() => {
+    const flush = () => {
+      if (!pending.current) return;
+      saveLibrary(stateRef.current.songs);
+      saveSetlists(stateRef.current.setlists);
+      pending.current = false;
+    };
+    window.addEventListener("pagehide", flush);
+    return () => window.removeEventListener("pagehide", flush);
+  }, []);
 
   const actions = useMemo<SongActions>(
     () => ({
@@ -229,8 +237,8 @@ export function useSongStore(): [AppState, SongActions] {
         };
         dispatch({ type: "addSong", song, open: true });
       },
-      importSong(song, open) {
-        dispatch({ type: "addSong", song: stamp(song), open });
+      importSong(song, open, keepUpdatedAt = false) {
+        dispatch({ type: "addSong", song: keepUpdatedAt ? song : stamp(song), open });
       },
       open(id) {
         dispatch({ type: "open", id });

@@ -58,11 +58,3 @@ export interface Setlist {
   createdAt: string;
   updatedAt: string;
 }
-
-export interface SongSummary {
-  id: string;
-  title: string;
-  artist?: string;
-  updatedAt: string;
-  capo: number;
-}

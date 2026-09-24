@@ -1,6 +1,8 @@
 import { normalizeSections } from "../client/lib/normalize";
 import { extractLabelNotes } from "../client/lib/sectionMarks";
 import { parseChord } from "../engine/chord";
+import { mod12 } from "../engine/notes";
+import { slugify } from "../shared/slug";
 import type { ChordPlacement, Song } from "../shared/types";
 
 /**
@@ -54,6 +56,10 @@ const SHARP_KEYS = ["G", "D", "A", "E", "B", "F#", "C#"];
 const FLAT_KEYS = ["F", "Bb", "Eb", "Ab", "Db", "Gb", "Cb"];
 const SHARP_ORDER = "FCGDAEB";
 const FLAT_ORDER = "BEADGCF";
+const LETTERS = "CDEFGAB";
+const LETTER_PC = [0, 2, 4, 5, 7, 9, 11];
+/** Spellings no chart prints as a chord root; the other accidental is the one that was dropped. */
+const UNSPELLED = new Set(["B#", "E#", "Cb", "Fb"]);
 
 const CHORD_FRAGMENT = /^(?:[A-G](?:m|dim|aug)?(?:\/[A-G])?|m(?:\/[A-G])?|\/[A-G])$/;
 
@@ -139,16 +145,38 @@ interface KeyRule {
   altered: Set<string>;
 }
 
+/** A minor key shares its signature with the major a minor third up, spelled two letters up ("Dm" to "F"). */
+function relativeMajor(tonic: string): string {
+  const i = LETTERS.indexOf(tonic[0]);
+  const j = (i + 2) % 7;
+  const accidental = tonic[1] === "#" ? 1 : tonic[1] === "b" ? -1 : 0;
+  const shift = mod12(LETTER_PC[i] + accidental + 3 - LETTER_PC[j]);
+  return LETTERS[j] + (shift === 1 ? "#" : shift === 11 ? "b" : "");
+}
+
 function keyRule(key: string, log: string[]): KeyRule {
-  const tonic = /^[A-G][#b]?/.exec(key)?.[0] ?? "";
-  const sharp = SHARP_KEYS.indexOf(tonic);
+  const m = /^([A-G][#b]?)(m(?!aj))?/.exec(key);
+  const name = m ? m[1] + (m[2] ?? "") : "";
+  const signature = m?.[2] ? relativeMajor(m[1]) : (m?.[1] ?? "");
+  const sharp = SHARP_KEYS.indexOf(signature);
   if (sharp >= 0) return { accidental: "#", altered: new Set(SHARP_ORDER.slice(0, sharp + 1)) };
-  const flat = FLAT_KEYS.indexOf(tonic);
+  const flat = FLAT_KEYS.indexOf(signature);
   if (flat >= 0) {
-    log.push(`flat key ${tonic}: flat glyphs leave no trace, they are restored from the key signature, check every chord`);
+    log.push(`flat key ${name}: flat glyphs leave no trace, they are restored from the key signature, check every chord`);
     return { accidental: "b", altered: new Set(FLAT_ORDER.slice(0, flat + 1)) };
   }
   return { accidental: "#", altered: new Set() };
+}
+
+/**
+ * The accidental a dropped glyph most likely was: the key's own, unless that
+ * spells B#, E#, Cb, or Fb (a C major chart's "B" with a missing flat is Bb, not B#).
+ */
+function droppedAccidental(letter: string, rule: KeyRule, log: string[]): "#" | "b" {
+  if (!UNSPELLED.has(letter + rule.accidental)) return rule.accidental;
+  const other = rule.accidental === "#" ? "b" : "#";
+  log.push(`${letter}${rule.accidental} is not a chord spelling, restored as ${letter}${other}: check it`);
+  return other;
 }
 
 /**
@@ -166,7 +194,7 @@ function assembleChords(row: Row, rule: KeyRule, log: string[]): RawChord[] {
       const known = [...symbol].every((ch) => ch in GLYPH);
       const expected = [...symbol].reduce((sum, ch) => sum + (GLYPH[ch] ?? 0), 0);
       if (known && w.xMax - w.xMin - expected > MISSING_GLYPH) {
-        const fixed = symbol[0] + rule.accidental + symbol.slice(1);
+        const fixed = symbol[0] + droppedAccidental(symbol[0], rule, log) + symbol.slice(1);
         log.push(`accidental restored from width: ${symbol} to ${fixed}`);
         symbol = fixed;
       }
@@ -175,8 +203,9 @@ function assembleChords(row: Row, rule: KeyRule, log: string[]): RawChord[] {
     }
     // A suffix fragment set off by a visible gap had an accidental before it.
     if (w.xMin - last.xMax > MISSING_GLYPH) {
-      log.push(`accidental restored from gap: ${last.symbol} to ${last.symbol + rule.accidental}`);
-      last.symbol += rule.accidental;
+      const accidental = droppedAccidental(last.symbol[last.symbol.length - 1], rule, log);
+      log.push(`accidental restored from gap: ${last.symbol} to ${last.symbol + accidental}`);
+      last.symbol += accidental;
     }
     // A superscript 1 is a chart marking, not a chord quality.
     if (isH(w, H_SMALL) && w.text === "1") {
@@ -236,14 +265,6 @@ function titleCase(s: string): string {
   return s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
 }
 
-export function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/['’]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 interface Meta {
   title: string;
   artist?: string;
@@ -287,14 +308,27 @@ export function ingestChart(words: WordBox[], options: IngestOptions = {}): Inge
   const placements: ChordPlacement[] = [];
   let pending: RawChord[] | null = null;
   let notes: string[] = [];
+  /** True once a chord or lyric row follows the current label: later notes are mid-section. */
+  let midSection = false;
+  let notesMidSection = false;
+  let section = "";
+  const chartNotes: string[] = [];
   let seenLabel = false;
 
   const place = (line: number, col: number, chord: string) =>
     placements.push({ id: `p${placements.length + 1}`, line, col, chord });
-  // Notes ride on the label line; extractLabelNotes promotes them to section marks.
+  // A note right under a label rides on the label line, and extractLabelNotes promotes it
+  // to a section mark. A note further down has no line of its own, so it goes to the song notes.
   const flushNotes = () => {
-    if (notes.length > 0) lyrics[lyrics.length - 1] += ` *${notes.join(", ")}*`;
+    if (notes.length === 0) return;
+    const text = notes.join(", ");
     notes = [];
+    if (!notesMidSection) {
+      lyrics[lyrics.length - 1] += ` *${text}*`;
+      return;
+    }
+    chartNotes.push(`Chart note in ${section}: ${text}`);
+    log.push(`note "${text}" sits mid-section in ${section}, moved to the song notes`);
   };
   // A chord row with no lyric under it is an instrumental line.
   const flushInstrumental = () => {
@@ -315,18 +349,23 @@ export function ingestChart(words: WordBox[], options: IngestOptions = {}): Inge
       flushInstrumental();
       flushNotes();
       if (lyrics.length > 0) lyrics.push("");
-      lyrics.push(`[${titleCase(row.slice(1).map((w) => w.text).join(" "))}]`);
+      section = `[${titleCase(row.slice(1).map((w) => w.text).join(" "))}]`;
+      lyrics.push(section);
       seenLabel = true;
+      midSection = false;
     } else if (!seenLabel || kind === "skip") {
       continue;
     } else if (kind === "note") {
+      if (notes.length === 0) notesMidSection = midSection;
       notes.push(row.map((w) => w.text).join(" "));
     } else if (kind === "chords") {
       flushNotes();
       flushInstrumental();
       pending = assembleChords(row, rule, log);
+      midSection = true;
     } else {
       flushNotes();
+      midSection = true;
       const starts: number[] = [];
       let text = "";
       for (const w of row) {
@@ -366,7 +405,7 @@ export function ingestChart(words: WordBox[], options: IngestOptions = {}): Inge
   const credits = [meta.writers && `Writers: ${meta.writers}.`, meta.artist && `As recorded by ${meta.artist}.`];
   const song: Song = {
     version: 1,
-    id: slugify(meta.title),
+    id: slugify(meta.title, new Set()),
     title: meta.title,
     ...(meta.artist ? { artist: meta.artist } : {}),
     lyrics: extracted.lyrics,
@@ -380,6 +419,7 @@ export function ingestChart(words: WordBox[], options: IngestOptions = {}): Inge
         .join(" ")
         .replace(/[^.]$/, "$&."),
       credits.filter(Boolean).join(" "),
+      ...chartNotes,
     ]
       .filter(Boolean)
       .join("\n"),

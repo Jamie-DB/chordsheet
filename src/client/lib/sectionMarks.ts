@@ -48,6 +48,29 @@ export function sectionRanges(lyrics: string[]): SectionRange[] {
   return out;
 }
 
+export interface SectionStyling {
+  /** Mark color for every line inside a marked section, label line included. */
+  colorByLine: Map<number, MarkColor>;
+  /** Lines inside a tacet section, drawn smaller. */
+  tacetLines: Set<number>;
+}
+
+/** Per-line section color and tacet flags, shared by the editor and print. */
+export function sectionStyling(lyrics: string[], marks: SectionMark[]): SectionStyling {
+  const colorByLine = new Map<number, MarkColor>();
+  const tacetLines = new Set<number>();
+  for (const r of sectionRanges(lyrics)) {
+    const mark = markFor(marks, r.label, r.occurrence);
+    if (!mark) continue;
+    const color = markColor(mark);
+    for (let i = r.start; i <= r.end; i++) {
+      colorByLine.set(i, color);
+      if (mark.kind === "tacet") tacetLines.add(i);
+    }
+  }
+  return { colorByLine, tacetLines };
+}
+
 export function markFor(
   marks: SectionMark[],
   label: string,

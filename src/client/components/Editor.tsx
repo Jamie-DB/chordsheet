@@ -3,6 +3,7 @@ import { detectKey, displayChord, isChordSymbol, shapedKey, soundingFromShape } 
 import type { Song } from "../../shared/types";
 import { buildAiPrompt } from "../lib/aiPrompt";
 import { parseImport } from "../lib/exchange";
+import { freshId } from "../lib/ids";
 import { chordsOnLine, deleteLine, editLine, insertLine } from "../lib/lineOps";
 import { normalizeSections } from "../lib/normalize";
 import {
@@ -10,6 +11,7 @@ import {
   markFor,
   markName,
   sectionRanges,
+  sectionStyling,
   stripBrackets,
   withMark,
   withoutMark,
@@ -40,17 +42,6 @@ interface Props {
   setNav?: SetNav;
 }
 
-export function songKeyName(song: Song): string | null {
-  if (song.keyOverride) return song.keyOverride;
-  return detectKey(song.placements.map((p) => p.chord))?.name ?? null;
-}
-
-function freshId(): string {
-  return typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : `p-${Math.random().toString(36).slice(2, 10)}`;
-}
-
 export function Editor({ song, onBack, onChange, setNav }: Props) {
   const detectedKey = detectKey(song.placements.map((p) => p.chord))?.name ?? null;
   const soundingKey = song.keyOverride ?? detectedKey;
@@ -71,17 +62,12 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
   const marks = song.sectionMarks ?? [];
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
-  const sectionClassByLine = new Map<number, string>();
-  const tacetLines = new Set<number>();
-  for (const r of ranges) {
-    const mark = markFor(marks, r.label, r.occurrence);
-    if (!mark) continue;
-    const cls = `sec-${markColor(mark)}`;
-    for (let i = r.start; i <= r.end; i++) {
-      sectionClassByLine.set(i, mark.kind === "tacet" ? `${cls} tacet-small` : cls);
-      if (mark.kind === "tacet") tacetLines.add(i);
-    }
-  }
+  const { colorByLine, tacetLines } = sectionStyling(song.lyrics, marks);
+  const sectionClassFor = (i: number): string | undefined => {
+    const color = colorByLine.get(i);
+    if (!color) return undefined;
+    return tacetLines.has(i) ? `sec-${color} tacet-small` : `sec-${color}`;
+  };
   const [notesOpen, setNotesOpen] = useState(() => Boolean(song.notes?.trim()));
 
   const bpm = song.bpm ?? 80;
@@ -127,7 +113,8 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
       const w = measureRef.current.getBoundingClientRect().width / 10;
       if (w > 0) setCharWidth(w);
     }
-    const pair = sheetRef.current?.querySelector(".line-pair");
+    // Collapsed label rows measure 0 and tacet rows are smaller, so skip both.
+    const pair = sheetRef.current?.querySelector(".line-pair:not(.label-collapsed):not(.tacet-small)");
     if (pair instanceof HTMLElement && pair.offsetHeight > 0) setPairHeight(pair.offsetHeight);
   }, [song.lyrics.length, lyricsDraft]);
 
@@ -472,7 +459,7 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
                 if (n > 0 && !window.confirm(`Delete this line and its ${n} chord(s)?`)) return;
                 onChange(deleteLine(song, line2));
               }}
-              sectionClass={sectionClassByLine.get(i)}
+              sectionClass={sectionClassFor(i)}
               sectionUi={(() => {
                 const range = rangeByStart.get(i);
                 if (!range) return undefined;
