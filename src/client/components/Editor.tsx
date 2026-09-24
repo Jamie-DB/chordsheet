@@ -5,8 +5,7 @@ import { buildAiPrompt } from "../lib/aiPrompt";
 import { renderArrangement, withArrangement } from "../lib/arrangement";
 import { parseImport } from "../lib/exchange";
 import { freshId } from "../lib/ids";
-import { chordsOnLine, deleteLine, editLine, insertLine } from "../lib/lineOps";
-import { normalizeSections } from "../lib/normalize";
+import { chordsOnLine, deleteLine, editLine, insertLine, replaceLyrics, stepsUsingLabel } from "../lib/lineOps";
 import {
   markColor,
   markFor,
@@ -205,23 +204,17 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
 
   function saveLyrics() {
     if (lyricsDraft === null) return;
-    const lines = lyricsFromPaste(lyricsDraft);
-    let dropped = 0;
-    const kept = song.placements.filter((p) => {
-      if (p.line >= lines.length) {
-        dropped += 1;
-        return false;
-      }
-      return true;
-    });
-    const normalized = normalizeSections(lines, kept);
-    onChange({ ...song, lyrics: normalized.lyrics, placements: normalized.placements });
+    const result = replaceLyrics(song, lyricsFromPaste(lyricsDraft));
+    onChange(result.song);
     setLyricsDraft(null);
-    setNotice(
-      dropped > 0
-        ? `Lyrics updated. ${dropped} chord(s) lost their line and were removed. Check placements.`
-        : null,
-    );
+    const lost: string[] = [];
+    if (result.droppedChords > 0) {
+      lost.push(`${result.droppedChords} chord(s) lost their line and were removed. Check placements.`);
+    }
+    if (result.droppedRefs > 0) {
+      lost.push(`${result.droppedRefs} section mark(s) or version step(s) lost their section label and were removed.`);
+    }
+    setNotice(lost.length > 0 ? `Lyrics updated. ${lost.join(" ")}` : null);
   }
 
   const longLines = song.lyrics.filter((l) => l.length > 90).length;
@@ -510,6 +503,15 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
               onDeleteLine={(line2) => {
                 const n = chordsOnLine(song, line2);
                 if (n > 0 && !window.confirm(`Delete this line and its ${n} chord(s)?`)) return;
+                const used = stepsUsingLabel(song, line2);
+                if (
+                  used > 0 &&
+                  !window.confirm(
+                    `This label starts a section that ${used} version step(s) play. Delete it and remove those steps from their versions?`,
+                  )
+                ) {
+                  return;
+                }
                 onChange(deleteLine(song, line2));
               }}
               sectionClass={sectionClassFor(i)}

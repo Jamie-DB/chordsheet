@@ -10,7 +10,7 @@ The editor with one of the public domain demo songs. The song is stored in Eb, c
 
 ## How it was built
 
-Built with Claude Code in a plan-first loop. The first commit is a conventions file and a design doc, not code. Everything after that is an issue, a commit that closes it, and a test wherever the logic is testable. 47 commits, 44 issues, 542 tests across 25 files. The first 29 commits and 31 issues landed in twelve days, August 5 to 16, 2026, from a one-paragraph idea to weekly rehearsal use. BUILDLOG.md has the day-by-day account.
+Built with Claude Code in a plan-first loop. The first commit is a conventions file and a design doc, not code. Everything after that is an issue, a commit that closes it, and a test wherever the logic is testable. 47 commits, 44 issues, 561 tests across 25 files. The first 29 commits and 31 issues landed in twelve days, August 5 to 16, 2026, from a one-paragraph idea to weekly rehearsal use. BUILDLOG.md has the day-by-day account.
 
 The agents wrote nearly all of the code: the scaffold, the chord engine, the placement editor, the AI round-trip kit, the print path, and the test suites. Eight phases were generated in 27 minutes on the first afternoon, which is the cheap part. The eleven days after that, 23 issues of real use breaking real assumptions, are what turned the skeleton into a tool.
 
@@ -32,7 +32,7 @@ Everything here is confirmed by running the app or reading the tree, not guessed
 - **No undo.** Deleting a chord takes effect on the click. Deleting a lyric line asks only when the line holds chords. Song and set deletion ask once. Nothing is recoverable after that except from a backup file.
 - **Unusual chords get approximate shapes.** Voicings come from a curated table plus movable barre forms, and anything outside that walks a simplification ladder to the nearest reasonable shape. The diagram tooltip names the substitution when it happens, so you can see when the grid is not literally the chord.
 - **One browser holds the working copy.** Songs live in that browser's localStorage. Nothing syncs between browsers or machines. Moving a library means folder save, "Download backup", or per-song export and import.
-- **Tests stop at the UI boundary.** 542 tests across 25 files cover the engine (213 of them), the client lib, and the PDF ingest. There are no component or browser tests, so layout and interaction regressions surface by using the app.
+- **Tests stop at the UI boundary.** 561 tests across 25 files cover the engine (213 of them), the client lib, and the PDF ingest. There are no component or browser tests, so layout and interaction regressions surface by using the app.
 - **One person, one browser, no sharing.** No accounts, no server, no hosting. That is the design, and the product version of it is #9 below.
 
 ## What's next
@@ -50,7 +50,7 @@ npm ci
 npm run dev      # http://localhost:5173
 ```
 
-`npm test` runs the Vitest suite, 542 tests in 25 files. `npm run build` type-checks and builds, 331.54 kB of JavaScript (100.99 kB gzipped) and 15.24 kB of CSS. `npm run preview` serves the build. `npm run ingest-pdf -- <chart.pdf>` turns a chord chart PDF that has a text layer into a song file in the personal library folder, outside the repo. It needs poppler, and docs/PDF-INGEST.md has the workflow and the review checklist.
+`npm test` runs the Vitest suite, 561 tests in 25 files. `npm run build` type-checks and builds, 333.07 kB of JavaScript (101.56 kB gzipped) and 15.24 kB of CSS. `npm run preview` serves the build. `npm run ingest-pdf -- <chart.pdf>` turns a chord chart PDF that has a text layer into a song file in the personal library folder, outside the repo. It needs poppler, and docs/PDF-INGEST.md has the workflow and the review checklist.
 
 ## Workflow
 
