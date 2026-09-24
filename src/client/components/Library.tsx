@@ -97,7 +97,7 @@ export function Library({
           const clashes = library.songs.filter((s) => songs.some((e) => e.id === s.id)).length;
           if (
             clashes > 0 &&
-            !window.confirm(`${file.name} contains ${library.songs.length} song(s); ${clashes} will replace songs already in the library. Continue?`)
+            !window.confirm(`${file.name} contains ${library.songs.length} song(s), and ${clashes} will replace songs already in the library. Continue?`)
           ) {
             continue;
           }
@@ -277,7 +277,7 @@ export function Library({
               )}
               <button
                 onClick={() => downloadLibrary(songs, setlists)}
-                title="Download every song and set in one chordsheet-library.json file; works in any browser. Import it to restore."
+                title="Download every song and set in one chordsheet-library.json file. Works in any browser. Import it to restore."
               >
                 Download backup
               </button>

@@ -180,29 +180,36 @@ export function useSongStore(): [AppState, SongActions] {
     };
   });
 
-  // Autosave library and setlists, debounced.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  // Autosave library and setlists, debounced. pending marks a change the
+  // timer has not written yet.
   const first = useRef(true);
+  const pending = useRef(false);
   useEffect(() => {
     if (first.current) {
       first.current = false;
       return;
     }
+    pending.current = true;
     const t = setTimeout(() => {
       saveLibrary(state.songs);
       saveSetlists(state.setlists);
+      pending.current = false;
     }, 800);
     return () => clearTimeout(t);
   }, [state.songs, state.setlists]);
 
-  const stateRef = useRef(state);
-  stateRef.current = state;
-
-  // The debounced autosave can lose the last edit when the tab closes, so
-  // save once more on the way out.
+  // Closing the tab inside the debounce window would lose the last edit, so
+  // write it on the way out. Only a pending edit is written: a tab with
+  // nothing unsaved must not overwrite what another tab saved since.
   useEffect(() => {
     const flush = () => {
+      if (!pending.current) return;
       saveLibrary(stateRef.current.songs);
       saveSetlists(stateRef.current.setlists);
+      pending.current = false;
     };
     window.addEventListener("pagehide", flush);
     return () => window.removeEventListener("pagehide", flush);
