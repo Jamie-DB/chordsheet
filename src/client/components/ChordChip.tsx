@@ -21,6 +21,8 @@ interface Props {
   maxColForLine(line: number): number;
   onCommitMove(id: string, line: number, col: number): void;
   onOpenEdit(id: string): void;
+  /** Hover diagrams only: no drag, no click to edit. */
+  readOnly?: boolean;
 }
 
 interface HoverCard {
@@ -81,7 +83,7 @@ export function ChordChip(props: Props) {
   return (
     <span
       ref={el}
-      className={`chord-chip${hold ? " hold-diamond" : ""}${offset ? " dragging" : ""}`}
+      className={`chord-chip${hold ? " hold-diamond" : ""}${offset ? " dragging" : ""}${props.readOnly ? " read-only" : ""}`}
       style={{
         left: `${col}ch`,
         transform: offset ? `translate(${offset.dx}px, ${offset.dy}px)` : undefined,
@@ -99,6 +101,7 @@ export function ChordChip(props: Props) {
       }}
       onPointerLeave={hideCard}
       onPointerDown={(e) => {
+        if (props.readOnly) return;
         hideCard();
         e.stopPropagation();
         e.preventDefault();

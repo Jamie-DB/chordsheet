@@ -25,6 +25,9 @@
   .autoscroll,
   .chord-panel,
   .notes-panel,
+  .version-bar,
+  .version-hint,
+  .arrangement-panel,
   .line-tools {
     display: none !important;
   }
@@ -165,6 +168,12 @@
 
   .print-artist {
     font-size: 10pt;
+    margin-bottom: 2pt;
+  }
+
+  .print-version {
+    font-size: 10pt;
+    font-style: italic;
     margin-bottom: 2pt;
   }
 

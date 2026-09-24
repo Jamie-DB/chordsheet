@@ -44,6 +44,17 @@ describe("sheetText", () => {
     );
   });
 
+  it("puts a version name on its own line after the title and artist", () => {
+    const lines = sheetText(song, "G", "G", "Sep 24 version").split("\n");
+    expect(lines.slice(0, 4)).toEqual(["Test", "Trad.", "Sep 24 version", "Key: G"]);
+    const noArtist = sheetText({ ...song, artist: undefined }, "G", "G", "Sep 24 version").split("\n");
+    expect(noArtist.slice(0, 3)).toEqual(["Test", "Sep 24 version", "Key: G"]);
+  });
+
+  it("leaves out a blank version name", () => {
+    expect(sheetText(song, "G", "G", "  ")).toBe(sheetText(song, "G", "G"));
+  });
+
   it("renders capo shapes and header capo", () => {
     const capoed = { ...song, capo: 3 };
     const text = sheetText(capoed, "G", "E");

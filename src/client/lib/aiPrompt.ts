@@ -7,6 +7,8 @@ import { songToJson } from "./exchange";
  * JSON with placements filled in, and never any lyric text beyond anchors.
  */
 export function buildAiPrompt(song: Song): string {
+  // Versions only reorder sections; they are noise to the AI and not its to touch.
+  const { arrangements: _versions, ...forAi } = song;
   return `I am annotating a song I have the lyrics to. Below is my song data as JSON. I am attaching an image of a chord chart for this song. Fill the "placements" array with the chords shown in the image and reply with the complete JSON only, no commentary.
 
 Rules:
@@ -21,5 +23,5 @@ Rules:
 
 My song JSON:
 
-${songToJson(song)}`;
+${songToJson(forAi)}`;
 }

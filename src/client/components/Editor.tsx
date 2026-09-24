@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { detectKey, displayChord, isChordSymbol, shapedKey, soundingFromShape } from "../../engine";
 import type { Song } from "../../shared/types";
 import { buildAiPrompt } from "../lib/aiPrompt";
+import { renderArrangement, withArrangement } from "../lib/arrangement";
 import { parseImport } from "../lib/exchange";
 import { freshId } from "../lib/ids";
 import { chordsOnLine, deleteLine, editLine, insertLine } from "../lib/lineOps";
@@ -19,6 +20,8 @@ import {
 import { sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
+import { findArrangement } from "../lib/versions";
+import { ArrangementPanel } from "./ArrangementPanel";
 import { AutoScrollBar } from "./AutoScrollBar";
 import { CapoSuggestions } from "./CapoSuggestions";
 import { ChordChartRow } from "./ChordChartRow";
@@ -26,6 +29,7 @@ import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportRe
 import { LyricLine, type EditingModel } from "./LyricLine";
 import { PrintSheet } from "./PrintSheet";
 import { Toolbar } from "./Toolbar";
+import { VersionBar } from "./VersionBar";
 
 export interface SetNav {
   setName: string;
@@ -37,15 +41,25 @@ export interface SetNav {
 
 interface Props {
   song: Song;
+  /** Version to open on; an unknown id opens the song as written. */
+  initialArrangementId?: string;
   onBack(): void;
   onChange(song: Song): void;
   setNav?: SetNav;
 }
 
-export function Editor({ song, onBack, onChange, setNav }: Props) {
+export function Editor({ song, initialArrangementId, onBack, onChange, setNav }: Props) {
+  // Key detection always reads the song as written: a reordered version
+  // could tip detectKey another way.
   const detectedKey = detectKey(song.placements.map((p) => p.chord))?.name ?? null;
   const soundingKey = song.keyOverride ?? detectedKey;
   const shaped = soundingKey ? shapedKey(soundingKey, song.capo) : "C";
+
+  const [activeId, setActiveId] = useState<string | null>(initialArrangementId ?? null);
+  const active = findArrangement(song, activeId);
+  const arranged = active ? renderArrangement(song, active) : null;
+  /** What the sheet, print, and copy show: the version when one is active. */
+  const shown = arranged?.song ?? song;
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const [editing, setEditing] = useState<EditingModel | null>(null);
@@ -59,10 +73,10 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
   const [autoEditLine, setAutoEditLine] = useState<number | null>(null);
   const [markPickerLine, setMarkPickerLine] = useState<number | null>(null);
 
-  const marks = song.sectionMarks ?? [];
-  const ranges = sectionRanges(song.lyrics);
+  const marks = shown.sectionMarks ?? [];
+  const ranges = sectionRanges(shown.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
-  const { colorByLine, tacetLines } = sectionStyling(song.lyrics, marks);
+  const { colorByLine, tacetLines } = sectionStyling(shown.lyrics, marks);
   const sectionClassFor = (i: number): string | undefined => {
     const color = colorByLine.get(i);
     if (!color) return undefined;
@@ -116,7 +130,7 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
     // Collapsed label rows measure 0 and tacet rows are smaller, so skip both.
     const pair = sheetRef.current?.querySelector(".line-pair:not(.label-collapsed):not(.tacet-small)");
     if (pair instanceof HTMLElement && pair.offsetHeight > 0) setPairHeight(pair.offsetHeight);
-  }, [song.lyrics.length, lyricsDraft]);
+  }, [shown.lyrics.length, lyricsDraft, active?.id]);
 
   // Auto-scroll: one line pair is assumed to span 8 beats (two 4/4 bars).
   useEffect(() => {
@@ -212,6 +226,15 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
 
   const longLines = song.lyrics.filter((l) => l.length > 90).length;
 
+  function selectVersion(id: string | null) {
+    // Chord edits, marks, and AI review act on the original's line numbers.
+    setActiveId(id);
+    setEditing(null);
+    setMarkPickerLine(null);
+    setReview(null);
+    setPasteOpen(false);
+  }
+
   async function copyPrompt() {
     try {
       await navigator.clipboard.writeText(buildAiPrompt(song));
@@ -286,7 +309,11 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
             </button>
           </span>
         )}
-        {lyricsDraft === null ? (
+        {active ? (
+          <span className="version-hint muted">
+            Words and chords are edited in As written. Changes there flow into every version.
+          </span>
+        ) : lyricsDraft === null ? (
           <>
             <button onClick={() => void copyPrompt()}>{copied ? "Copied" : "Copy AI prompt"}</button>
             <button onClick={() => setPasteOpen(true)}>Paste AI reply</button>
@@ -300,8 +327,17 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
         )}
       </div>
 
+      <VersionBar
+        song={song}
+        activeId={active?.id ?? null}
+        disabled={lyricsDraft !== null}
+        onSelect={selectVersion}
+        onChange={onChange}
+      />
+
       <Toolbar
         song={song}
+        hasVersions={(song.arrangements?.length ?? 0) > 0}
         soundingKey={soundingKey}
         detectedKey={detectedKey}
         onChange={onChange}
@@ -311,7 +347,7 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
         copiedText={copiedText}
         onCopyText={() => {
           void navigator.clipboard
-            .writeText(sheetText(song, soundingKey, shaped))
+            .writeText(sheetText(shown, soundingKey, shaped, active?.name))
             .then(() => {
               setCopiedText(true);
               setTimeout(() => setCopiedText(false), 2500);
@@ -320,7 +356,7 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
         }}
       />
 
-      <PrintSheet song={song} soundingKey={soundingKey} shapedKeyName={shaped} />
+      <PrintSheet song={shown} soundingKey={soundingKey} shapedKeyName={shaped} versionName={active?.name} />
 
       {showSuggestions && soundingKey && (
         <CapoSuggestions
@@ -361,11 +397,20 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
         </details>
       )}
 
-      {song.placements.length > 0 && lyricsDraft === null && (
+      {shown.placements.length > 0 && lyricsDraft === null && (
         <details className="chord-panel" open>
           <summary>Chords</summary>
-          <ChordChartRow song={song} shapedKeyName={shaped} />
+          <ChordChartRow song={shown} shapedKeyName={shaped} />
         </details>
+      )}
+
+      {active && arranged && (
+        <ArrangementPanel
+          song={song}
+          arrangement={active}
+          missing={arranged.missing}
+          onChange={(next) => onChange(withArrangement(song, next))}
+        />
       )}
 
       {review && (
@@ -392,23 +437,31 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
           <span className="measure" ref={measureRef} aria-hidden>
             {"0".repeat(10)}
           </span>
-          <p className="sheet-hint muted">
-            Click a spot to add a chord. Click a chord to edit it; drag to move it. Double-click a
-            line to edit its words; hover the left edge for line tools.
-            {song.capo > 0 && ` Entry is in shape space for capo ${song.capo}.`}
-          </p>
+          {active ? (
+            <p className="sheet-hint muted">
+              {active.name}: hover a chord for its diagram. Order, repeats, cues, and marks are set
+              in the panel above.
+            </p>
+          ) : (
+            <p className="sheet-hint muted">
+              Click a spot to add a chord. Click a chord to edit it; drag to move it. Double-click a
+              line to edit its words; hover the left edge for line tools.
+              {song.capo > 0 && ` Entry is in shape space for capo ${song.capo}.`}
+            </p>
+          )}
           <AutoScrollBar
             bpm={bpm}
             playing={playing}
             onToggle={() => setPlaying((v) => !v)}
             onBpm={(next) => onChange({ ...song, bpm: next })}
           />
-          {song.lyrics.map((line, i) => (
+          {shown.lyrics.map((line, i) => (
             <LyricLine
               key={i}
               index={i}
               text={line}
-              chips={song.placements
+              readOnly={active !== null}
+              chips={shown.placements
                 .filter((p) => p.line === i)
                 .sort((a, b) => a.col - b.col)
                 .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
@@ -417,7 +470,7 @@ export function Editor({ song, onBack, onChange, setNav }: Props) {
                 .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
               charWidth={tacetLines.has(i) ? charWidth * 0.67 : charWidth}
               pairHeight={pairHeight}
-              lineCount={song.lyrics.length}
+              lineCount={shown.lyrics.length}
               editing={editing}
               maxColForLine={maxColForLine}
               validate={isChordSymbol}

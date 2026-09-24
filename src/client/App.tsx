@@ -1,6 +1,7 @@
 import { Editor, type SetNav } from "./components/Editor";
 import { Library } from "./components/Library";
 import { SetView } from "./components/SetView";
+import { entryTitle } from "./lib/versions";
 import { useSongStore } from "./state/songStore";
 
 export function App() {
@@ -15,12 +16,10 @@ export function App() {
         const set = state.setlists.find((s) => s.id === view.setId);
         if (set) {
           const index = view.setIndex;
-          const titleOf = (id: string | undefined) =>
-            id === undefined ? null : (state.songs.find((s) => s.id === id)?.title ?? null);
           setNav = {
             setName: set.name,
-            prevTitle: titleOf(set.songIds[index - 1]),
-            nextTitle: titleOf(set.songIds[index + 1]),
+            prevTitle: entryTitle(state.songs, set.entries[index - 1]),
+            nextTitle: entryTitle(state.songs, set.entries[index + 1]),
             onPrev: () => actions.openInSet(set.id, index - 1),
             onNext: () => actions.openInSet(set.id, index + 1),
           };
@@ -31,6 +30,7 @@ export function App() {
         <Editor
           key={`${song.id}:${view.setIndex ?? ""}`}
           song={song}
+          initialArrangementId={view.arrangementId}
           onBack={backToSet !== undefined ? () => actions.openSet(backToSet) : actions.close}
           onChange={actions.replaceSong}
           setNav={setNav}
@@ -53,6 +53,7 @@ export function App() {
           onRemoveAt={actions.removeFromSet}
           onMove={actions.moveInSet}
           onOpenAt={actions.openInSet}
+          onSetVersion={actions.setEntryArrangement}
         />
       );
     }

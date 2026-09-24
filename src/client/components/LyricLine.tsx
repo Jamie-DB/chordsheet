@@ -64,10 +64,16 @@ interface Props {
   sectionUi?: SectionUi;
   /** Tint/bar class when this line sits inside a marked section. */
   sectionClass?: string;
+  /**
+   * A version's sheet: chords show with hover diagrams, but nothing places,
+   * moves, or edits chords, words, lines, or marks. The edit callbacks are
+   * never called.
+   */
+  readOnly?: boolean;
 }
 
 export function LyricLine(props: Props) {
-  const { index, text, chips, charWidth, pairHeight, lineCount, editing } = props;
+  const { index, text, chips, charWidth, pairHeight, lineCount, editing, readOnly = false } = props;
   const [draft, setDraft] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -94,7 +100,7 @@ export function LyricLine(props: Props) {
     setDraft(null);
   }
 
-  const editingHere = editing !== null && editing.line === index;
+  const editingHere = !readOnly && editing !== null && editing.line === index;
 
   const { sectionUi } = props;
   // Section label rows leave the vertical flow (their tag lives in the left
@@ -103,21 +109,23 @@ export function LyricLine(props: Props) {
 
   return (
     <div
-      className={`line-pair${props.sectionClass ? ` ${props.sectionClass}` : ""}${collapsed ? " label-collapsed" : ""}`}
+      className={`line-pair${props.sectionClass ? ` ${props.sectionClass}` : ""}${collapsed ? " label-collapsed" : ""}${readOnly ? " read-only" : ""}`}
       data-line={index}
     >
-      <span className="line-tools">
-        <button className="mini" title="Insert line above" onClick={() => props.onInsertLine(index)}>
-          +&#8593;
-        </button>
-        <button className="mini" title="Insert line below" onClick={() => props.onInsertLine(index + 1)}>
-          +&#8595;
-        </button>
-        <button className="mini danger" title="Delete line" onClick={() => props.onDeleteLine(index)}>
-          &#215;
-        </button>
-      </span>
-      <div className="chord-lane" onClick={(e) => props.onPlace(index, colFromEvent(e))}>
+      {!readOnly && (
+        <span className="line-tools">
+          <button className="mini" title="Insert line above" onClick={() => props.onInsertLine(index)}>
+            +&#8593;
+          </button>
+          <button className="mini" title="Insert line below" onClick={() => props.onInsertLine(index + 1)}>
+            +&#8595;
+          </button>
+          <button className="mini danger" title="Delete line" onClick={() => props.onDeleteLine(index)}>
+            &#215;
+          </button>
+        </span>
+      )}
+      <div className="chord-lane" onClick={readOnly ? undefined : (e) => props.onPlace(index, colFromEvent(e))}>
         {chips.map((chip) =>
           editingHere && editing.id === chip.id ? null : (
             <ChordChip
@@ -133,6 +141,7 @@ export function LyricLine(props: Props) {
               maxColForLine={props.maxColForLine}
               onCommitMove={props.onCommitMove}
               onOpenEdit={props.onOpenEdit}
+              readOnly={readOnly}
             />
           ),
         )}
@@ -161,7 +170,7 @@ export function LyricLine(props: Props) {
             onCancel={props.onCancelEdit}
           />
         )}
-        {sectionUi?.pickerOpen && (
+        {!readOnly && sectionUi?.pickerOpen && (
           <SectionMarkPicker
             col={2}
             current={sectionUi.current}
@@ -184,6 +193,13 @@ export function LyricLine(props: Props) {
           }}
           aria-label={`Edit line ${index + 1}`}
         />
+      ) : sectionUi && readOnly ? (
+        <div className="label-side">
+          <span className={`section-tag read-only${sectionUi.color ? ` pill-${sectionUi.color}` : ""}`}>
+            {sectionUi.title}
+            {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
+          </span>
+        </div>
       ) : sectionUi ? (
         <div className="label-side">
           <button
@@ -203,6 +219,8 @@ export function LyricLine(props: Props) {
             {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
           </button>
         </div>
+      ) : readOnly ? (
+        <pre className="lyric-row">{text || " "}</pre>
       ) : (
         <pre
           className="lyric-row"

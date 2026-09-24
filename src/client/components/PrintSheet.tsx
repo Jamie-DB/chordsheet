@@ -10,6 +10,8 @@ interface Props {
   song: Song;
   soundingKey: string | null;
   shapedKeyName: string;
+  /** Printed under the title when the sheet is a version of the song. */
+  versionName?: string;
 }
 
 /** Widest row (chords or lyric) that still fits a two-column layout. */
@@ -20,7 +22,7 @@ const TWO_COLUMN_MAX_CHARS = 38;
  * so print alignment is exact by construction. Hidden on screen; print CSS
  * hides the app and shows this.
  */
-export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
+export function PrintSheet({ song, soundingKey, shapedKeyName, versionName }: Props) {
   const rows = song.lyrics.map((_, i) =>
     buildChordRowSegments(
       song.placements.filter((p) => p.line === i),
@@ -50,6 +52,7 @@ export function PrintSheet({ song, soundingKey, shapedKeyName }: Props) {
       <div className="print-header">
         <h1>{song.title}</h1>
         {song.artist && <div className="print-artist">{song.artist}</div>}
+        {versionName?.trim() && <div className="print-version">{versionName.trim()}</div>}
         <div className="print-key">{headerKeyLine(soundingKey, song.capo)}</div>
       </div>
       {song.notes?.trim() && <pre className="print-notes">{song.notes.trim()}</pre>}
