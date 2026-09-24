@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import type { WordBox } from "../../ingest/chartPdf";
 import type { Setlist, Song } from "../../shared/types";
 import {
   diskSyncSupported,
@@ -14,6 +15,7 @@ import { downloadLibrary, downloadSong, parseImport, parseLibraryFile } from "..
 import { DEFAULT_SORT, SORTS, isSortKey, matchesQuery, type SortKey } from "../lib/librarySort";
 import { loadUiPrefs, saveUiPrefs } from "../lib/storage";
 import { versionCount } from "../lib/versions";
+import { PdfImportReview } from "./PdfImportReview";
 
 interface Props {
   songs: Song[];
@@ -54,6 +56,30 @@ export function Library({
     return isSortKey(stored) ? stored : DEFAULT_SORT;
   });
   const fileRef = useRef<HTMLInputElement>(null);
+  const pdfRef = useRef<HTMLInputElement>(null);
+  const [pdf, setPdf] = useState<{ fileName: string; words: WordBox[] } | null>(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
+
+  async function handlePdf(file: File | undefined) {
+    if (!file) return;
+    setStatus(null);
+    setPdf(null);
+    setPdfBusy(true);
+    try {
+      const { readPdfWords } = await import("../lib/pdfReader");
+      const words = await readPdfWords(new Uint8Array(await file.arrayBuffer()));
+      if (words.length === 0) {
+        setStatus(`${file.name} has no text to read, so it is a scan. Create the song from its lyrics and use Copy AI prompt with a screenshot.`);
+      } else {
+        setPdf({ fileName: file.name, words });
+      }
+    } catch {
+      setStatus(`${file.name} could not be read as a PDF.`);
+    } finally {
+      setPdfBusy(false);
+      if (pdfRef.current) pdfRef.current.value = "";
+    }
+  }
 
   async function saveAll(forcePick: boolean) {
     try {
@@ -189,6 +215,16 @@ export function Library({
             </select>
           </label>
           <button onClick={() => fileRef.current?.click()}>Import JSON</button>
+          <button onClick={() => pdfRef.current?.click()} disabled={pdfBusy} title="Read a chord chart PDF into a new song. The file stays in this browser.">
+            {pdfBusy ? "Reading PDF..." : "Import PDF"}
+          </button>
+          <input
+            ref={pdfRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            hidden
+            onChange={(e) => void handlePdf(e.target.files?.[0])}
+          />
           <input
             ref={fileRef}
             type="file"
@@ -200,6 +236,19 @@ export function Library({
         </div>
         {status && <p className="status">{status}</p>}
       </section>
+
+      {pdf && (
+        <PdfImportReview
+          fileName={pdf.fileName}
+          words={pdf.words}
+          songs={songs}
+          onAdd={(song) => {
+            setPdf(null);
+            onImport(song, true);
+          }}
+          onDiscard={() => setPdf(null)}
+        />
+      )}
 
       <section className="sets-section">
         <div className="song-list-head">

@@ -4,15 +4,15 @@
  * result can be proofread against the chart before import.
  *
  * Run with: npm run ingest-pdf -- <chart.pdf> [outDir] [--key Bb] [--force] [--dry-run]
- * Needs poppler's pdftotext on PATH (brew install poppler).
+ * The app's Import PDF button runs the same reader and ingest in the browser.
  */
-import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildChordRow } from "../src/engine/layout";
-import { ingestChart, parseBboxHtml } from "../src/ingest/chartPdf";
+import { ingestChart } from "../src/ingest/chartPdf";
+import { readPdfWords } from "../src/ingest/readPdf";
+import { groupLog, previewLines } from "../src/ingest/review";
 import { songSchema } from "../src/shared/schemas";
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -34,8 +34,7 @@ if (!relative(REPO, outDir).startsWith("..")) {
   process.exit(2);
 }
 
-const html = execFileSync("pdftotext", ["-bbox", pdf, "-"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
-const words = parseBboxHtml(html);
+const words = await readPdfWords(new Uint8Array(readFileSync(pdf)));
 if (words.length === 0) {
   console.error("no text layer found: this PDF is a scan, use the screenshot round trip in docs/AI-PLACEMENT.md");
   process.exit(1);
@@ -44,17 +43,11 @@ if (words.length === 0) {
 const { song, log } = ingestChart(words, { key });
 songSchema.parse(song);
 
-song.lyrics.forEach((line, i) => {
-  const here = song.placements.filter((p) => p.line === i);
-  if (here.length > 0) console.log("    " + buildChordRow(here));
-  console.log(String(i).padStart(3) + " " + line);
-});
+for (const line of previewLines(song)) console.log(line);
 console.log("\nsection marks:");
 for (const m of song.sectionMarks ?? []) console.log(`  ${m.section} #${m.occurrence}: ${m.kind}${m.text ? ` "${m.text}"` : ""}`);
 console.log("\ncorrections and judgment calls:");
-const counts = new Map<string, number>();
-for (const entry of log) counts.set(entry, (counts.get(entry) ?? 0) + 1);
-for (const [entry, n] of counts) console.log(`  ${entry}${n > 1 ? ` (x${n})` : ""}`);
+for (const { entry, count } of groupLog(log)) console.log(`  ${entry}${count > 1 ? ` (x${count})` : ""}`);
 console.log(`\n${song.title}: key ${song.keyOverride}, ${song.lyrics.length} lines, ${song.placements.length} placements`);
 console.log("chords:", [...new Set(song.placements.map((p) => p.chord))].sort().join(" "));
 

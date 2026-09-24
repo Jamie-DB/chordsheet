@@ -123,7 +123,7 @@ Print CSS: `@media print` hides everything except `.print-sheet`; `@page { margi
 
 ## PDF chart ingest (src/ingest/)
 
-`npm run ingest-pdf -- <chart.pdf>` reads a chord chart PDF that carries a text layer and writes a library song outside the repo. `src/ingest/chartPdf.ts` is pure (word boxes in, Song and a correction log out) and table tested on synthetic boxes built from the demo set. The script in `scripts/ingest-pdf.mts` does the file and process work. Workflow, review checklist, and known limits are in docs/PDF-INGEST.md.
+The library's "Import PDF" button reads a chord chart PDF that carries a text layer and shows a review panel (PdfImportReview.tsx) before the song is added. `npm run ingest-pdf -- <chart.pdf>` runs the same path from the command line and writes a library song outside the repo. `src/ingest/readPdf.ts` turns pdf.js's operator list into text operators, `pdfWords.ts` groups glyphs into word boxes the way poppler's `pdftotext -bbox` does, and `chartPdf.ts` turns word boxes into a Song and a correction log. The last two are pure and table tested on synthetic input built from the demo set. pdf.js loads only when a PDF is picked, as its own chunk plus a worker, so the main bundle does not carry it. Workflow, review checklist, and known limits are in docs/PDF-INGEST.md.
 
 ## Chord diagrams (src/engine/shapes.ts, ChordDiagram.tsx, ChordChartRow.tsx)
 
