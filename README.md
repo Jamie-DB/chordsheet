@@ -10,7 +10,7 @@ The editor with one of the public domain demo songs. The song is stored in Eb, c
 
 ## How it was built
 
-Built with Claude Code in a plan-first loop. The first commit is a conventions file and a design doc, not code. Everything after that is an issue, a commit that closes it, and a test wherever the logic is testable. 47 commits, 44 issues, 371 tests across 20 files. The first 29 commits and 31 issues landed in twelve days, August 5 to 16, 2026, from a one-paragraph idea to weekly rehearsal use. BUILDLOG.md has the day-by-day account.
+Built with Claude Code in a plan-first loop. The first commit is a conventions file and a design doc, not code. Everything after that is an issue, a commit that closes it, and a test wherever the logic is testable. 47 commits, 44 issues, 542 tests across 25 files. The first 29 commits and 31 issues landed in twelve days, August 5 to 16, 2026, from a one-paragraph idea to weekly rehearsal use. BUILDLOG.md has the day-by-day account.
 
 The agents wrote nearly all of the code: the scaffold, the chord engine, the placement editor, the AI round-trip kit, the print path, and the test suites. Eight phases were generated in 27 minutes on the first afternoon, which is the cheap part. The eleven days after that, 23 issues of real use breaking real assumptions, are what turned the skeleton into a tool.
 
@@ -21,7 +21,7 @@ What I decided or corrected myself:
 - **A migration scan that reported clean and was not.** The pass that promoted section labels missed labels carrying inline notes. I caught the misses by eye in the files, and the fix then went across every song (#31).
 - **Fix one song, then audit the library.** Chord rows imported as lyric text were invisible to transpose and capo. Repairing the song in front of me would have left the rest silently broken, so the fix is a bar-notation-aware parser plus an audit pass over every file (#24).
 - **A workaround that had to be universal.** Brave disables the File System Access API, so folder save did nothing there. The response is both Brave-specific guidance and a single-file backup that works in any browser (#20).
-- **Ideas that stayed issues.** The multi-user buildout was filed on day one and deferred on the spot (#9). The arrangement timeline was written down with "just capture the idea for now, not sure on it yet" and is still open (#22).
+- **Ideas that stayed issues.** The multi-user buildout was filed on day one and deferred on the spot (#9). The arrangement timeline was written down with "just capture the idea for now, not sure on it yet" (#22) and sat for seven weeks until real sets needed double choruses and extended endings. It shipped as named versions.
 
 ## Current shortcomings
 
@@ -32,15 +32,14 @@ Everything here is confirmed by running the app or reading the tree, not guessed
 - **No undo.** Deleting a chord takes effect on the click. Deleting a lyric line asks only when the line holds chords. Song and set deletion ask once. Nothing is recoverable after that except from a backup file.
 - **Unusual chords get approximate shapes.** Voicings come from a curated table plus movable barre forms, and anything outside that walks a simplification ladder to the nearest reasonable shape. The diagram tooltip names the substitution when it happens, so you can see when the grid is not literally the chord.
 - **One browser holds the working copy.** Songs live in that browser's localStorage. Nothing syncs between browsers or machines. Moving a library means folder save, "Download backup", or per-song export and import.
-- **Tests stop at the UI boundary.** 371 tests across 20 files cover the engine (213 of them), the client lib, and the PDF ingest. There are no component or browser tests, so layout and interaction regressions surface by using the app.
+- **Tests stop at the UI boundary.** 542 tests across 25 files cover the engine (213 of them), the client lib, and the PDF ingest. There are no component or browser tests, so layout and interaction regressions surface by using the app.
 - **One person, one browser, no sharing.** No accounts, no server, no hosting. That is the design, and the product version of it is #9 below.
 
 ## What's next
 
-Two things are unbuilt on purpose.
+One thing is unbuilt on purpose.
 
 - **Full buildout for other users (#9).** Filed as phase 9 on day one and immediately deferred. This is a personal tool and the leanest architecture that works was a stated goal, so the product version stayed an issue instead of becoming scope.
-- **Section timeline and arrangement builder (#22).** Captured on August 6, 2026 with the note "just capture the idea for now, not sure on it yet". Still open, on purpose.
 
 ## Build and run
 
@@ -51,7 +50,7 @@ npm ci
 npm run dev      # http://localhost:5173
 ```
 
-`npm test` runs the Vitest suite, 371 tests in 20 files. `npm run build` type-checks and builds, 319.53 kB of JavaScript (97.57 kB gzipped) and 13.49 kB of CSS. `npm run preview` serves the build. `npm run ingest-pdf -- <chart.pdf>` turns a chord chart PDF that has a text layer into a song file in the personal library folder, outside the repo. It needs poppler, and docs/PDF-INGEST.md has the workflow and the review checklist.
+`npm test` runs the Vitest suite, 542 tests in 25 files. `npm run build` type-checks and builds, 331.54 kB of JavaScript (100.99 kB gzipped) and 15.24 kB of CSS. `npm run preview` serves the build. `npm run ingest-pdf -- <chart.pdf>` turns a chord chart PDF that has a text layer into a song file in the personal library folder, outside the repo. It needs poppler, and docs/PDF-INGEST.md has the workflow and the review checklist.
 
 ## Workflow
 
@@ -62,13 +61,14 @@ npm run dev      # http://localhost:5173
 5. At-a-glance notation: the chord popover's diamond checkbox marks a full-measure hold, drawn as a diamond around the chord (Nashville style, written as <C> in plain-text export). Each [Section] label carries a small pill for dynamics marks: Tacet, Soft, Build, Full, or a custom word with a color. On the printed page (single-column layout) section titles move out of the flow into a left sidebar with the mark as a colored tag beneath, plus a thin edge bar along marked sections. Tacet sections shrink to about two thirds size so they tighten up and move out of the way. The dense two-column layout keeps compact in-line labels.
 6. Chord diagrams: a CHORDS row shows fretboard grids for the song's displayed shapes (post-capo), on screen in a collapsible panel and at the top of the printed page. Voicings come from a curated open-chord table plus movable barre forms. Unusual chords fall back to the closest reasonable shape and the on-screen tooltip names the substitution.
 7. Play along: the floating Scroll control auto-scrolls the sheet. Speed is in BPM (detected from pasted tabs, default 80, saved per song). Space toggles it.
-8. Print. The printed sheet is literal monospace text rows, so chords land above exactly the right characters and a chord row never separates from its lyric across pages. Short-line songs print in two columns automatically. "Copy text" puts a plain-text version on the clipboard with the same chord and lyric rows. It is not identical to print: section labels keep their brackets, holds are written as <C>, and dynamics marks and chord diagrams are left out.
+8. Versions: once a song is finished, "New version" in the editor makes a named arrangement of it, such as "Aug 23 version". The panel orders its sections: double a chorus, add a bridge, repeat the outro x4, put a cue like "vamp while the pastor speaks" under a label, or give one pass of a chorus its own dynamics mark. A version holds no words or chords of its own, so fixing a chord in "As written" fixes it in every version. A version's sheet is read-only, and it prints with the version name under the title.
+9. Print. The printed sheet is literal monospace text rows, so chords land above exactly the right characters and a chord row never separates from its lyric across pages. Short-line songs print in two columns automatically. "Copy text" puts a plain-text version on the clipboard with the same chord and lyric rows. It is not identical to print: section labels keep their brackets, holds are written as <C>, and dynamics marks and chord diagrams are left out.
 
 Shortcuts: `+` and `-` transpose, `Space` toggles auto-scroll, `Escape` closes the chord popover, the mark picker, the Paste AI reply box, and capo suggestions, and stops auto-scroll. The import review and the lyrics editor stay open until you use their own buttons.
 
 ## Library and sets
 
-The library lists songs alphabetically by default, with a search box (title and artist) and a sort selector (Title, Artist, Recently updated, Recently added) that remembers your choice. Sets group songs in order for a service: create one in the Sets section, add songs (repeats allowed), reorder, then step through it in the editor with Prev and Next. Deleting a song removes it from every set. Sets ride along in "Save all to folder" (one setlists.json) and in Download backup.
+The library lists songs alphabetically by default, with a search box (title and artist) and a sort selector (Title, Artist, Recently updated, Recently added) that remembers your choice. Sets group songs in order for a service: create one in the Sets section, add songs (repeats allowed), reorder, then step through it in the editor with Prev and Next. Each set entry can play a song as written or one of its versions, picked in the set view, and Prev and Next open that version. Deleting a song removes it from every set, and deleting a version puts its entries back to the song as written. Sets ride along in "Save all to folder" (one setlists.json) and in Download backup.
 
 ## Storage
 

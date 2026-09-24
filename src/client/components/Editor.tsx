@@ -444,8 +444,8 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
             </p>
           ) : (
             <p className="sheet-hint muted">
-              Click a spot to add a chord. Click a chord to edit it; drag to move it. Double-click a
-              line to edit its words; hover the left edge for line tools.
+              Click a spot to add a chord. Click a chord to edit it, or drag to move it. Double-click
+              a line to edit its words. Hover the left edge for line tools.
               {song.capo > 0 && ` Entry is in shape space for capo ${song.capo}.`}
             </p>
           )}
