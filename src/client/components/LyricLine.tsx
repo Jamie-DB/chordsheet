@@ -150,7 +150,7 @@ export function LyricLine(props: Props) {
             key={p.id}
             className="chord-chip proposal"
             style={{ left: `${p.col}ch` }}
-            title="Proposed by import; click to accept"
+            title="Proposed by import. Click to accept"
             onClick={(e) => {
               e.stopPropagation();
               props.onAcceptProposal(p.id);
@@ -213,7 +213,7 @@ export function LyricLine(props: Props) {
               props.onCancelEdit();
               setDraft(text);
             }}
-            title="Click for a dynamics mark; double-click to rename the section"
+            title="Click for a dynamics mark, double-click to rename the section"
           >
             {sectionUi.title}
             {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
@@ -224,7 +224,7 @@ export function LyricLine(props: Props) {
       ) : (
         <pre
           className="lyric-row"
-          title="Click to place a chord; double-click to edit the words"
+          title="Click to place a chord, double-click to edit the words"
           onClick={(e) => props.onPlace(index, colFromEvent(e))}
           onDoubleClick={() => {
             props.onCancelEdit();
