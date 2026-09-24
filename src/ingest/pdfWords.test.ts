@@ -88,6 +88,43 @@ describe("wordsFromPages", () => {
     expect(words[1]).toMatchObject({ text: "Newton", xMin: 100, yMin: 192 - 7.5 });
   });
 
+  it("restores the text state with the transform, so a font set inside save and restore does not leak", () => {
+    const ops: TextOp[] = [
+      at(100, 700),
+      show("How"),
+      { op: "save" },
+      { op: "beginText" },
+      { op: "font", name: "f1", size: 5 },
+      { op: "charSpacing", value: 3 },
+      at(100, 650),
+      show("small"),
+      { op: "restore" },
+      { op: "beginText" },
+      at(100, 600),
+      show("sweet"),
+    ];
+    const sweet = wordsFromPages([page(ops)])[2];
+    expect(sweet).toMatchObject({ text: "sweet", xMin: 100, xMax: 125, yMin: 192 - 7.5, yMax: 192 + 2.5 });
+  });
+
+  it("draws an annotation from the page's base transform through its matrix and rect fit, then restores", () => {
+    const ops: TextOp[] = [
+      { op: "transform", m: [2, 0, 0, 2, 0, 0] }, // left unbalanced by the page content
+      { op: "annotation", matrix: [2, 0, 0, 2, 0, 0], transform: [0.5, 0, 0, 0.5, 400, 500] },
+      { op: "beginText" },
+      { op: "font", name: "f1", size: 10 },
+      at(2, 5),
+      show("Capo"),
+      { op: "restore" },
+      { op: "beginText" },
+      at(50, 350),
+      show("Grace"),
+    ];
+    const words = wordsFromPages([page(ops)]);
+    expect(words[0]).toMatchObject({ text: "Capo", xMin: 402, xMax: 422, yMin: 287 - 7.5 });
+    expect(words[1]).toMatchObject({ text: "Grace", xMin: 100, yMax: 92 + 5 });
+  });
+
   it("moves down by the leading on a new line", () => {
     const ops: TextOp[] = [at(100, 700), { op: "leading", value: 12 }, show("How"), { op: "nextLine" }, show("sweet")];
     const words = wordsFromPages([page(ops)]);

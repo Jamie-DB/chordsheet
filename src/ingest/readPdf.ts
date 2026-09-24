@@ -28,6 +28,10 @@ function toTextOp(fn: number, args: unknown[]): TextOp[] {
       return args[0] ? [{ op: "save" }, { op: "transform", m: toMatrix(args[0] as number[]) }] : [{ op: "save" }];
     case OPS.paintFormXObjectEnd:
       return [{ op: "restore" }];
+    case OPS.beginAnnotation:
+      return [{ op: "annotation", transform: toMatrix(args[2] as number[]), matrix: toMatrix(args[3] as number[]) }];
+    case OPS.endAnnotation:
+      return [{ op: "restore" }];
     case OPS.beginText:
       return [{ op: "beginText" }];
     case OPS.setFont:

@@ -20,6 +20,12 @@ export type TextOp =
   | { op: "save" }
   | { op: "restore" }
   | { op: "transform"; m: Matrix }
+  /**
+   * An annotation's appearance stream: drawn from the page's base transform, not the
+   * content stream's, through its own /Matrix and then the matrix that fits it to /Rect.
+   * Closed by a restore.
+   */
+  | { op: "annotation"; matrix: Matrix; transform: Matrix }
   | { op: "beginText" }
   | { op: "font"; name: string; size: number }
   | { op: "textMatrix"; m: Matrix }
@@ -82,6 +88,29 @@ interface Char {
   text: string;
 }
 
+/** The graphics state a restore brings back: the transform and the text state, not the text matrix. */
+interface GraphicsState {
+  ctm: Matrix;
+  font: FontMetrics;
+  size: number;
+  charSpacing: number;
+  wordSpacing: number;
+  hScale: number;
+  leading: number;
+  rise: number;
+}
+
+const initialState = (ctm: Matrix): GraphicsState => ({
+  ctm,
+  font: { ascent: 0.8, descent: -0.2 },
+  size: 0,
+  charSpacing: 0,
+  wordSpacing: 0,
+  hScale: 1,
+  leading: 0,
+  rise: 0,
+});
+
 interface OpenWord {
   xMin: number;
   xMax: number;
@@ -95,38 +124,35 @@ interface OpenWord {
 /** Every drawn glyph on one page, in content stream order. */
 function pageChars(page: PageText): Char[] {
   const chars: Char[] = [];
-  const stack: Matrix[] = [];
-  let ctm: Matrix = page.viewport;
+  const stack: GraphicsState[] = [];
+  let gs = initialState(page.viewport);
   let tm: Matrix = IDENTITY;
   let lineX = 0;
   let lineY = 0;
   let x = 0;
-  let leading = 0;
-  let charSpacing = 0;
-  let wordSpacing = 0;
-  let hScale = 1;
-  let rise = 0;
-  let font: FontMetrics = { ascent: 0.8, descent: -0.2 };
-  let size = 0;
 
   for (const op of page.ops) {
     switch (op.op) {
       case "save":
-        stack.push(ctm);
+        stack.push({ ...gs });
         break;
       case "restore":
-        ctm = stack.pop() ?? ctm;
+        gs = stack.pop() ?? gs;
         break;
       case "transform":
-        ctm = multiply(op.m, ctm);
+        gs.ctm = multiply(op.m, gs.ctm);
+        break;
+      case "annotation":
+        stack.push({ ...gs });
+        gs = initialState(multiply(multiply(op.matrix, op.transform), page.viewport));
         break;
       case "beginText":
         tm = IDENTITY;
         x = lineX = lineY = 0;
         break;
       case "font":
-        font = page.fonts[op.name] ?? font;
-        size = Math.abs(op.size);
+        gs.font = page.fonts[op.name] ?? gs.font;
+        gs.size = Math.abs(op.size);
         break;
       case "textMatrix":
         tm = op.m;
@@ -137,26 +163,27 @@ function pageChars(page: PageText): Char[] {
         lineY += op.y;
         break;
       case "leading":
-        leading = op.value;
+        gs.leading = op.value;
         break;
       case "nextLine":
         x = lineX;
-        lineY -= leading;
+        lineY -= gs.leading;
         break;
       case "charSpacing":
-        charSpacing = op.value;
+        gs.charSpacing = op.value;
         break;
       case "wordSpacing":
-        wordSpacing = op.value;
+        gs.wordSpacing = op.value;
         break;
       case "hScale":
-        hScale = op.value / 100;
+        gs.hScale = op.value / 100;
         break;
       case "rise":
-        rise = op.value;
+        gs.rise = op.value;
         break;
       case "show": {
-        const m = multiply(tm, ctm);
+        const { font, size, charSpacing, wordSpacing, hScale, rise } = gs;
+        const m = multiply(tm, gs.ctm);
         const deviceSize = size * Math.hypot(m[2], m[3]);
         const scale = size * (font.fontMatrix?.[0] ?? 0.001);
         for (const g of op.glyphs) {
