@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { songSchema } from "../shared/schemas";
-import { ingestChart, parseBboxHtml, type WordBox } from "./chartPdf";
+import { ingestChart, type WordBox } from "./chartPdf";
 
 // Synthetic word boxes in the chart layout, built from the demo set only.
 const CW = 5; // points per lyric character
@@ -55,23 +55,6 @@ const ingest = (words: WordBox[], key?: string) => ingestChart(words, { key, now
 const chordsOn = (r: ReturnType<typeof ingest>, line: number) =>
   r.song.placements.filter((p) => p.line === line).map((p) => [p.col, p.chord]);
 
-describe("parseBboxHtml", () => {
-  it("reads pages, boxes, and entities", () => {
-    const html =
-      '<doc><page width="612.000000" height="792.000000">' +
-      '<word xMin="1.5" yMin="2" xMax="3" yMax="4">wretch&apos;s</word></page>' +
-      '<page width="600.000000" height="792.000000"><word xMin="5" yMin="6" xMax="7" yMax="8">a&amp;b</word></page></doc>';
-    expect(parseBboxHtml(html)).toEqual([
-      { page: 0, pageWidth: 612, xMin: 1.5, yMin: 2, xMax: 3, yMax: 4, text: "wretch's" },
-      { page: 1, pageWidth: 600, xMin: 5, yMin: 6, xMax: 7, yMax: 8, text: "a&b" },
-    ]);
-  });
-
-  it("returns nothing for a PDF with no text layer", () => {
-    expect(parseBboxHtml('<doc><page width="612" height="792"></page></doc>')).toEqual([]);
-  });
-});
-
 describe("ingestChart", () => {
   it("reads header metadata and produces a schema-valid song", () => {
     const r = ingest([
@@ -98,6 +81,11 @@ describe("ingestChart", () => {
     });
     expect(r.song.notes).toBe("Ingested from a PDF chart. 3/4, tempo 72.50.\nWriters: John Newton. As recorded by John Newton.");
     expect(chordsOn(r, 1)).toEqual([[0, "G"], [19, "C"]]);
+  });
+
+  it("suffixes the id when the title is already in the library", () => {
+    const words = [...header(), ...label(140, "V1", "VERSE 1"), ...lyric(180, "Amazing grace")];
+    expect(ingestChart(words, { takenIds: new Set(["amazing-grace"]) }).song.id).toBe("amazing-grace-2");
   });
 
   it("maps chord x to a cell: word start, inside a word, in a gap, left of an indent, past the end", () => {

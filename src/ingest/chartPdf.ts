@@ -6,10 +6,11 @@ import { slugify } from "../shared/slug";
 import type { ChordPlacement, Song } from "../shared/types";
 
 /**
- * Text-layer chord chart PDF to Song. Input is the word boxes poppler's
- * `pdftotext -bbox` reports; chords sit on their own row directly above the
- * lyric row, so a chord's x position maps to a character cell in that lyric.
- * Pure: no file or process access here, the script in scripts/ does that.
+ * Text-layer chord chart PDF to Song. Input is word boxes as poppler's
+ * `pdftotext -bbox` groups them, which pdfWords.ts reproduces from pdf.js;
+ * chords sit on their own row directly above the lyric row, so a chord's
+ * x position maps to a character cell in that lyric.
+ * Pure: no file access here, readPdf.ts does the reading.
  * Layout constants are tuned to one chart vendor (see docs/PDF-INGEST.md).
  */
 
@@ -29,6 +30,8 @@ export interface IngestOptions {
   key?: string;
   /** ISO timestamp for createdAt and updatedAt. */
   now?: string;
+  /** Ids already in the library; the song gets a numeric suffix instead of replacing one. */
+  takenIds?: Set<string>;
 }
 
 export interface IngestResult {
@@ -62,37 +65,6 @@ const LETTER_PC = [0, 2, 4, 5, 7, 9, 11];
 const UNSPELLED = new Set(["B#", "E#", "Cb", "Fb"]);
 
 const CHORD_FRAGMENT = /^(?:[A-G](?:m|dim|aug)?(?:\/[A-G])?|m(?:\/[A-G])?|\/[A-G])$/;
-
-function decodeEntities(s: string): string {
-  return s
-    .replace(/&apos;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)))
-    .replace(/&amp;/g, "&");
-}
-
-/** Parse `pdftotext -bbox` XHTML into word boxes. */
-export function parseBboxHtml(html: string): WordBox[] {
-  const words: WordBox[] = [];
-  html.split("<page ").slice(1).forEach((chunk, page) => {
-    const pageWidth = Number(/width="([\d.]+)"/.exec(chunk)?.[1] ?? 612);
-    const re = /<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)<\/word>/g;
-    for (let m = re.exec(chunk); m; m = re.exec(chunk)) {
-      words.push({
-        page,
-        pageWidth,
-        xMin: Number(m[1]),
-        yMin: Number(m[2]),
-        xMax: Number(m[3]),
-        yMax: Number(m[4]),
-        text: decodeEntities(m[5]),
-      });
-    }
-  });
-  return words;
-}
 
 type Row = WordBox[];
 
@@ -405,7 +377,7 @@ export function ingestChart(words: WordBox[], options: IngestOptions = {}): Inge
   const credits = [meta.writers && `Writers: ${meta.writers}.`, meta.artist && `As recorded by ${meta.artist}.`];
   const song: Song = {
     version: 1,
-    id: slugify(meta.title, new Set()),
+    id: slugify(meta.title, options.takenIds ?? new Set()),
     title: meta.title,
     ...(meta.artist ? { artist: meta.artist } : {}),
     lyrics: extracted.lyrics,
