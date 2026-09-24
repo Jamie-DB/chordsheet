@@ -16,10 +16,17 @@ export function headerKeyLine(soundingKey: string | null, capo: number): string 
  * Plain-text rendering of the sheet. Chord and lyric rows match print because
  * both come from buildChordRow, but section labels stay as bracketed lyric
  * lines, holds render as <C>, and dynamics marks and chord diagrams are left out.
+ * A version's name gets its own line under the title and artist.
  */
-export function sheetText(song: Song, soundingKey: string | null, shapedKeyName: string): string {
+export function sheetText(
+  song: Song,
+  soundingKey: string | null,
+  shapedKeyName: string,
+  versionName?: string,
+): string {
   const out: string[] = [song.title];
   if (song.artist) out.push(song.artist);
+  if (versionName?.trim()) out.push(versionName.trim());
   const keyLine = headerKeyLine(soundingKey, song.capo);
   if (keyLine) out.push(keyLine);
   if (song.notes?.trim()) out.push(...song.notes.trim().split("\n"));

@@ -7,6 +7,7 @@ import {
   moveInSet,
   pruneSetlists,
   removeAtFromSet,
+  setEntryArrangement,
 } from "../lib/setOps";
 import {
   loadLibrary,
@@ -19,7 +20,7 @@ import { parsePastedTab } from "../lib/tabPaste";
 
 export type View =
   | { name: "library" }
-  | { name: "editor"; id: string; setId?: string; setIndex?: number }
+  | { name: "editor"; id: string; setId?: string; setIndex?: number; arrangementId?: string }
   | { name: "set"; id: string };
 
 export interface AppState {
@@ -28,7 +29,7 @@ export interface AppState {
   view: View;
 }
 
-type Action =
+export type Action =
   | { type: "addSong"; song: Song; open: boolean }
   | { type: "open"; id: string }
   | { type: "openInSet"; setId: string; setIndex: number }
@@ -43,6 +44,7 @@ type Action =
   | { type: "addToSet"; setId: string; songId: string }
   | { type: "removeFromSet"; setId: string; index: number }
   | { type: "moveInSet"; setId: string; index: number; delta: number }
+  | { type: "setEntryArrangement"; setId: string; index: number; arrangementId?: string }
   | { type: "importSetlists"; sets: Setlist[] };
 
 function stamp(song: Song): Song {
@@ -69,7 +71,8 @@ function updateSet(state: AppState, id: string, fn: (set: Setlist) => Setlist): 
   return { ...state, setlists: state.setlists.map((s) => (s.id === id ? fn(s) : s)) };
 }
 
-function reducer(state: AppState, action: Action): AppState {
+/** Pure; exported for tests. */
+export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "addSong": {
       const others = state.songs.filter((s) => s.id !== action.song.id);
@@ -83,11 +86,17 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, view: { name: "editor", id: action.id } };
     case "openInSet": {
       const set = state.setlists.find((s) => s.id === action.setId);
-      const songId = set?.songIds[action.setIndex];
-      if (!set || songId === undefined) return state;
+      const entry = set?.entries[action.setIndex];
+      if (!set || entry === undefined) return state;
       return {
         ...state,
-        view: { name: "editor", id: songId, setId: action.setId, setIndex: action.setIndex },
+        view: {
+          name: "editor",
+          id: entry.songId,
+          setId: action.setId,
+          setIndex: action.setIndex,
+          ...(entry.arrangementId ? { arrangementId: entry.arrangementId } : {}),
+        },
       };
     }
     case "openSet":
@@ -111,11 +120,12 @@ function reducer(state: AppState, action: Action): AppState {
             : state.view,
       };
     }
-    case "replaceSong":
-      return {
-        ...state,
-        songs: state.songs.map((s) => (s.id === action.song.id ? stamp(action.song) : s)),
-      };
+    case "replaceSong": {
+      const songs = state.songs.map((s) => (s.id === action.song.id ? stamp(action.song) : s));
+      // A deleted version falls back to the song as written in every set.
+      const pruned = pruneSetlists(state.setlists, songs);
+      return { ...state, songs, setlists: pruned.changed ? pruned.sets : state.setlists };
+    }
     case "createSet": {
       const set = createSetlist(action.name, new Set(state.setlists.map((s) => s.id)));
       return { ...state, setlists: [...state.setlists, set], view: { name: "set", id: set.id } };
@@ -138,6 +148,10 @@ function reducer(state: AppState, action: Action): AppState {
       return updateSet(state, action.setId, (s) => removeAtFromSet(s, action.index));
     case "moveInSet":
       return updateSet(state, action.setId, (s) => moveInSet(s, action.index, action.delta));
+    case "setEntryArrangement":
+      return updateSet(state, action.setId, (s) =>
+        setEntryArrangement(s, action.index, action.arrangementId),
+      );
     case "importSetlists": {
       const byId = new Map(state.setlists.map((s) => [s.id, s]));
       for (const set of action.sets) byId.set(set.id, set);
@@ -167,6 +181,8 @@ export interface SongActions {
   addToSet(setId: string, songId: string): void;
   removeFromSet(setId: string, index: number): void;
   moveInSet(setId: string, index: number, delta: number): void;
+  /** Choose the version a set entry plays; undefined means as written. */
+  setEntryArrangement(setId: string, index: number, arrangementId?: string): void;
   importSetlists(sets: Setlist[]): void;
 }
 
@@ -278,6 +294,9 @@ export function useSongStore(): [AppState, SongActions] {
       },
       moveInSet(setId, index, delta) {
         dispatch({ type: "moveInSet", setId, index, delta });
+      },
+      setEntryArrangement(setId, index, arrangementId) {
+        dispatch({ type: "setEntryArrangement", setId, index, arrangementId });
       },
       importSetlists(sets) {
         dispatch({ type: "importSetlists", sets });

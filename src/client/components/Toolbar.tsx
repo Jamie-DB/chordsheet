@@ -14,6 +14,8 @@ interface Props {
   onPrint?(): void;
   onCopyText?(): void;
   copiedText?: boolean;
+  /** The song has versions; say that key, capo, and transpose reach all of them. */
+  hasVersions?: boolean;
 }
 
 const ALL_KEYS: string[] = [
@@ -29,16 +31,17 @@ export function Toolbar(props: Props) {
   }
 
   const shaped = soundingKey ? shapedKey(soundingKey, song.capo) : null;
+  const everyVersion = props.hasVersions ? " Applies to every version." : "";
 
   return (
     <div className="toolbar">
-      <span className="toolbar-group" title="Change the actual key of the song">
+      <span className="toolbar-group" title={`Change the actual key of the song.${everyVersion}`}>
         <span className="toolbar-label">Transpose</span>
         <button onClick={() => transpose(-1)} disabled={song.placements.length === 0}>-1</button>
         <button onClick={() => transpose(1)} disabled={song.placements.length === 0}>+1</button>
       </span>
 
-      <span className="toolbar-group" title="Sounding key; auto-detected from the chords unless overridden">
+      <span className="toolbar-group" title={`Sounding key, detected from the chords unless you pick one.${everyVersion}`}>
         <span className="toolbar-label">Key</span>
         <select
           value={song.keyOverride ?? "auto"}
@@ -55,7 +58,7 @@ export function Toolbar(props: Props) {
         </select>
       </span>
 
-      <span className="toolbar-group" title="Capo keeps the key; it changes which shapes you play">
+      <span className="toolbar-group" title={`Capo keeps the key and changes which shapes you play.${everyVersion}`}>
         <span className="toolbar-label">Capo</span>
         <select
           value={song.capo}

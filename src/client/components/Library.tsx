@@ -13,6 +13,7 @@ import {
 import { downloadLibrary, downloadSong, parseImport, parseLibraryFile } from "../lib/exchange";
 import { DEFAULT_SORT, SORTS, isSortKey, matchesQuery, type SortKey } from "../lib/librarySort";
 import { loadUiPrefs, saveUiPrefs } from "../lib/storage";
+import { versionCount } from "../lib/versions";
 
 interface Props {
   songs: Song[];
@@ -238,7 +239,7 @@ export function Library({
                   <button className="song-open" onClick={() => onOpenSet(set.id)}>
                     <span className="song-title">{set.name}</span>
                     <span className="song-artist">
-                      {set.songIds.length} song{set.songIds.length === 1 ? "" : "s"}
+                      {set.entries.length} song{set.entries.length === 1 ? "" : "s"}
                     </span>
                   </button>
                 </li>
@@ -327,6 +328,9 @@ export function Library({
                 <span className="song-title">{song.title}</span>
                 {song.artist && <span className="song-artist">{song.artist}</span>}
                 {song.capo > 0 && <span className="badge">Capo {song.capo}</span>}
+                {song.arrangements && song.arrangements.length > 0 && (
+                  <span className="badge">{versionCount(song.arrangements.length)}</span>
+                )}
               </button>
               <span className="song-tools">
                 <button

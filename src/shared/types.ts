@@ -25,8 +25,10 @@ export interface Song {
   bpm?: number;
   /** Free-text block under the header: tuning, strum pattern, reminders. */
   notes?: string;
-  /** Per-section dynamics marks for this arrangement. */
+  /** Per-section dynamics marks for the song as written. */
   sectionMarks?: SectionMark[];
+  /** Named playing versions (double chorus, extended ending) over these sections. */
+  arrangements?: Arrangement[];
   createdAt: string;
   updatedAt: string;
 }
@@ -48,13 +50,51 @@ export interface SectionMark {
   color?: MarkColor;
 }
 
+/** A mark's look without its anchor; arrangement steps carry their own. */
+export type MarkStyle = Pick<SectionMark, "kind" | "text" | "color">;
+
+/**
+ * One block of an arrangement: a section of the song, found the same way
+ * section marks are (label line text plus occurrence). OPENING ("") names
+ * the unlabeled lines above the first label.
+ */
+export interface ArrangementStep {
+  section: string;
+  occurrence: number;
+  /** Played this many times, printed once as "x3"; absent means once. */
+  repeat?: number;
+  /** Cue printed under the label, e.g. "vamp while the pastor speaks". */
+  note?: string;
+  /** Overrides the section's own mark; null clears it for this step. */
+  mark?: MarkStyle | null;
+}
+
+/**
+ * A named version of the song for a service ("Aug 23 version"). Words and
+ * chords stay in the song; the arrangement only orders its sections.
+ */
+export interface Arrangement {
+  /** Slug, unique within the song. */
+  id: string;
+  name: string;
+  steps: ArrangementStep[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SetEntry {
+  songId: string;
+  /** Which version to play; absent means the song as written. */
+  arrangementId?: string;
+}
+
 export interface Setlist {
   version: 1;
   /** Slug from the name; setlists sync as one setlists.json file. */
   id: string;
   name: string;
   /** Ordered; a song may appear more than once. */
-  songIds: string[];
+  entries: SetEntry[];
   createdAt: string;
   updatedAt: string;
 }
