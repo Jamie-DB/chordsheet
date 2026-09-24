@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Song } from "../../shared/types";
-import { chordsOnLine, deleteLine, editLine, insertLine, isSectionLabel } from "./lineOps";
+import { chordsOnLine, deleteLine, editLine, insertLine, isSectionLabel, retargetSections } from "./lineOps";
 
 const song: Song = {
   version: 1,
@@ -63,5 +63,59 @@ describe("chordsOnLine", () => {
   it("counts placements per line", () => {
     expect(chordsOnLine(song, 1)).toBe(2);
     expect(chordsOnLine(song, 0)).toBe(0);
+  });
+});
+
+describe("section references follow a renamed label", () => {
+  // It Is Well with My Soul, public domain.
+  const well: Song = {
+    ...song,
+    lyrics: ["[Verse 1]", "When peace like a river attendeth my way,", "", "[Chorus]", "It is well (it is well),", "", "[Chorus]", "With my soul (with my soul),"],
+    placements: [],
+    sectionMarks: [
+      { section: "[Chorus]", occurrence: 1, kind: "soft" },
+      { section: "[Chorus]", occurrence: 2, kind: "full" },
+    ],
+    arrangements: [
+      {
+        id: "sep",
+        name: "Sep",
+        steps: [
+          { section: "", occurrence: 1 },
+          { section: "[Verse 1]", occurrence: 1 },
+          { section: "[Chorus]", occurrence: 2, repeat: 2 },
+        ],
+        createdAt: "2026-01-01",
+        updatedAt: "2026-01-01",
+      },
+    ],
+  };
+
+  it("renames marks and steps with the label", () => {
+    const next = editLine(well, 0, "[Verse]");
+    expect(next.arrangements?.[0].steps[1]).toEqual({ section: "[Verse]", occurrence: 1 });
+    expect(next.sectionMarks).toEqual(well.sectionMarks);
+  });
+
+  it("shifts occurrences among equal labels", () => {
+    const next = editLine(well, 3, "[Refrain]");
+    expect(next.sectionMarks).toEqual([
+      { section: "[Refrain]", occurrence: 1, kind: "soft" },
+      { section: "[Chorus]", occurrence: 1, kind: "full" },
+    ]);
+    expect(next.arrangements?.[0].steps[2]).toEqual({ section: "[Chorus]", occurrence: 1, repeat: 2 });
+    expect(next.arrangements?.[0].steps[0]).toEqual({ section: "", occurrence: 1 });
+  });
+
+  it("leaves references alone when a label appears or disappears", () => {
+    const next = editLine(well, 3, "It is well");
+    expect(next.sectionMarks).toEqual(well.sectionMarks);
+    expect(next.arrangements).toEqual(well.arrangements);
+  });
+
+  it("returns the edited song untouched when no label changed", () => {
+    const edited = editLine(well, 1, "When peace like a river");
+    expect(edited.arrangements).toBe(well.arrangements);
+    expect(retargetSections(well, well)).toBe(well);
   });
 });
