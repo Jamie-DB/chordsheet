@@ -86,6 +86,7 @@
     font-weight: 800;
     color: black;
     line-height: 1.2;
+    overflow-wrap: break-word;
   }
 
   .print-side-label .print-mark-name {
@@ -98,6 +99,10 @@
     font-size: 11pt;
     font-weight: 800;
     color: black;
+    /* Long dynamics wrap inside the column instead of running into the
+       next one. */
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
   }
 
   /* Breathing room above a compact label so the section start stands out. */
