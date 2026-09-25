@@ -128,7 +128,22 @@ describe("PrintSheet pass lines", () => {
     ];
     const html = render(s);
     expect(html).toContain('<span class="print-repeat">↻ x2</span>');
-    expect(html).toContain('<span class="print-pass"><span class="print-pass-num">1st</span> SOFT</span>');
-    expect(html).toContain('<span class="print-pass"><span class="print-pass-num">2nd</span> ADD SNARE</span>');
+    expect(html).toContain('<span class="print-pass"><span class="print-pass-num pass-1">1st</span> SOFT</span>');
+    expect(html).toContain('<span class="print-pass"><span class="print-pass-num pass-2">2nd</span> ADD SNARE</span>');
+  });
+});
+
+describe("PrintSheet pass colors", () => {
+  it("colors a run by its first pass and caps at the fourth", () => {
+    const s = song(["[Chorus x2]", "Amazing grace", "[Chorus]", "Amazing grace", "[Chorus x3]", "Amazing grace"]);
+    s.sectionMarks = [
+      { section: "[Chorus x2]", occurrence: 1, kind: "soft" },
+      { section: "[Chorus]", occurrence: 1, kind: "build" },
+      { section: "[Chorus x3]", occurrence: 1, kind: "full" },
+    ];
+    const html = render(s);
+    expect(html).toContain('<span class="print-pass-num pass-1">1st-2nd</span>');
+    expect(html).toContain('<span class="print-pass-num pass-3">3rd</span>');
+    expect(html).toContain('<span class="print-pass-num pass-4">4th-6th</span>');
   });
 });

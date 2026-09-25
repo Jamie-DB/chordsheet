@@ -75,11 +75,13 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
           // A highlighted badge so repeats cannot slip past on the stand.
           const repeatBadge = (repeat: number) =>
             repeat > 1 && <span className="print-repeat">{`\u21BB x${repeat}`}</span>;
-          // One line per pass, led by a "1st" / "2nd" badge in the repeat
-          // badge's colors, so each time through reads apart at a glance.
+          // One line per pass, led by a "1st" / "2nd" badge whose color
+          // deepens with each time through (capped at the 4th), so passes
+          // read apart at a glance. A run like "1st-2nd" takes its first color.
           const passLine = (n: PassNote) => (
             <span key={n.passes} className="print-pass">
-              <span className="print-pass-num">{passBadge(n.passes)}</span> {markName(n.mark).toUpperCase()}
+              <span className={`print-pass-num pass-${Math.min(parseInt(n.passes, 10), 4)}`}>{passBadge(n.passes)}</span>{" "}
+              {markName(n.mark).toUpperCase()}
             </span>
           );
           const body: ReactNode[] = [];

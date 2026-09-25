@@ -182,20 +182,27 @@
     white-space: normal;
   }
 
+  /* Pass badges: fully rounded and outlined in their own shade, so they
+     never read as the square, black-outlined repeat badge. Warm colors
+     from the same family deepen with each pass. */
   .print-pass-num {
     display: inline-block;
     white-space: nowrap;
     font-size: 8.5pt;
     font-weight: 800;
     letter-spacing: 0;
-    color: black;
-    background: #fde047;
-    border: 1pt solid black;
-    border-radius: 3pt;
-    padding: 0 2.5pt;
+    color: #3b2604;
+    border: 1pt solid;
+    border-radius: 999px;
+    padding: 0 4pt;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
+
+  .print-pass-num.pass-1 { background: #ffef9e; border-color: #c9a100; }
+  .print-pass-num.pass-2 { background: #ffd98a; border-color: #d08c00; }
+  .print-pass-num.pass-3 { background: #ffb98a; border-color: #d4692a; }
+  .print-pass-num.pass-4 { background: #f7a1a1; border-color: #c24848; }
 
   /* Dynamics are plain notes; color belongs to the section type. */
   .print-mark-name {
