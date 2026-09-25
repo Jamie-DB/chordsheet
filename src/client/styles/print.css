@@ -216,6 +216,13 @@
     -webkit-print-color-adjust: exact;
   }
 
+  /* A section title and its first row, kept together across page and
+     column breaks. */
+  .print-keep {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   .print-gap {
     height: 0.45em;
   }

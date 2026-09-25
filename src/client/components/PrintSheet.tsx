@@ -69,6 +69,23 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
           const passName = (n: PassNote) => `${n.passes}: ${markName(n.mark).toUpperCase()}`;
           const body: ReactNode[] = [];
           let pendingSidebar: Sidebar | null = null;
+          // Label rows waiting for their first content row. They print in one
+          // unbreakable block with it, so a title never ends a page or column.
+          let heading: ReactNode[] = [];
+          const pushHeading = (node: ReactNode) => heading.push(node);
+          const pushContent = (key: React.Key, node: ReactNode) => {
+            if (heading.length === 0) {
+              body.push(node);
+              return;
+            }
+            body.push(
+              <div className="print-keep" key={`keep-${key}`}>
+                {heading}
+                {node}
+              </div>,
+            );
+            heading = [];
+          };
 
           const compactLabel = (key: React.Key, { title, mark, passes }: Sidebar) => (
             <div className={`print-pair print-label-compact`} key={key}>
@@ -137,16 +154,16 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
               };
               if (pendingSidebar) {
                 // Empty section before this one: fall back to a compact row.
-                body.push(compactLabel(`orphan-${i}`, pendingSidebar));
+                pushHeading(compactLabel(`orphan-${i}`, pendingSidebar));
                 pendingSidebar = null;
               }
               if (twoCol) {
                 // Chords placed on the label line print above the label.
-                if (row.length > 0) body.push(pair(`label-chords-${i}`, i, null, null));
-                body.push(compactLabel(i, label));
+                if (row.length > 0) pushHeading(pair(`label-chords-${i}`, i, null, null));
+                pushHeading(compactLabel(i, label));
               } else if (row.length > 0) {
                 // Chords on the label line get their own row, which carries the title.
-                body.push(pair(i, i, label, null));
+                pushHeading(pair(i, i, label, null));
               } else {
                 // The title leaves the flow and rides the next content pair.
                 pendingSidebar = label;
@@ -154,18 +171,21 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
               return;
             }
             if (line.length === 0 && row.length === 0) {
-              body.push(<div className="print-gap" key={i} />);
+              const gap = <div className="print-gap" key={i} />;
+              if (heading.length > 0 || pendingSidebar) pushHeading(gap);
+              else body.push(gap);
               return;
             }
             const sidebar = pendingSidebar;
             pendingSidebar = null;
-            body.push(pair(i, i, sidebar, line));
+            pushContent(i, pair(i, i, sidebar, line));
           });
           // TS cannot see the callback writes; re-widen before the last check.
           const leftover = pendingSidebar as Sidebar | null;
           if (leftover) {
-            body.push(compactLabel("orphan-end", leftover));
+            heading.push(compactLabel("orphan-end", leftover));
           }
+          body.push(...heading);
           return body;
         })()}
       </div>
