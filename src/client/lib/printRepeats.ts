@@ -1,10 +1,11 @@
-import type { ChordPlacement, SectionMark, Song } from "../../shared/types";
+import type { ChordPlacement, SectionMark, SectionRef, Song } from "../../shared/types";
 import { markFor, sectionRanges, stripBrackets } from "./sectionMarks";
 
 /**
  * Back-to-back sections with the same label and the same words and chords
  * print once, as "[Chorus x2]", with each pass's dynamics listed under the
- * label. Print only: the stored song and the editor keep every section.
+ * label. A pass the player sits out never merges with one they play.
+ * Print only: the stored song and the editor keep every section.
  */
 
 /** One line of a merged section's pass list, e.g. "1-2: SOFT". */
@@ -38,12 +39,16 @@ function sameMark(a: SectionMark | null, b: SectionMark | null): boolean {
 interface Group {
   base: string;
   start: number;
+  out: boolean;
   /** One entry per pass, in playing order. */
   marks: (SectionMark | null)[];
 }
 
 export function collapseRepeats(song: Song): CollapsedSong {
   const marks = song.sectionMarks ?? [];
+  const outs = song.outSections ?? [];
+  const isOut = (label: string, occurrence: number) =>
+    outs.some((o) => o.section === label && o.occurrence === occurrence);
   const chordLines = new Set(song.placements.map((p) => p.line));
   const isContent = (i: number) => song.lyrics[i].trim() !== "" || chordLines.has(i);
 
@@ -67,13 +72,14 @@ export function collapseRepeats(song: Song): CollapsedSong {
     const { base, count } = parseLabel(r.label);
     const passes = Array<SectionMark | null>(count).fill(markFor(marks, r.label, r.occurrence));
     const b = body(r.start, r.end);
+    const out = isOut(r.label, r.occurrence);
     const last = groups[groups.length - 1];
-    if (last && b !== null && b === groupBody && last.base === base) {
+    if (last && b !== null && b === groupBody && last.base === base && last.out === out) {
       last.marks.push(...passes);
       for (let i = r.start; i <= r.end; i++) dropped.add(i);
       continue;
     }
-    groups.push({ base, start: r.start, marks: passes });
+    groups.push({ base, start: r.start, out, marks: passes });
     groupBody = b;
   }
   if (dropped.size === 0) return { song, passNotes: new Map() };
@@ -96,11 +102,13 @@ export function collapseRepeats(song: Song): CollapsedSong {
 
   // Rebuild marks against the output labels, whose occurrences have shifted.
   const sectionMarks: SectionMark[] = [];
+  const outSections: SectionRef[] = [];
   const passNotes = new Map<number, PassNote[]>();
   const rangeAt = new Map(ranges.map((r) => [newLine.get(r.start), r]));
   for (const r of sectionRanges(lyrics)) {
     const old = rangeAt.get(r.start)!;
     const g = merged.get(old.start);
+    if (isOut(old.label, old.occurrence)) outSections.push({ section: r.label, occurrence: r.occurrence });
     let mark = markFor(marks, old.label, old.occurrence);
     if (g) {
       const uniform = g.marks.every((m) => sameMark(m, g.marks[0]));
@@ -111,7 +119,13 @@ export function collapseRepeats(song: Song): CollapsedSong {
   }
 
   return {
-    song: { ...song, lyrics, placements, sectionMarks: sectionMarks.length > 0 ? sectionMarks : undefined },
+    song: {
+      ...song,
+      lyrics,
+      placements,
+      sectionMarks: sectionMarks.length > 0 ? sectionMarks : undefined,
+      outSections: outSections.length > 0 ? outSections : undefined,
+    },
     passNotes,
   };
 }

@@ -145,6 +145,72 @@
     margin-top: 0;
   }
 
+  /* Sections the player sits out, drawn like a pen markup: an OUT stamp
+     by the first title, one line down the run (bridging the gaps between
+     sections), and a foot where playing resumes. Words and chords fade. */
+  .print-gap.out {
+    position: relative;
+  }
+
+  .print-pair.out::after,
+  .print-gap.out::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 9pt;
+    border-left: 1.5pt solid var(--out-ink);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .print-gap.out::after {
+    left: 4pt;
+  }
+
+  .print-pair.out.section-start:not(.out-start)::after {
+    top: -5pt;
+  }
+
+  /* The line starts under the stamped title row, not through it. */
+  .print-label-compact.out-start::after {
+    display: none;
+  }
+
+  .print-pair.out-end::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 9pt;
+    width: 7pt;
+    border-bottom: 1.5pt solid var(--out-ink);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .print-pair.out:not(.print-label-compact) pre {
+    opacity: 0.5;
+  }
+
+  .print-out-stamp {
+    display: inline-block;
+    /* Vertical room so the tilt clears the notes under a sidebar title. */
+    margin: 1.5pt 0 3pt 5pt;
+    padding: 0 3pt;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 9.5pt;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    white-space: nowrap;
+    color: var(--out-ink);
+    border: 1.5pt solid var(--out-ink);
+    border-radius: 2pt;
+    transform: rotate(-7deg);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   /* Tacet sections tighten up and move out of the way. */
   .print-pair.tacet-small {
     font-size: 67%;

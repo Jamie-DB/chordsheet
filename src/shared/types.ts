@@ -27,6 +27,11 @@ export interface Song {
   notes?: string;
   /** Per-section dynamics marks for the song as written. */
   sectionMarks?: SectionMark[];
+  /**
+   * Sections the player sits out, anchored like marks. Set only on a
+   * rendered version (from its steps), never on a stored song.
+   */
+  outSections?: SectionRef[];
   /** Named playing versions (double chorus, extended ending) over these sections. */
   arrangements?: Arrangement[];
   createdAt: string;
@@ -40,6 +45,12 @@ export type MarkKind = "tacet" | "soft" | "build" | "full" | "custom";
  * A dynamics mark on one section, anchored by the label line's exact text
  * and its occurrence among identical labels, so line edits never shift it.
  */
+/** A section by its label line and which of the identical labels it is. */
+export interface SectionRef {
+  section: string;
+  occurrence: number;
+}
+
 export interface SectionMark {
   section: string;
   occurrence: number;
@@ -67,6 +78,8 @@ export interface ArrangementStep {
   note?: string;
   /** Overrides the section's own mark; null clears it for this step. */
   mark?: MarkStyle | null;
+  /** The player sits this step out: it prints small under an OUT stamp. */
+  out?: boolean;
 }
 
 /**

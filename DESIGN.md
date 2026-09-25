@@ -60,6 +60,7 @@ interface ArrangementStep {
   repeat?: number;       // 2-16, printed once as "Chorus x2"; absent = once
   note?: string;         // cue printed under the label
   mark?: { kind; text?; color? } | null;   // overrides the section's mark; null clears it
+  out?: boolean;         // the player sits this step out: small, faded, under an OUT stamp
 }
 
 interface Setlist {

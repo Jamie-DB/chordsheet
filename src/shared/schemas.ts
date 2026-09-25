@@ -22,6 +22,7 @@ export const arrangementStepSchema = z.object({
   repeat: z.number().int().min(1).max(16).optional(),
   note: z.string().optional(),
   mark: sectionMarkSchema.pick({ kind: true, text: true, color: true }).nullable().optional(),
+  out: z.boolean().optional(),
 });
 
 export const arrangementSchema = z.object({
@@ -44,6 +45,7 @@ export const songSchema = z.object({
   bpm: z.number().int().min(20).max(400).optional(),
   notes: z.string().optional(),
   sectionMarks: z.array(sectionMarkSchema).optional(),
+  outSections: z.array(sectionMarkSchema.pick({ section: true, occurrence: true })).optional(),
   arrangements: z.array(arrangementSchema).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),

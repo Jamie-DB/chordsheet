@@ -3,6 +3,7 @@ import type {
   ArrangementStep,
   ChordPlacement,
   SectionMark,
+  SectionRef,
   Song,
 } from "../../shared/types";
 import { markFor, sectionRanges, stripBrackets } from "./sectionMarks";
@@ -112,6 +113,7 @@ export function renderArrangement(song: Song, arrangement: Arrangement): Arrange
   const lyrics: string[] = [];
   const placements: ChordPlacement[] = [];
   const sectionMarks: SectionMark[] = [];
+  const outSections: SectionRef[] = [];
   const labelCounts = new Map<string, number>();
   const missing: number[] = [];
 
@@ -129,13 +131,15 @@ export function renderArrangement(song: Song, arrangement: Arrangement): Arrange
     const note = step.note?.trim();
     const labeled = step.section !== OPENING;
     // Unlabeled opening lines get a label once they need one: a repeat, a
-    // cue, a mark, or a place after another section they would otherwise join.
-    if (labeled || suffix || note || step.mark || !first) {
+    // cue, a mark, an out, or a place after another section they would
+    // otherwise join.
+    if (labeled || suffix || note || step.mark || step.out || !first) {
       const base = labeled ? stripBrackets(step.section) : stepTitle(OPENING, 1);
       const label = `[${base}${suffix}]`;
       const occurrence = (labelCounts.get(label) ?? 0) + 1;
       labelCounts.set(label, occurrence);
       lyrics.push(label);
+      if (step.out) outSections.push({ section: label, occurrence });
 
       // The step's own mark wins; null clears; absent inherits the section's.
       const inherited =
@@ -168,6 +172,7 @@ export function renderArrangement(song: Song, arrangement: Arrangement): Arrange
       lyrics,
       placements,
       sectionMarks: sectionMarks.length > 0 ? sectionMarks : undefined,
+      outSections: outSections.length > 0 ? outSections : undefined,
       arrangements: undefined,
     },
     missing,
@@ -240,6 +245,7 @@ export function updateStep(
     if (repeat > 1) next.repeat = repeat;
     else delete next.repeat;
     if (!next.note?.trim()) delete next.note;
+    if (!next.out) delete next.out;
     return next;
   });
 }
