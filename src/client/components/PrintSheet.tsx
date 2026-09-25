@@ -3,7 +3,7 @@ import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
 import { markFor, markName, sectionRanges, sectionStyling, stripBrackets } from "../lib/sectionMarks";
 import { collapseRepeats, type PassNote } from "../lib/printRepeats";
-import { headerKeyLine, printFooterCss } from "../lib/sheetText";
+import { printFooterCss, printTagline } from "../lib/sheetText";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
 
@@ -11,7 +11,7 @@ interface Props {
   song: Song;
   soundingKey: string | null;
   shapedKeyName: string;
-  /** Printed under the title when the sheet is a version of the song. */
+  /** Printed in the page footer when the sheet is a version of the song. */
   versionName?: string;
 }
 
@@ -53,13 +53,12 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
   return (
     <div className={`print-sheet${twoCol ? "" : " with-sidebar"}`}>
       <style>{printFooterCss(song.title, versionName)}</style>
+      {/* Title and tagline only; artist, notes, and version stay off the
+          page to leave room for the chart. The footer names the version. */}
       <div className="print-header">
         <h1>{song.title}</h1>
-        {song.artist && <div className="print-artist">{song.artist}</div>}
-        {versionName?.trim() && <div className="print-version">{versionName.trim()}</div>}
-        <div className="print-key">{headerKeyLine(soundingKey, song.capo)}</div>
+        <span className="print-key">{printTagline(soundingKey, song.capo, song.bpm)}</span>
       </div>
-      {song.notes?.trim() && <pre className="print-notes">{song.notes.trim()}</pre>}
       <div className="print-diagrams">
         <ChordChartRow song={song} shapedKeyName={shapedKeyName} />
       </div>

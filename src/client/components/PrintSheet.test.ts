@@ -82,3 +82,16 @@ describe("PrintSheet section type bars", () => {
     expect(html).not.toMatch(/name-(red|blue|amber|green)/);
   });
 });
+
+describe("PrintSheet header", () => {
+  it("prints only the title and a key, capo, and tempo tagline", () => {
+    const s = { ...song(["[Verse 1]", "Amazing grace"]), artist: "John Newton", notes: "Chorus after every verse.", capo: 2, bpm: 72 };
+    const html = renderToStaticMarkup(
+      createElement(PrintSheet, { song: s, soundingKey: "G", shapedKeyName: "F", versionName: "Short" }),
+    );
+    expect(html).toContain('<div class="print-header"><h1>Amazing Grace</h1><span class="print-key">Key: G, Capo 2, 72 BPM</span></div>');
+    expect(html).not.toContain("John Newton");
+    expect(html).not.toContain("Chorus after every verse.");
+    expect(html).not.toMatch(/<div class="print-version">/);
+  });
+});
