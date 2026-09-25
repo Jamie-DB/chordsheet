@@ -116,6 +116,21 @@ export function collapseRepeats(song: Song): CollapsedSong {
   };
 }
 
+/** 1 to "1st", 2 to "2nd", 11 to "11th". */
+export function ordinal(n: number): string {
+  const teen = n % 100 >= 11 && n % 100 <= 13;
+  const suffix = teen ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th";
+  return `${n}${suffix}`;
+}
+
+/** A pass list entry's badge text: "1" to "1st", "1-2" to "1st-2nd". */
+export function passBadge(passes: string): string {
+  return passes
+    .split("-")
+    .map((p) => ordinal(Number(p)))
+    .join("-");
+}
+
 /** Runs of passes sharing a mark, unmarked passes left out: [SOFT, SOFT, FULL] to 1-2, 3. */
 function passList(marks: (SectionMark | null)[]): PassNote[] {
   const out: PassNote[] = [];

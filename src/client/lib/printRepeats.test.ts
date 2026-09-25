@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ChordPlacement, SectionMark, Song } from "../../shared/types";
-import { collapseRepeats } from "./printRepeats";
+import { collapseRepeats, ordinal, passBadge } from "./printRepeats";
 
 // Public domain lyrics (It Is Well with My Soul).
 const V1A = "When peace like a river attendeth my way,";
@@ -104,5 +104,30 @@ describe("collapseRepeats", () => {
     const { song, passNotes } = collapseRepeats(input);
     expect(song).toBe(input);
     expect(passNotes.size).toBe(0);
+  });
+});
+
+describe("pass badges", () => {
+  it.each([
+    [1, "1st"],
+    [2, "2nd"],
+    [3, "3rd"],
+    [4, "4th"],
+    [11, "11th"],
+    [12, "12th"],
+    [13, "13th"],
+    [21, "21st"],
+    [22, "22nd"],
+    [101, "101st"],
+    [111, "111th"],
+  ])("%i is %s", (n, text) => {
+    expect(ordinal(n)).toBe(text);
+  });
+
+  it("turns pass lists into ordinals", () => {
+    expect(passBadge("1")).toBe("1st");
+    expect(passBadge("2")).toBe("2nd");
+    expect(passBadge("1-2")).toBe("1st-2nd");
+    expect(passBadge("3-4")).toBe("3rd-4th");
   });
 });

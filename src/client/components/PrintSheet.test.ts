@@ -118,3 +118,17 @@ describe("PrintSheet repeat badge", () => {
     expect(html).toContain("Verse x");
   });
 });
+
+describe("PrintSheet pass lines", () => {
+  it("prints each pass of a merged repeat on its own line with an ordinal badge", () => {
+    const s = song(["[Chorus]", "Amazing grace", "[Chorus]", "Amazing grace"]);
+    s.sectionMarks = [
+      { section: "[Chorus]", occurrence: 1, kind: "soft" },
+      { section: "[Chorus]", occurrence: 2, kind: "custom", text: "Add snare" },
+    ];
+    const html = render(s);
+    expect(html).toContain('<span class="print-repeat">↻ x2</span>');
+    expect(html).toContain('<span class="print-pass"><span class="print-pass-num">1st</span> SOFT</span>');
+    expect(html).toContain('<span class="print-pass"><span class="print-pass-num">2nd</span> ADD SNARE</span>');
+  });
+});

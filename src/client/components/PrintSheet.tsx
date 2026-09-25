@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
 import { markFor, markName, sectionRanges, sectionStyling } from "../lib/sectionMarks";
-import { collapseRepeats, parseLabel, type PassNote } from "../lib/printRepeats";
+import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
 import { printFooterCss, printTagline } from "../lib/sheetText";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
@@ -75,7 +75,13 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
           // A highlighted badge so repeats cannot slip past on the stand.
           const repeatBadge = (repeat: number) =>
             repeat > 1 && <span className="print-repeat">{`\u21BB x${repeat}`}</span>;
-          const passName = (n: PassNote) => `${n.passes}: ${markName(n.mark).toUpperCase()}`;
+          // One line per pass, led by a "1st" / "2nd" badge in the repeat
+          // badge's colors, so each time through reads apart at a glance.
+          const passLine = (n: PassNote) => (
+            <span key={n.passes} className="print-pass">
+              <span className="print-pass-num">{passBadge(n.passes)}</span> {markName(n.mark).toUpperCase()}
+            </span>
+          );
           const body: ReactNode[] = [];
           let pendingSidebar: Sidebar | null = null;
           // Label rows waiting for their first content row. They print in one
@@ -107,11 +113,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
                     {"  " + markName(mark).toUpperCase()}
                   </span>
                 )}
-                {passes?.map((n) => (
-                  <span key={n.passes} className="print-mark-name">
-                    {"  " + passName(n)}
-                  </span>
-                ))}
+                {passes?.map(passLine)}
               </pre>
             </div>
           );
@@ -130,11 +132,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
                         {markName(sidebar.mark).toUpperCase()}
                       </span>
                     )}
-                    {sidebar.passes?.map((n) => (
-                      <span key={n.passes} className="print-mark-name">
-                        {passName(n)}
-                      </span>
-                    ))}
+                    {sidebar.passes?.map(passLine)}
                   </span>
                 )}
                 {row.length > 0 && (
