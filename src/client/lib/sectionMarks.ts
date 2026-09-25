@@ -1,4 +1,4 @@
-import type { MarkColor, MarkKind, SectionMark } from "../../shared/types";
+import type { MarkColor, MarkKind, SectionMark, SectionRef } from "../../shared/types";
 import { isSectionLabel } from "./lineOps";
 
 export const PRESETS: Record<Exclude<MarkKind, "custom">, { name: string }> = {
@@ -92,6 +92,39 @@ export function sectionStyling(lyrics: string[], marks: SectionMark[]): SectionS
     }
   }
   return { typeByLine, tacetLines };
+}
+
+export interface OutStyling {
+  /** Every line of every out run, trailing blank lines trimmed. */
+  lines: Set<number>;
+  /** The label line that opens each run, where the OUT stamp goes. */
+  starts: Set<number>;
+  /** The last line of each run, where the line ends in a foot. */
+  ends: Set<number>;
+}
+
+/**
+ * Back-to-back sections the player sits out join into one run, drawn as a
+ * single stamped line like a pen markup. A run ends at its last line with
+ * words or chords, so the foot lands where playing resumes.
+ */
+export function outStyling(lyrics: string[], outs: SectionRef[], chordLines: Set<number>): OutStyling {
+  const lines = new Set<number>();
+  const starts = new Set<number>();
+  const ends = new Set<number>();
+  const isOut = (r: SectionRange) => outs.some((o) => o.section === r.label && o.occurrence === r.occurrence);
+  const ranges = sectionRanges(lyrics);
+  for (let k = 0; k < ranges.length; k++) {
+    if (!isOut(ranges[k])) continue;
+    const first = ranges[k];
+    while (k + 1 < ranges.length && isOut(ranges[k + 1])) k += 1;
+    let end = ranges[k].end;
+    while (end > ranges[k].start && lyrics[end].trim() === "" && !chordLines.has(end)) end -= 1;
+    for (let i = first.start; i <= end; i++) lines.add(i);
+    starts.add(first.start);
+    ends.add(end);
+  }
+  return { lines, starts, ends };
 }
 
 export function markFor(

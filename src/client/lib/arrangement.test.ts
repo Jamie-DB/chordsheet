@@ -577,3 +577,36 @@ describe("step list ops", () => {
     expect(steps[1]).toEqual(step("[Chorus]"));
   });
 });
+
+describe("out steps", () => {
+  it("anchors each out step to its rendered label and occurrence", () => {
+    const { song } = renderArrangement(
+      WELL,
+      arr([step("[Verse 1]", 1, { out: true }), step("[Chorus]"), step("[Chorus]", 1, { out: true })]),
+    );
+    expect(song.outSections).toEqual([
+      { section: "[Verse 1]", occurrence: 1 },
+      { section: "[Chorus]", occurrence: 2 },
+    ]);
+    const labels = sectionRanges(song.lyrics).map((r) => [r.label, r.occurrence]);
+    expect(labels).toContainEqual(["[Chorus]", 2]);
+  });
+
+  it("leaves outSections undefined when no step is out", () => {
+    expect(renderArrangement(WELL, arr(defaultSteps(WELL))).song.outSections).toBeUndefined();
+  });
+
+  it("labels an unlabeled opening so an out can anchor to it", () => {
+    const song = mk([AG, "", "[Verse 1]", V1A]);
+    const { song: out } = renderArrangement(song, arr([step(OPENING, 1, { out: true }), step("[Verse 1]")]));
+    expect(out.lyrics[0]).toBe("[Opening]");
+    expect(out.outSections).toEqual([{ section: "[Opening]", occurrence: 1 }]);
+  });
+
+  it("updateStep sets out and drops it again when cleared", () => {
+    const steps = [step("[Chorus]")];
+    const on = updateStep(steps, 0, { out: true });
+    expect(on[0]).toEqual({ section: "[Chorus]", occurrence: 1, out: true });
+    expect(updateStep(on, 0, { out: false })[0]).toEqual({ section: "[Chorus]", occurrence: 1 });
+  });
+});

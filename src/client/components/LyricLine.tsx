@@ -14,6 +14,8 @@ export interface SectionUi {
   name: string | null;
   /** Section type; the tag and side bar take its color. */
   type: SectionType;
+  /** Opens a run of sections the player sits out; the tag shows an OUT stamp. */
+  outStart?: boolean;
   pickerOpen: boolean;
   current: SectionMark | null;
   onOpen(): void;
@@ -199,6 +201,7 @@ export function LyricLine(props: Props) {
         <div className="label-side">
           <span className={`section-tag read-only pill-${sectionUi.type}`}>
             {sectionUi.title}
+            {sectionUi.outStart && <span className="tag-out">OUT</span>}
             {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
           </span>
         </div>
@@ -218,6 +221,7 @@ export function LyricLine(props: Props) {
             title="Click for a dynamics mark, double-click to rename the section"
           >
             {sectionUi.title}
+            {sectionUi.outStart && <span className="tag-out">OUT</span>}
             {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
           </button>
         </div>

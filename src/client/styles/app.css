@@ -19,6 +19,9 @@
   --sec-outro: #6f93b5;
   --sec-instrumental: #9b958b;
   --sec-other: #c4bfb6;
+
+  /* Pen ink for sections the player sits out. */
+  --out-ink: #d0247a;
 }
 
 * {
@@ -398,6 +401,57 @@ textarea {
 .sec-other, .pill-other { --sec: var(--sec-other); }
 
 .line-pair[class*="sec-"] { border-left-color: var(--sec); }
+
+/* Sections the player sits out: a pen-style line down the run, a foot
+   where playing resumes, and faded words and chords. The label row has
+   zero height, so the line starts at the first content row. */
+.line-pair.out::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: -0.2rem;
+  left: calc(7px + 0.6ch);
+  border-left: 2px solid var(--out-ink);
+  pointer-events: none;
+}
+
+.line-pair.out-end::after {
+  bottom: 0;
+}
+
+/* Collapsed label rows have no height; a stub there reads as a stray tick. */
+.line-pair.out.label-collapsed::after {
+  display: none;
+}
+
+.line-pair.out-end::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: calc(7px + 0.6ch);
+  width: 1.2ch;
+  border-bottom: 2px solid var(--out-ink);
+  pointer-events: none;
+}
+
+.line-pair.out .chord-lane,
+.line-pair.out .lyric-row {
+  opacity: 0.5;
+}
+
+.section-tag .tag-out {
+  display: block;
+  align-self: flex-end;
+  margin: 0.15rem 0 0.05rem;
+  padding: 0 0.3rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--out-ink);
+  border: 1.5px solid var(--out-ink);
+  border-radius: 2px;
+  transform: rotate(-6deg);
+}
 
 /* Tacet sections tighten up; chips and clicks scale with the em grid. */
 .line-pair.tacet-small {
@@ -964,6 +1018,17 @@ button.mini {
   display: inline-flex;
   gap: 2px;
   margin-left: auto;
+}
+
+/* Out toggle: pen ink when on, and the step's title fades to match. */
+.arr-out.on {
+  color: white;
+  background: var(--out-ink);
+  border-color: var(--out-ink);
+}
+
+.arr-step.out .arr-title {
+  color: var(--muted);
 }
 
 .arr-step.missing .arr-title {

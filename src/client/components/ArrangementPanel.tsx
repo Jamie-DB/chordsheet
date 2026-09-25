@@ -66,7 +66,7 @@ export function ArrangementPanel({ song, arrangement, missing, onChange }: Props
           const repeat = step.repeat ?? 1;
           const inherited = inheritedMark(song, step);
           return (
-            <li key={i} className="arr-step">
+            <li key={i} className={`arr-step${step.out ? " out" : ""}`}>
               <span className="arr-num">{i + 1}</span>
               <span className="arr-title">{title}</span>
               <span className="arr-repeat">
@@ -116,6 +116,14 @@ export function ArrangementPanel({ song, arrangement, missing, onChange }: Props
                   <option value="custom">{markName({ section: "", occurrence: 1, ...step.mark })}</option>
                 )}
               </select>
+              <button
+                className={`mini arr-out${step.out ? " on" : ""}`}
+                aria-pressed={Boolean(step.out)}
+                title={step.out ? "You play this section again" : "You sit this section out: it prints small with an OUT stamp"}
+                onClick={() => setSteps(updateStep(steps, i, { out: !step.out }))}
+              >
+                Out
+              </button>
               <span className="arr-tools">
                 <button className="mini" disabled={i === 0} title="Move up" onClick={() => setSteps(moveStep(steps, i, -1))}>
                   &#8593;

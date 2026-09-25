@@ -49,7 +49,7 @@ describe("arrangements in songs", () => {
       { section: "", occurrence: 1 },
       { section: "[Verse 1]", occurrence: 1, mark: { kind: "soft" } },
       { section: "[Chorus]", occurrence: 1, repeat: 2, note: "build" },
-      { section: "[Chorus]", occurrence: 2, mark: null },
+      { section: "[Chorus]", occurrence: 2, mark: null, out: true },
       { section: "[Verse 4]", occurrence: 1, mark: { kind: "custom", text: "all in", color: "green" } },
     ],
     ...stamps,
@@ -82,6 +82,7 @@ describe("arrangements in songs", () => {
     ["a fractional repeat", { section: "[Chorus]", occurrence: 1, repeat: 1.5 }],
     ["occurrence 0", { section: "[Chorus]", occurrence: 0 }],
     ["an unknown mark kind", { section: "[Chorus]", occurrence: 1, mark: { kind: "loud" } }],
+    ["a non-boolean out", { section: "[Chorus]", occurrence: 1, out: "yes" }],
   ])("rejects a step with %s, in the song and alone", (_name, bad) => {
     const broken = { ...arrangement, steps: [bad] };
     expect(arrangementSchema.safeParse(broken).success).toBe(false);

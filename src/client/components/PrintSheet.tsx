@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
-import { markFor, markName, sectionRanges, sectionStyling } from "../lib/sectionMarks";
+import { markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
 import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
 import { printFooterCss, printTagline } from "../lib/sheetText";
 import { ChordChartRow } from "./ChordChartRow";
@@ -45,10 +45,19 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
   const { typeByLine, tacetLines } = sectionStyling(song.lyrics, marks);
+  // Sections the player sits out shrink like tacet and carry a pen-style
+  // line from an OUT stamp down to a foot where playing resumes.
+  const out = outStyling(song.lyrics, song.outSections ?? [], new Set(song.placements.map((p) => p.line)));
   const pairClass = (i: number): string => {
     const type = typeByLine.get(i);
-    return `print-pair${type ? ` sec-${type}` : ""}${tacetLines.has(i) ? " tacet-small" : ""}`;
+    const small = tacetLines.has(i) || out.lines.has(i);
+    return (
+      `print-pair${type ? ` sec-${type}` : ""}${small ? " tacet-small" : ""}` +
+      `${out.lines.has(i) ? " out" : ""}${out.ends.has(i) ? " out-end" : ""}`
+    );
   };
+  const outStamp = (labelLine: number) =>
+    out.starts.has(labelLine) && <span className="print-out-stamp">OUT</span>;
 
   return (
     <div className={`print-sheet${twoCol ? "" : " with-sidebar"}`}>
@@ -105,11 +114,15 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
           };
 
           const compactLabel = (key: React.Key, { line, title, repeat, mark, passes }: Sidebar, start = true) => (
-            <div className={`${pairClass(line)} print-label-compact${start ? " section-start" : ""}`} key={key}>
+            <div
+              className={`${pairClass(line)} print-label-compact${start ? " section-start" : ""}${out.starts.has(line) ? " out-start" : ""}`}
+              key={key}
+            >
               <pre className="print-lyric">
                 {title}
                 {repeat > 1 && " "}
                 {repeatBadge(repeat)}
+                {outStamp(line)}
                 {mark && (
                   <span className="print-mark-name">
                     {"  " + markName(mark).toUpperCase()}
@@ -123,12 +136,16 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
           const pair = (key: React.Key, i: number, sidebar: Sidebar | null, lyric: string | null, start = false) => {
             const row = rows[i];
             return (
-              <div className={`${pairClass(i)}${sidebar || start ? " section-start" : ""}`} key={key}>
+              <div
+                className={`${pairClass(i)}${sidebar || start ? " section-start" : ""}${sidebar && out.starts.has(sidebar.line) ? " out-start" : ""}`}
+                key={key}
+              >
                 {sidebar && (
                   <span className="print-side-label">
                     {sidebar.title}
                     {sidebar.repeat > 1 && " "}
                     {repeatBadge(sidebar.repeat)}
+                    {outStamp(sidebar.line)}
                     {sidebar.mark && (
                       <span className="print-mark-name">
                         {markName(sidebar.mark).toUpperCase()}
@@ -186,7 +203,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
               return;
             }
             if (line.length === 0 && row.length === 0) {
-              const gap = <div className="print-gap" key={i} />;
+              const gap = <div className={`print-gap${out.lines.has(i) ? " out" : ""}`} key={i} />;
               if (heading.length > 0 || pendingSidebar) pushHeading(gap);
               else body.push(gap);
               return;

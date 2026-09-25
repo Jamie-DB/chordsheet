@@ -131,3 +131,31 @@ describe("pass badges", () => {
     expect(passBadge("3-4")).toBe("3rd-4th");
   });
 });
+
+describe("collapseRepeats with out passes", () => {
+  const outs = (song: Song, refs: Song["outSections"]): Song => ({ ...song, outSections: refs });
+
+  it("never merges a pass the player sits out with one they play", () => {
+    const { song } = collapseRepeats(outs(mk(twice, twiceChords), [{ section: "[Chorus]", occurrence: 1 }]));
+    expect(song.lyrics).toEqual(twice);
+    expect(song.outSections).toEqual([{ section: "[Chorus]", occurrence: 1 }]);
+  });
+
+  it("merges passes that are both out and keeps the merged label out", () => {
+    const { song } = collapseRepeats(
+      outs(mk(twice, twiceChords), [
+        { section: "[Chorus]", occurrence: 1 },
+        { section: "[Chorus]", occurrence: 2 },
+      ]),
+    );
+    expect(song.lyrics).toEqual(["[Verse 1]", V1A, "", "[Chorus x2]", CHA, CHB, ""]);
+    expect(song.outSections).toEqual([{ section: "[Chorus x2]", occurrence: 1 }]);
+  });
+
+  it("re-anchors outs whose occurrence shifts when earlier repeats merge", () => {
+    const lyrics = [...twice, "[Chorus]", V1A];
+    const { song } = collapseRepeats(outs(mk(lyrics, twiceChords), [{ section: "[Chorus]", occurrence: 3 }]));
+    expect(song.lyrics).toEqual(["[Verse 1]", V1A, "", "[Chorus x2]", CHA, CHB, "", "[Chorus]", V1A]);
+    expect(song.outSections).toEqual([{ section: "[Chorus]", occurrence: 1 }]);
+  });
+});

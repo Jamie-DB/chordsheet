@@ -147,3 +147,19 @@ describe("PrintSheet pass colors", () => {
     expect(html).toContain('<span class="print-pass-num pass-4">4th-6th</span>');
   });
 });
+
+describe("PrintSheet out sections", () => {
+  it("stamps the first title of a run, shrinks and lines every row, and feet the last", () => {
+    const s = { ...song(["[Intro]", "Amazing grace", "", "[Verse 1]", "How sweet the sound", "", "[Chorus]", "That saved a wretch"]) };
+    s.outSections = [
+      { section: "[Intro]", occurrence: 1 },
+      { section: "[Verse 1]", occurrence: 1 },
+    ];
+    const html = render(s);
+    expect(html.match(/print-out-stamp/g)).toHaveLength(1);
+    expect(html).toMatch(/class="print-pair sec-intro tacet-small out print-label-compact section-start out-start"><pre class="print-lyric">Intro<span class="print-out-stamp">OUT<\/span>/);
+    expect(html).toContain('class="print-gap out"');
+    expect(html).toMatch(/class="print-pair sec-verse tacet-small out out-end"><pre class="print-lyric">How sweet the sound/);
+    expect(html).toMatch(/class="print-pair sec-chorus"><pre class="print-lyric">That saved a wretch/);
+  });
+});

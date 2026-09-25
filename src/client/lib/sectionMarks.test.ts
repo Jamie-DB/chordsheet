@@ -5,6 +5,7 @@ import {
   inferKind,
   markFor,
   markName,
+  outStyling,
   sectionRanges,
   sectionStyling,
   sectionType,
@@ -178,5 +179,33 @@ describe("extractLabelNotes", () => {
     const result = extractLabelNotes(["[Verse]", "Just words [not a label]", "so [brackets] here"], []);
     expect(result.changed).toBe(false);
     expect(result.lyrics).toEqual(["[Verse]", "Just words [not a label]", "so [brackets] here"]);
+  });
+});
+
+describe("outStyling", () => {
+  const lyrics = ["[Intro]", "a", "", "[Verse 1]", "b", "c", "", "[Chorus]", "d", "", "[Verse 2]", "e", ""];
+  const ref = (section: string, occurrence = 1) => ({ section, occurrence });
+
+  it("joins back-to-back out sections into one run and trims trailing blanks", () => {
+    const out = outStyling(lyrics, [ref("[Intro]"), ref("[Verse 1]")], new Set());
+    expect([...out.lines]).toEqual([0, 1, 2, 3, 4, 5]);
+    expect([...out.starts]).toEqual([0]);
+    expect([...out.ends]).toEqual([5]);
+  });
+
+  it("splits runs at a section the player plays", () => {
+    const out = outStyling(lyrics, [ref("[Intro]"), ref("[Chorus]")], new Set());
+    expect([...out.starts]).toEqual([0, 7]);
+    expect([...out.ends]).toEqual([1, 8]);
+  });
+
+  it("keeps a trailing chord-only line in the run", () => {
+    const out = outStyling(lyrics, [ref("[Verse 2]")], new Set([12]));
+    expect([...out.ends]).toEqual([12]);
+  });
+
+  it("is empty with no outs", () => {
+    const out = outStyling(lyrics, [], new Set());
+    expect(out.lines.size + out.starts.size + out.ends.size).toBe(0);
   });
 });

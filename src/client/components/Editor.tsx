@@ -10,6 +10,7 @@ import {
   markFor,
   markName,
   sectionRanges,
+  outStyling,
   sectionStyling,
   sectionType,
   stripBrackets,
@@ -76,10 +77,15 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
   const ranges = sectionRanges(shown.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
   const { typeByLine, tacetLines } = sectionStyling(shown.lyrics, marks);
+  const outRuns = outStyling(shown.lyrics, shown.outSections ?? [], new Set(shown.placements.map((p) => p.line)));
   const sectionClassFor = (i: number): string | undefined => {
     const type = typeByLine.get(i);
     if (!type) return undefined;
-    return tacetLines.has(i) ? `sec-${type} tacet-small` : `sec-${type}`;
+    const out = outRuns.lines.has(i);
+    return (
+      `sec-${type}${tacetLines.has(i) || out ? " tacet-small" : ""}` +
+      `${out ? " out" : ""}${outRuns.ends.has(i) ? " out-end" : ""}`
+    );
   };
   const [notesOpen, setNotesOpen] = useState(() => Boolean(song.notes?.trim()));
 
@@ -523,6 +529,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
                   title: stripBrackets(range.label),
                   name: current ? markName(current) : null,
                   type: sectionType(range.label),
+                  outStart: outRuns.starts.has(i),
                   pickerOpen: markPickerLine === i,
                   current,
                   onOpen: () => setMarkPickerLine(i),
