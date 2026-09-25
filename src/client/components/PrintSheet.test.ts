@@ -95,3 +95,26 @@ describe("PrintSheet header", () => {
     expect(html).not.toMatch(/<div class="print-version">/);
   });
 });
+
+describe("PrintSheet repeat badge", () => {
+  it("splits a trailing xN off the title into a badge", () => {
+    const html = render(song(["[Chorus x2]", "Amazing grace"]));
+    expect(html).toContain('Chorus <span class="print-repeat">↻ x2</span>');
+  });
+
+  it("badges sections merged from back-to-back repeats", () => {
+    const html = render(song(["[Chorus]", "Amazing grace", "[Chorus]", "Amazing grace", "[Chorus]", "Amazing grace"]));
+    expect(html).toContain('<span class="print-repeat">↻ x3</span>');
+  });
+
+  it("badges sidebar titles too", () => {
+    const html = render(song(["[Verse 1 x2]", LONG]));
+    expect(html).toContain('<span class="print-side-label">Verse 1 <span class="print-repeat">↻ x2</span></span>');
+  });
+
+  it("leaves single sections and x-words alone", () => {
+    const html = render(song(["[Chorus]", "Amazing grace", "[Verse x]", "How sweet"]));
+    expect(html).not.toContain("print-repeat");
+    expect(html).toContain("Verse x");
+  });
+});

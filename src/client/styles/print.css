@@ -138,6 +138,24 @@
     font-size: 67%;
   }
 
+  /* Repeat badge: highlighter yellow, a color no section bar uses, with a
+     dark outline so it survives grayscale printing too. */
+  .print-repeat {
+    display: inline-block;
+    white-space: nowrap;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 10pt;
+    font-weight: 800;
+    line-height: 1.15;
+    color: black;
+    background: #fde047;
+    border: 1.2pt solid black;
+    border-radius: 3pt;
+    padding: 0 3pt;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   /* Dynamics are plain notes; color belongs to the section type. */
   .print-mark-name {
     font-size: 9pt;

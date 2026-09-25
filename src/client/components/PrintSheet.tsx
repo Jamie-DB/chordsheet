@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
-import { markFor, markName, sectionRanges, sectionStyling, stripBrackets } from "../lib/sectionMarks";
-import { collapseRepeats, type PassNote } from "../lib/printRepeats";
+import { markFor, markName, sectionRanges, sectionStyling } from "../lib/sectionMarks";
+import { collapseRepeats, parseLabel, type PassNote } from "../lib/printRepeats";
 import { printFooterCss, printTagline } from "../lib/sheetText";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
@@ -64,7 +64,17 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
       </div>
       <div className={twoCol ? "print-body two-col" : "print-body"}>
         {(() => {
-          type Sidebar = { line: number; title: string; mark: ReturnType<typeof markFor>; passes?: PassNote[] };
+          type Sidebar = {
+            line: number;
+            title: string;
+            /** Times the section plays, from a trailing "x2" on its label. */
+            repeat: number;
+            mark: ReturnType<typeof markFor>;
+            passes?: PassNote[];
+          };
+          // A highlighted badge so repeats cannot slip past on the stand.
+          const repeatBadge = (repeat: number) =>
+            repeat > 1 && <span className="print-repeat">{`\u21BB x${repeat}`}</span>;
           const passName = (n: PassNote) => `${n.passes}: ${markName(n.mark).toUpperCase()}`;
           const body: ReactNode[] = [];
           let pendingSidebar: Sidebar | null = null;
@@ -86,10 +96,12 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
             heading = [];
           };
 
-          const compactLabel = (key: React.Key, { line, title, mark, passes }: Sidebar, start = true) => (
+          const compactLabel = (key: React.Key, { line, title, repeat, mark, passes }: Sidebar, start = true) => (
             <div className={`${pairClass(line)} print-label-compact${start ? " section-start" : ""}`} key={key}>
               <pre className="print-lyric">
                 {title}
+                {repeat > 1 && " "}
+                {repeatBadge(repeat)}
                 {mark && (
                   <span className="print-mark-name">
                     {"  " + markName(mark).toUpperCase()}
@@ -111,6 +123,8 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
                 {sidebar && (
                   <span className="print-side-label">
                     {sidebar.title}
+                    {sidebar.repeat > 1 && " "}
+                    {repeatBadge(sidebar.repeat)}
                     {sidebar.mark && (
                       <span className="print-mark-name">
                         {markName(sidebar.mark).toUpperCase()}
@@ -148,7 +162,8 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
             if (range) {
               const label: Sidebar = {
                 line: i,
-                title: stripBrackets(range.label),
+                title: parseLabel(range.label).base,
+                repeat: parseLabel(range.label).count,
                 mark: markFor(marks, range.label, range.occurrence),
                 passes: passNotes.get(i),
               };

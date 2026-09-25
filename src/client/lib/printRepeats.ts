@@ -22,8 +22,8 @@ export interface CollapsedSong {
 
 const REPEAT_SUFFIX = /\s+x(\d+)$/;
 
-/** "[Chorus x2]" to { base: "Chorus", count: 2 }. */
-function parseLabel(label: string): { base: string; count: number } {
+/** "[Chorus x2]" to { base: "Chorus", count: 2 }; brackets optional. */
+export function parseLabel(label: string): { base: string; count: number } {
   const title = stripBrackets(label);
   const m = REPEAT_SUFFIX.exec(title);
   return m ? { base: title.slice(0, m.index), count: Number(m[1]) } : { base: title, count: 1 };
