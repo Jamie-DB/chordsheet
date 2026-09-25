@@ -175,6 +175,9 @@
     column-count: 2;
     column-gap: 7mm;
     column-fill: auto;
+    /* Room for the section bars, which hang 8pt left of the text. Chrome
+       clips anything left of the first column when printing. */
+    padding-left: 8pt;
   }
 
   .print-sheet pre {
