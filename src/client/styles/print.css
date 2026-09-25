@@ -65,7 +65,7 @@
 
   /* Section titles live in a left sidebar gutter (single-column layout). */
   .print-sheet.with-sidebar {
-    padding-left: 21mm;
+    padding-left: 30mm;
   }
 
   .print-pair {
@@ -77,15 +77,15 @@
 
   .print-side-label {
     float: left;
-    width: 17mm;
-    margin-left: -20.5mm;
+    width: 26mm;
+    margin-left: -29.5mm;
     margin-bottom: 1pt;
     text-align: right;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 8pt;
-    font-weight: 600;
-    color: #6b7280;
-    line-height: 1.25;
+    font-size: 11pt;
+    font-weight: 800;
+    color: black;
+    line-height: 1.2;
   }
 
   .print-side-label .print-mark-name {
@@ -95,9 +95,14 @@
   /* Compact in-flow label: two-column layout and empty-section fallback. */
   .print-label-compact .print-lyric {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 8pt;
-    font-weight: 600;
-    color: #6b7280;
+    font-size: 11pt;
+    font-weight: 800;
+    color: black;
+  }
+
+  /* Breathing room above a compact label so the section start stands out. */
+  .print-pair.print-label-compact {
+    margin-top: 4pt;
   }
 
   /* Section dynamics: no backgrounds; a thin colored edge bar (borders
@@ -125,9 +130,11 @@
   }
 
   .print-mark-name {
-    font-size: 6.5pt;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-size: 9pt;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .print-mark-name.name-red { color: #dc2626; }
