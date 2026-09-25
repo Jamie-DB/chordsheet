@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
-import { markColor, markFor, markName, sectionRanges, sectionStyling, stripBrackets } from "../lib/sectionMarks";
+import { markFor, markName, sectionRanges, sectionStyling, stripBrackets } from "../lib/sectionMarks";
 import { collapseRepeats, type PassNote } from "../lib/printRepeats";
 import { headerKeyLine, printFooterCss } from "../lib/sheetText";
 import { ChordChartRow } from "./ChordChartRow";
@@ -44,10 +44,10 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
   const marks = song.sectionMarks ?? [];
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
-  const { colorByLine, tacetLines } = sectionStyling(song.lyrics, marks);
+  const { typeByLine, tacetLines } = sectionStyling(song.lyrics, marks);
   const pairClass = (i: number): string => {
-    const color = colorByLine.get(i);
-    return `print-pair${color ? ` sec-${color}` : ""}${tacetLines.has(i) ? " tacet-small" : ""}`;
+    const type = typeByLine.get(i);
+    return `print-pair${type ? ` sec-${type}` : ""}${tacetLines.has(i) ? " tacet-small" : ""}`;
   };
 
   return (
@@ -65,7 +65,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
       </div>
       <div className={twoCol ? "print-body two-col" : "print-body"}>
         {(() => {
-          type Sidebar = { title: string; mark: ReturnType<typeof markFor>; passes?: PassNote[] };
+          type Sidebar = { line: number; title: string; mark: ReturnType<typeof markFor>; passes?: PassNote[] };
           const passName = (n: PassNote) => `${n.passes}: ${markName(n.mark).toUpperCase()}`;
           const body: ReactNode[] = [];
           let pendingSidebar: Sidebar | null = null;
@@ -87,17 +87,17 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
             heading = [];
           };
 
-          const compactLabel = (key: React.Key, { title, mark, passes }: Sidebar) => (
-            <div className={`print-pair print-label-compact`} key={key}>
+          const compactLabel = (key: React.Key, { line, title, mark, passes }: Sidebar, start = true) => (
+            <div className={`${pairClass(line)} print-label-compact${start ? " section-start" : ""}`} key={key}>
               <pre className="print-lyric">
                 {title}
                 {mark && (
-                  <span className={`print-mark-name name-${markColor(mark)}`}>
+                  <span className="print-mark-name">
                     {"  " + markName(mark).toUpperCase()}
                   </span>
                 )}
                 {passes?.map((n) => (
-                  <span key={n.passes} className={`print-mark-name name-${markColor(n.mark)}`}>
+                  <span key={n.passes} className="print-mark-name">
                     {"  " + passName(n)}
                   </span>
                 ))}
@@ -105,20 +105,20 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
             </div>
           );
 
-          const pair = (key: React.Key, i: number, sidebar: Sidebar | null, lyric: string | null) => {
+          const pair = (key: React.Key, i: number, sidebar: Sidebar | null, lyric: string | null, start = false) => {
             const row = rows[i];
             return (
-              <div className={pairClass(i)} key={key}>
+              <div className={`${pairClass(i)}${sidebar || start ? " section-start" : ""}`} key={key}>
                 {sidebar && (
                   <span className="print-side-label">
                     {sidebar.title}
                     {sidebar.mark && (
-                      <span className={`print-mark-name name-${markColor(sidebar.mark)}`}>
+                      <span className="print-mark-name">
                         {markName(sidebar.mark).toUpperCase()}
                       </span>
                     )}
                     {sidebar.passes?.map((n) => (
-                      <span key={n.passes} className={`print-mark-name name-${markColor(n.mark)}`}>
+                      <span key={n.passes} className="print-mark-name">
                         {passName(n)}
                       </span>
                     ))}
@@ -148,6 +148,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
             const range = rangeByStart.get(i);
             if (range) {
               const label: Sidebar = {
+                line: i,
                 title: stripBrackets(range.label),
                 mark: markFor(marks, range.label, range.occurrence),
                 passes: passNotes.get(i),
@@ -159,8 +160,8 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
               }
               if (twoCol) {
                 // Chords placed on the label line print above the label.
-                if (row.length > 0) pushHeading(pair(`label-chords-${i}`, i, null, null));
-                pushHeading(compactLabel(i, label));
+                if (row.length > 0) pushHeading(pair(`label-chords-${i}`, i, null, null, true));
+                pushHeading(compactLabel(i, label, row.length === 0));
               } else if (row.length > 0) {
                 // Chords on the label line get their own row, which carries the title.
                 pushHeading(pair(i, i, label, null));

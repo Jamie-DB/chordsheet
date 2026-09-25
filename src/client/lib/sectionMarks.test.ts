@@ -3,11 +3,11 @@ import type { SectionMark } from "../../shared/types";
 import {
   extractLabelNotes,
   inferKind,
-  markColor,
   markFor,
   markName,
   sectionRanges,
   sectionStyling,
+  sectionType,
   withMark,
   withoutMark,
 } from "./sectionMarks";
@@ -37,26 +37,67 @@ describe("sectionStyling", () => {
     "I once was lost, but now am found",
   ];
 
-  it("colors every line of a marked section and flags tacet lines", () => {
+  it("types every line of a section by its label and flags tacet lines", () => {
     const marks: SectionMark[] = [
       { section: "[Verse]", occurrence: 1, kind: "soft" },
       { section: "[Chorus]", occurrence: 2, kind: "tacet" },
     ];
-    const { colorByLine, tacetLines } = sectionStyling(lyrics, marks);
-    expect([...colorByLine.entries()]).toEqual([
-      [0, "blue"],
-      [1, "blue"],
-      [2, "blue"],
-      [5, "red"],
-      [6, "red"],
+    const { typeByLine, tacetLines } = sectionStyling(lyrics, marks);
+    expect([...typeByLine.entries()]).toEqual([
+      [0, "verse"],
+      [1, "verse"],
+      [2, "verse"],
+      [3, "chorus"],
+      [4, "chorus"],
+      [5, "chorus"],
+      [6, "chorus"],
     ]);
     expect([...tacetLines]).toEqual([5, 6]);
   });
 
-  it("leaves unmarked songs unstyled", () => {
-    const { colorByLine, tacetLines } = sectionStyling(lyrics, []);
-    expect(colorByLine.size).toBe(0);
+  it("types sections the same with or without marks", () => {
+    const { typeByLine, tacetLines } = sectionStyling(lyrics, []);
+    expect(typeByLine.get(1)).toBe("verse");
+    expect(typeByLine.get(4)).toBe("chorus");
     expect(tacetLines.size).toBe(0);
+  });
+
+  it("leaves unlabeled lines untyped", () => {
+    const { typeByLine } = sectionStyling(["Amazing grace", "[Verse]", "How sweet"], []);
+    expect([...typeByLine.keys()]).toEqual([1, 2]);
+  });
+});
+
+describe("sectionType", () => {
+  it.each([
+    ["[Intro]", "intro"],
+    ["[Verse 1]", "verse"],
+    ["[verse]", "verse"],
+    ["[Pre-Chorus]", "prechorus"],
+    ["[Prechorus 2]", "prechorus"],
+    ["[Pre Chorus]", "prechorus"],
+    ["[Chorus]", "chorus"],
+    ["[Final Chorus]", "chorus"],
+    ["[Refrain]", "chorus"],
+    ["[Hook]", "chorus"],
+    ["[Post-Chorus]", "tag"],
+    ["[Tag]", "tag"],
+    ["[Tagline]", "tag"],
+    ["[Vamp]", "tag"],
+    ["[Bridge]", "bridge"],
+    ["[Bridge 2]", "bridge"],
+    ["[Outro]", "outro"],
+    ["[Ending]", "outro"],
+    ["[Coda]", "outro"],
+    ["[Instrumental]", "instrumental"],
+    ["[Interlude]", "instrumental"],
+    ["[Guitar Solo]", "instrumental"],
+    ["[Turnaround]", "instrumental"],
+    ["[Break]", "instrumental"],
+    ["[Spoken]", "other"],
+    ["[Vintage]", "other"],
+  ])("%s is %s", (label, type) => {
+    expect(sectionType(label)).toBe(type);
   });
 });
 
@@ -70,18 +111,15 @@ describe("marks", () => {
     expect(markFor([tacet], "[Verse]", 2)).toBeNull();
   });
 
-  it("names and colors presets and customs", () => {
+  it("names presets and customs", () => {
     expect(markName(tacet)).toBe("Tacet");
-    expect(markColor(tacet)).toBe("red");
     expect(markName(custom)).toBe("swell");
-    expect(markColor(custom)).toBe("amber");
     expect(markName({ ...custom, text: "  " })).toBe("Custom");
   });
 
-  it("a note overrides any preset's term while keeping its color", () => {
+  it("a note overrides any preset's term", () => {
     const noted: SectionMark = { ...tacet, text: "Hard cut - Absolute Quiet" };
     expect(markName(noted)).toBe("Hard cut - Absolute Quiet");
-    expect(markColor(noted)).toBe("red");
   });
 
   it("infers presets from note keywords, custom amber otherwise", () => {

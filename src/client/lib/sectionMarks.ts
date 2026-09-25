@@ -1,14 +1,42 @@
 import type { MarkColor, MarkKind, SectionMark } from "../../shared/types";
 import { isSectionLabel } from "./lineOps";
 
-export const PRESETS: Record<Exclude<MarkKind, "custom">, { name: string; color: MarkColor }> = {
-  tacet: { name: "Tacet", color: "red" },
-  soft: { name: "Soft", color: "blue" },
-  build: { name: "Build", color: "amber" },
-  full: { name: "Full", color: "green" },
+export const PRESETS: Record<Exclude<MarkKind, "custom">, { name: string }> = {
+  tacet: { name: "Tacet" },
+  soft: { name: "Soft" },
+  build: { name: "Build" },
+  full: { name: "Full" },
 };
 
-export const MARK_COLORS: MarkColor[] = ["red", "blue", "amber", "green"];
+/** What part of the song a section is; the side bar color follows it. */
+export type SectionType =
+  | "intro"
+  | "verse"
+  | "prechorus"
+  | "chorus"
+  | "bridge"
+  | "tag"
+  | "outro"
+  | "instrumental"
+  | "other";
+
+/** First match wins, so "Pre-Chorus" and "Post-Chorus" beat "Chorus". */
+const SECTION_TYPE_RULES: Array<[RegExp, SectionType]> = [
+  [/\bpre[- ]?chorus\b/, "prechorus"],
+  [/\bpost[- ]?chorus\b|\btag(line)?\b|\bvamp\b/, "tag"],
+  [/\bchorus\b|\brefrain\b|\bhook\b/, "chorus"],
+  [/\bverse\b/, "verse"],
+  [/\bbridge\b/, "bridge"],
+  [/\bintro\b/, "intro"],
+  [/\boutro\b|\bending\b|\bcoda\b/, "outro"],
+  [/\binstrumental\b|\binterlude\b|\bsolo\b|\bturnaround\b|\bbreak\b/, "instrumental"],
+];
+
+/** "[Verse 2]" to "verse"; anything unrecognized is "other". */
+export function sectionType(label: string): SectionType {
+  const name = stripBrackets(label).toLowerCase();
+  return SECTION_TYPE_RULES.find(([re]) => re.test(name))?.[1] ?? "other";
+}
 
 /** The displayed term: a free-text note overrides any preset's name. */
 export function markName(mark: SectionMark): string {
@@ -20,10 +48,6 @@ export function markName(mark: SectionMark): string {
 /** "[Verse 1]" to "Verse 1" for tags and sidebars. */
 export function stripBrackets(label: string): string {
   return label.trim().replace(/^\[|\]$/g, "");
-}
-
-export function markColor(mark: SectionMark): MarkColor {
-  return mark.kind === "custom" ? (mark.color ?? "amber") : PRESETS[mark.kind].color;
 }
 
 export interface SectionRange {
@@ -49,26 +73,25 @@ export function sectionRanges(lyrics: string[]): SectionRange[] {
 }
 
 export interface SectionStyling {
-  /** Mark color for every line inside a marked section, label line included. */
-  colorByLine: Map<number, MarkColor>;
+  /** Section type for every line inside a section, label line included. */
+  typeByLine: Map<number, SectionType>;
   /** Lines inside a tacet section, drawn smaller. */
   tacetLines: Set<number>;
 }
 
-/** Per-line section color and tacet flags, shared by the editor and print. */
+/** Per-line section type and tacet flags, shared by the editor and print. */
 export function sectionStyling(lyrics: string[], marks: SectionMark[]): SectionStyling {
-  const colorByLine = new Map<number, MarkColor>();
+  const typeByLine = new Map<number, SectionType>();
   const tacetLines = new Set<number>();
   for (const r of sectionRanges(lyrics)) {
-    const mark = markFor(marks, r.label, r.occurrence);
-    if (!mark) continue;
-    const color = markColor(mark);
+    const type = sectionType(r.label);
+    const tacet = markFor(marks, r.label, r.occurrence)?.kind === "tacet";
     for (let i = r.start; i <= r.end; i++) {
-      colorByLine.set(i, color);
-      if (mark.kind === "tacet") tacetLines.add(i);
+      typeByLine.set(i, type);
+      if (tacet) tacetLines.add(i);
     }
   }
-  return { colorByLine, tacetLines };
+  return { typeByLine, tacetLines };
 }
 
 export function markFor(

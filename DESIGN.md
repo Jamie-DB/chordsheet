@@ -43,7 +43,7 @@ interface SectionMark {
   occurrence: number;    // which of the identical labels, 1-based
   kind: "tacet" | "soft" | "build" | "full" | "custom";
   text?: string;         // custom word shown in place of the preset name
-  color?: "red" | "blue" | "amber" | "green";   // custom marks only
+  color?: "red" | "blue" | "amber" | "green";   // legacy, ignored: colors follow the section type
 }
 
 interface Arrangement {

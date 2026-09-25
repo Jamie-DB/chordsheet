@@ -25,20 +25,20 @@ describe("PrintSheet keeps section titles with their first row", () => {
   it("wraps a two-column compact label with the line after it", () => {
     const html = render(song(["[Verse 1]", "Amazing grace", "That saved a wretch", "[Verse 2]", "I once was lost"]));
     expect(html.match(/class="print-keep"/g)).toHaveLength(2);
-    expect(html).toMatch(/<div class="print-keep"><div class="print-pair print-label-compact">.*?Verse 1.*?Amazing grace/);
-    expect(html).toMatch(/<div class="print-keep"><div class="print-pair print-label-compact">.*?Verse 2.*?I once was lost/);
+    expect(html).toMatch(/<div class="print-keep"><div class="print-pair[^"]* print-label-compact[^"]*">.*?Verse 1.*?Amazing grace/);
+    expect(html).toMatch(/<div class="print-keep"><div class="print-pair[^"]* print-label-compact[^"]*">.*?Verse 2.*?I once was lost/);
     // Lines after the first stay outside the block so the section can still break.
-    expect(html).toContain('Amazing grace</pre></div></div><div class="print-pair"><pre class="print-lyric">That saved a wretch');
+    expect(html).toMatch(/Amazing grace<\/pre><\/div><\/div><div class="print-pair[^"]*"><pre class="print-lyric">That saved a wretch/);
   });
 
   it("keeps chords placed on a label line with the title and first line", () => {
     const html = render(song(["[Verse 1]", "Amazing grace"], [{ id: "a", line: 0, col: 0, chord: "G" }]));
-    expect(html).toMatch(/<div class="print-keep"><div class="print-pair"><pre class="print-chords">G<\/pre><\/div><div class="print-pair print-label-compact">.*?Verse 1.*?Amazing grace/);
+    expect(html).toMatch(/<div class="print-keep"><div class="print-pair[^"]*"><pre class="print-chords">G<\/pre><\/div><div class="print-pair[^"]* print-label-compact[^"]*">.*?Verse 1.*?Amazing grace/);
   });
 
   it("keeps a sidebar label row with chords together with the first line", () => {
     const html = render(song(["[Verse 1]", LONG], [{ id: "a", line: 0, col: 0, chord: "G" }]));
-    expect(html).toMatch(/<div class="print-keep"><div class="print-pair"><span class="print-side-label">Verse 1<\/span>.*?<\/div><div class="print-pair">.*?Amazing grace/);
+    expect(html).toMatch(/<div class="print-keep"><div class="print-pair[^"]*"><span class="print-side-label">Verse 1<\/span>.*?<\/div><div class="print-pair[^"]*">.*?Amazing grace/);
   });
 
   it("does not wrap a sidebar title that already rides its first line", () => {
@@ -57,5 +57,28 @@ describe("PrintSheet keeps section titles with their first row", () => {
     const html = render(song(["Amazing grace", "[Outro]"]));
     expect(html).not.toContain("print-keep");
     expect(html).toContain("Outro");
+  });
+});
+
+describe("PrintSheet section type bars", () => {
+  it("gives every row of a section its type's bar, label row included", () => {
+    const html = render(song(["[Verse 1]", "Amazing grace", "[Chorus]", "How sweet the sound"]));
+    expect(html).toMatch(/class="print-pair sec-verse print-label-compact section-start"><pre class="print-lyric">Verse 1/);
+    expect(html).toMatch(/class="print-pair sec-verse"><pre class="print-lyric">Amazing grace/);
+    expect(html).toMatch(/class="print-pair sec-chorus print-label-compact section-start"><pre class="print-lyric">Chorus/);
+    expect(html).toMatch(/class="print-pair sec-chorus"><pre class="print-lyric">How sweet the sound/);
+  });
+
+  it("leaves rows before the first label without a bar", () => {
+    const html = render(song(["Amazing grace", "[Verse 1]", "How sweet the sound"]));
+    expect(html).toMatch(/class="print-pair"><pre class="print-lyric">Amazing grace/);
+  });
+
+  it("prints dynamics as neutral notes", () => {
+    const s = song(["[Chorus]", "Amazing grace"]);
+    s.sectionMarks = [{ section: "[Chorus]", occurrence: 1, kind: "soft" }];
+    const html = render(s);
+    expect(html).toContain('<span class="print-mark-name">  SOFT</span>');
+    expect(html).not.toMatch(/name-(red|blue|amber|green)/);
   });
 });

@@ -82,7 +82,7 @@
     margin-bottom: 1pt;
     text-align: right;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 11pt;
+    font-size: 10pt;
     font-weight: 800;
     color: black;
     line-height: 1.2;
@@ -96,7 +96,7 @@
   /* Compact in-flow label: two-column layout and empty-section fallback. */
   .print-label-compact .print-lyric {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 11pt;
+    font-size: 10pt;
     font-weight: 800;
     color: black;
     /* Long dynamics wrap inside the column instead of running into the
@@ -105,47 +105,53 @@
     overflow-wrap: break-word;
   }
 
-  /* Breathing room above a compact label so the section start stands out. */
-  .print-pair.print-label-compact {
-    margin-top: 4pt;
-  }
-
-  /* Section dynamics: no backgrounds; a thin colored edge bar (borders
-     always print) plus the tag name. Margin/padding cancel so columns hold. */
-  .print-pair.sec-red,
-  .print-pair.sec-blue,
-  .print-pair.sec-amber,
-  .print-pair.sec-green {
+  /* Section type bars: no backgrounds; a colored edge bar (borders always
+     print) runs the full height of each section, so verse, chorus, and
+     bridge read apart at a glance. Margin/padding cancel so columns hold. */
+  .print-pair.sec-intro,
+  .print-pair.sec-verse,
+  .print-pair.sec-prechorus,
+  .print-pair.sec-chorus,
+  .print-pair.sec-bridge,
+  .print-pair.sec-tag,
+  .print-pair.sec-outro,
+  .print-pair.sec-instrumental,
+  .print-pair.sec-other {
     margin-left: -8pt;
-    padding-left: 6.5pt;
-    border-left-width: 1.5pt;
+    padding-left: 5pt;
+    border-left-width: 3pt;
     border-left-style: solid;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  .print-pair.sec-red { border-left-color: #dc2626; }
-  .print-pair.sec-blue { border-left-color: #2563eb; }
-  .print-pair.sec-amber { border-left-color: #d97706; }
-  .print-pair.sec-green { border-left-color: #16a34a; }
+  .print-pair.sec-intro { border-left-color: #16a34a; }
+  .print-pair.sec-verse { border-left-color: #2563eb; }
+  .print-pair.sec-prechorus { border-left-color: #0891b2; }
+  .print-pair.sec-chorus { border-left-color: #dc2626; }
+  .print-pair.sec-bridge { border-left-color: #7c3aed; }
+  .print-pair.sec-tag { border-left-color: #d97706; }
+  .print-pair.sec-outro { border-left-color: #16a34a; }
+  .print-pair.sec-instrumental { border-left-color: #6b7280; }
+  .print-pair.sec-other { border-left-color: #9ca3af; }
+
+  /* A gap above each section breaks the bar between back-to-back sections. */
+  .section-start {
+    margin-top: 5pt;
+  }
 
   /* Tacet sections tighten up and move out of the way. */
   .print-pair.tacet-small {
     font-size: 67%;
   }
 
+  /* Dynamics are plain notes; color belongs to the section type. */
   .print-mark-name {
     font-size: 9pt;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 0.05em;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
+    color: #374151;
   }
-
-  .print-mark-name.name-red { color: #dc2626; }
-  .print-mark-name.name-blue { color: #2563eb; }
-  .print-mark-name.name-amber { color: #b45309; }
-  .print-mark-name.name-green { color: #16a34a; }
 
   /* Diagram row spans the page above the columns. */
   .print-diagrams .chord-chart-row {
@@ -208,7 +214,8 @@
   .print-pair {
     break-inside: avoid;
     page-break-inside: avoid;
-    margin-bottom: 1.5pt;
+    /* Padding, not margin, so a section's bar has no gaps between rows. */
+    padding-bottom: 1.5pt;
   }
 
   .print-chords {
