@@ -7,6 +7,18 @@
   --danger: #dc2626;
   --muted: #6b7280;
   --border: #d1d5db;
+
+  /* Section type palette, shared by the editor and print: sage verse,
+     orange chorus, and softer companions for the rest. */
+  --sec-verse: #6aa36f;
+  --sec-chorus: #e39343;
+  --sec-bridge: #9577b8;
+  --sec-prechorus: #d1ae45;
+  --sec-tag: #d68a8a;
+  --sec-intro: #6f93b5;
+  --sec-outro: #6f93b5;
+  --sec-instrumental: #9b958b;
+  --sec-other: #c4bfb6;
 }
 
 * {
@@ -375,15 +387,17 @@ textarea {
   border-left-style: solid;
 }
 
-.line-pair.sec-intro { border-left-color: #16a34a; }
-.line-pair.sec-verse { border-left-color: #2563eb; }
-.line-pair.sec-prechorus { border-left-color: #0891b2; }
-.line-pair.sec-chorus { border-left-color: #dc2626; }
-.line-pair.sec-bridge { border-left-color: #7c3aed; }
-.line-pair.sec-tag { border-left-color: #d97706; }
-.line-pair.sec-outro { border-left-color: #16a34a; }
-.line-pair.sec-instrumental { border-left-color: #6b7280; }
-.line-pair.sec-other { border-left-color: #9ca3af; }
+.sec-verse, .pill-verse { --sec: var(--sec-verse); }
+.sec-chorus, .pill-chorus { --sec: var(--sec-chorus); }
+.sec-bridge, .pill-bridge { --sec: var(--sec-bridge); }
+.sec-prechorus, .pill-prechorus { --sec: var(--sec-prechorus); }
+.sec-tag, .pill-tag { --sec: var(--sec-tag); }
+.sec-intro, .pill-intro { --sec: var(--sec-intro); }
+.sec-outro, .pill-outro { --sec: var(--sec-outro); }
+.sec-instrumental, .pill-instrumental { --sec: var(--sec-instrumental); }
+.sec-other, .pill-other { --sec: var(--sec-other); }
+
+.line-pair[class*="sec-"] { border-left-color: var(--sec); }
 
 /* Tacet sections tighten up; chips and clicks scale with the em grid. */
 .line-pair.tacet-small {
@@ -439,15 +453,11 @@ textarea {
   letter-spacing: 0.05em;
 }
 
-.section-tag.pill-intro { color: #16a34a; border-color: #16a34a; }
-.section-tag.pill-verse { color: #2563eb; border-color: #2563eb; }
-.section-tag.pill-prechorus { color: #0891b2; border-color: #0891b2; }
-.section-tag.pill-chorus { color: #dc2626; border-color: #dc2626; }
-.section-tag.pill-bridge { color: #7c3aed; border-color: #7c3aed; }
-.section-tag.pill-tag { color: #d97706; border-color: #d97706; }
-.section-tag.pill-outro { color: #16a34a; border-color: #16a34a; }
-.section-tag.pill-instrumental { color: #6b7280; border-color: #6b7280; }
-.section-tag.pill-other { color: #9ca3af; border-color: #9ca3af; }
+/* Pill text is the type color darkened so it stays readable on white. */
+.section-tag[class*="pill-"] {
+  color: color-mix(in srgb, var(--sec) 70%, black);
+  border-color: var(--sec);
+}
 
 /* Dynamics notes stay neutral; the pill color is the section type. */
 .section-tag .tag-note {

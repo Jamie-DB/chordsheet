@@ -125,15 +125,7 @@
     -webkit-print-color-adjust: exact;
   }
 
-  .print-pair.sec-intro { border-left-color: #16a34a; }
-  .print-pair.sec-verse { border-left-color: #2563eb; }
-  .print-pair.sec-prechorus { border-left-color: #0891b2; }
-  .print-pair.sec-chorus { border-left-color: #dc2626; }
-  .print-pair.sec-bridge { border-left-color: #7c3aed; }
-  .print-pair.sec-tag { border-left-color: #d97706; }
-  .print-pair.sec-outro { border-left-color: #16a34a; }
-  .print-pair.sec-instrumental { border-left-color: #6b7280; }
-  .print-pair.sec-other { border-left-color: #9ca3af; }
+  .print-pair[class*="sec-"] { border-left-color: var(--sec); }
 
   /* A gap above each section breaks the bar between back-to-back sections. */
   .section-start {
