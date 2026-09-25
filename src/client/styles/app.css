@@ -7,6 +7,18 @@
   --danger: #dc2626;
   --muted: #6b7280;
   --border: #d1d5db;
+
+  /* Section type palette, shared by the editor and print: sage verse,
+     orange chorus, and softer companions for the rest. */
+  --sec-verse: #6aa36f;
+  --sec-chorus: #e39343;
+  --sec-bridge: #9577b8;
+  --sec-prechorus: #d1ae45;
+  --sec-tag: #d68a8a;
+  --sec-intro: #6f93b5;
+  --sec-outro: #6f93b5;
+  --sec-instrumental: #9b958b;
+  --sec-other: #c4bfb6;
 }
 
 * {
@@ -357,22 +369,35 @@ textarea {
   outline: none;
 }
 
-/* Section dynamics marks: no backgrounds, just a thin edge bar and the
-   pill tag; margin/padding cancel so character columns never shift. */
-.line-pair.sec-red,
-.line-pair.sec-blue,
-.line-pair.sec-amber,
-.line-pair.sec-green {
+/* Section type bars: no backgrounds, just a thin edge bar and the pill
+   tag in the type's color; margin/padding cancel so character columns
+   never shift. */
+.line-pair.sec-intro,
+.line-pair.sec-verse,
+.line-pair.sec-prechorus,
+.line-pair.sec-chorus,
+.line-pair.sec-bridge,
+.line-pair.sec-tag,
+.line-pair.sec-outro,
+.line-pair.sec-instrumental,
+.line-pair.sec-other {
   margin-left: -10px;
-  padding-left: 8px;
-  border-left-width: 2px;
+  padding-left: 7px;
+  border-left-width: 3px;
   border-left-style: solid;
 }
 
-.line-pair.sec-red { border-left-color: #dc2626; }
-.line-pair.sec-blue { border-left-color: #2563eb; }
-.line-pair.sec-amber { border-left-color: #d97706; }
-.line-pair.sec-green { border-left-color: #16a34a; }
+.sec-verse, .pill-verse { --sec: var(--sec-verse); }
+.sec-chorus, .pill-chorus { --sec: var(--sec-chorus); }
+.sec-bridge, .pill-bridge { --sec: var(--sec-bridge); }
+.sec-prechorus, .pill-prechorus { --sec: var(--sec-prechorus); }
+.sec-tag, .pill-tag { --sec: var(--sec-tag); }
+.sec-intro, .pill-intro { --sec: var(--sec-intro); }
+.sec-outro, .pill-outro { --sec: var(--sec-outro); }
+.sec-instrumental, .pill-instrumental { --sec: var(--sec-instrumental); }
+.sec-other, .pill-other { --sec: var(--sec-other); }
+
+.line-pair[class*="sec-"] { border-left-color: var(--sec); }
 
 /* Tacet sections tighten up; chips and clicks scale with the em grid. */
 .line-pair.tacet-small {
@@ -428,50 +453,21 @@ textarea {
   letter-spacing: 0.05em;
 }
 
-.section-tag.pill-red { color: #dc2626; border-color: #dc2626; }
-.section-tag.pill-blue { color: #2563eb; border-color: #2563eb; }
-.section-tag.pill-amber { color: #b45309; border-color: #d97706; }
-.section-tag.pill-green { color: #16a34a; border-color: #16a34a; }
+/* Pill text is the type color darkened so it stays readable on white. */
+.section-tag[class*="pill-"] {
+  color: color-mix(in srgb, var(--sec) 70%, black);
+  border-color: var(--sec);
+}
+
+/* Dynamics notes stay neutral; the pill color is the section type. */
+.section-tag .tag-note {
+  color: var(--muted);
+}
 
 .mark-picker {
   flex-wrap: wrap;
   max-width: 30rem;
 }
-
-.mark-btn.mark-red { color: #dc2626; }
-.mark-btn.mark-blue { color: #2563eb; }
-.mark-btn.mark-amber { color: #b45309; }
-.mark-btn.mark-green { color: #16a34a; }
-
-.mark-custom {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.mark-custom input {
-  font-size: 0.8rem;
-  padding: 0.15rem 0.35rem;
-  width: 7ch;
-}
-
-.mark-dot {
-  width: 0.85rem;
-  height: 0.85rem;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  padding: 0;
-  cursor: pointer;
-}
-
-.mark-dot.selected {
-  border-color: var(--ink);
-}
-
-.mark-dot.dot-red { background: #dc2626; }
-.mark-dot.dot-blue { background: #2563eb; }
-.mark-dot.dot-amber { background: #d97706; }
-.mark-dot.dot-green { background: #16a34a; }
 
 /* Interactive editor grid */
 

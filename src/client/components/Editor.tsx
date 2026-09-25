@@ -7,11 +7,11 @@ import { parseImport } from "../lib/exchange";
 import { freshId } from "../lib/ids";
 import { chordsOnLine, deleteLine, editLine, insertLine, replaceLyrics, stepsUsingLabel } from "../lib/lineOps";
 import {
-  markColor,
   markFor,
   markName,
   sectionRanges,
   sectionStyling,
+  sectionType,
   stripBrackets,
   withMark,
   withoutMark,
@@ -75,11 +75,11 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
   const marks = shown.sectionMarks ?? [];
   const ranges = sectionRanges(shown.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
-  const { colorByLine, tacetLines } = sectionStyling(shown.lyrics, marks);
+  const { typeByLine, tacetLines } = sectionStyling(shown.lyrics, marks);
   const sectionClassFor = (i: number): string | undefined => {
-    const color = colorByLine.get(i);
-    if (!color) return undefined;
-    return tacetLines.has(i) ? `sec-${color} tacet-small` : `sec-${color}`;
+    const type = typeByLine.get(i);
+    if (!type) return undefined;
+    return tacetLines.has(i) ? `sec-${type} tacet-small` : `sec-${type}`;
   };
   const [notesOpen, setNotesOpen] = useState(() => Boolean(song.notes?.trim()));
 
@@ -522,17 +522,16 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
                 return {
                   title: stripBrackets(range.label),
                   name: current ? markName(current) : null,
-                  color: current ? markColor(current) : null,
+                  type: sectionType(range.label),
                   pickerOpen: markPickerLine === i,
                   current,
                   onOpen: () => setMarkPickerLine(i),
-                  onPick: (kind, text, color) => {
+                  onPick: (kind, text) => {
                     const next = withMark(marks, {
                       section: range.label,
                       occurrence: range.occurrence,
                       kind,
                       ...(text ? { text } : {}),
-                      ...(kind === "custom" ? { color } : {}),
                     });
                     onChange({ ...song, sectionMarks: next });
                     setMarkPickerLine(null);

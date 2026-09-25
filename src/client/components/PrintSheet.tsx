@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
-import { markColor, markFor, markName, sectionRanges, sectionStyling, stripBrackets } from "../lib/sectionMarks";
-import { collapseRepeats, type PassNote } from "../lib/printRepeats";
-import { headerKeyLine, printFooterCss } from "../lib/sheetText";
+import { markFor, markName, sectionRanges, sectionStyling } from "../lib/sectionMarks";
+import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
+import { printFooterCss, printTagline } from "../lib/sheetText";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
 
@@ -11,7 +11,7 @@ interface Props {
   song: Song;
   soundingKey: string | null;
   shapedKeyName: string;
-  /** Printed under the title when the sheet is a version of the song. */
+  /** Printed in the page footer when the sheet is a version of the song. */
   versionName?: string;
 }
 
@@ -44,67 +44,97 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
   const marks = song.sectionMarks ?? [];
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
-  const { colorByLine, tacetLines } = sectionStyling(song.lyrics, marks);
+  const { typeByLine, tacetLines } = sectionStyling(song.lyrics, marks);
   const pairClass = (i: number): string => {
-    const color = colorByLine.get(i);
-    return `print-pair${color ? ` sec-${color}` : ""}${tacetLines.has(i) ? " tacet-small" : ""}`;
+    const type = typeByLine.get(i);
+    return `print-pair${type ? ` sec-${type}` : ""}${tacetLines.has(i) ? " tacet-small" : ""}`;
   };
 
   return (
     <div className={`print-sheet${twoCol ? "" : " with-sidebar"}`}>
       <style>{printFooterCss(song.title, versionName)}</style>
+      {/* Title and tagline only; artist, notes, and version stay off the
+          page to leave room for the chart. The footer names the version. */}
       <div className="print-header">
         <h1>{song.title}</h1>
-        {song.artist && <div className="print-artist">{song.artist}</div>}
-        {versionName?.trim() && <div className="print-version">{versionName.trim()}</div>}
-        <div className="print-key">{headerKeyLine(soundingKey, song.capo)}</div>
+        <span className="print-key">{printTagline(soundingKey, song.capo, song.bpm)}</span>
       </div>
-      {song.notes?.trim() && <pre className="print-notes">{song.notes.trim()}</pre>}
       <div className="print-diagrams">
         <ChordChartRow song={song} shapedKeyName={shapedKeyName} />
       </div>
       <div className={twoCol ? "print-body two-col" : "print-body"}>
         {(() => {
-          type Sidebar = { title: string; mark: ReturnType<typeof markFor>; passes?: PassNote[] };
-          const passName = (n: PassNote) => `${n.passes}: ${markName(n.mark).toUpperCase()}`;
+          type Sidebar = {
+            line: number;
+            title: string;
+            /** Times the section plays, from a trailing "x2" on its label. */
+            repeat: number;
+            mark: ReturnType<typeof markFor>;
+            passes?: PassNote[];
+          };
+          // A highlighted badge so repeats cannot slip past on the stand.
+          const repeatBadge = (repeat: number) =>
+            repeat > 1 && <span className="print-repeat">{`\u21BB x${repeat}`}</span>;
+          // One line per pass, led by a "1st" / "2nd" badge whose color
+          // deepens with each time through (capped at the 4th), so passes
+          // read apart at a glance. A run like "1st-2nd" takes its first color.
+          const passLine = (n: PassNote) => (
+            <span key={n.passes} className="print-pass">
+              <span className={`print-pass-num pass-${Math.min(parseInt(n.passes, 10), 4)}`}>{passBadge(n.passes)}</span>{" "}
+              {markName(n.mark).toUpperCase()}
+            </span>
+          );
           const body: ReactNode[] = [];
           let pendingSidebar: Sidebar | null = null;
+          // Label rows waiting for their first content row. They print in one
+          // unbreakable block with it, so a title never ends a page or column.
+          let heading: ReactNode[] = [];
+          const pushHeading = (node: ReactNode) => heading.push(node);
+          const pushContent = (key: React.Key, node: ReactNode) => {
+            if (heading.length === 0) {
+              body.push(node);
+              return;
+            }
+            body.push(
+              <div className="print-keep" key={`keep-${key}`}>
+                {heading}
+                {node}
+              </div>,
+            );
+            heading = [];
+          };
 
-          const compactLabel = (key: React.Key, { title, mark, passes }: Sidebar) => (
-            <div className={`print-pair print-label-compact`} key={key}>
+          const compactLabel = (key: React.Key, { line, title, repeat, mark, passes }: Sidebar, start = true) => (
+            <div className={`${pairClass(line)} print-label-compact${start ? " section-start" : ""}`} key={key}>
               <pre className="print-lyric">
                 {title}
+                {repeat > 1 && " "}
+                {repeatBadge(repeat)}
                 {mark && (
-                  <span className={`print-mark-name name-${markColor(mark)}`}>
+                  <span className="print-mark-name">
                     {"  " + markName(mark).toUpperCase()}
                   </span>
                 )}
-                {passes?.map((n) => (
-                  <span key={n.passes} className={`print-mark-name name-${markColor(n.mark)}`}>
-                    {"  " + passName(n)}
-                  </span>
-                ))}
+                {passes?.map(passLine)}
               </pre>
             </div>
           );
 
-          const pair = (key: React.Key, i: number, sidebar: Sidebar | null, lyric: string | null) => {
+          const pair = (key: React.Key, i: number, sidebar: Sidebar | null, lyric: string | null, start = false) => {
             const row = rows[i];
             return (
-              <div className={pairClass(i)} key={key}>
+              <div className={`${pairClass(i)}${sidebar || start ? " section-start" : ""}`} key={key}>
                 {sidebar && (
                   <span className="print-side-label">
                     {sidebar.title}
+                    {sidebar.repeat > 1 && " "}
+                    {repeatBadge(sidebar.repeat)}
                     {sidebar.mark && (
-                      <span className={`print-mark-name name-${markColor(sidebar.mark)}`}>
+                      <span className="print-mark-name">
                         {markName(sidebar.mark).toUpperCase()}
                       </span>
                     )}
-                    {sidebar.passes?.map((n) => (
-                      <span key={n.passes} className={`print-mark-name name-${markColor(n.mark)}`}>
-                        {passName(n)}
-                      </span>
-                    ))}
+                    {sidebar.passes?.map(passLine)}
                   </span>
                 )}
                 {row.length > 0 && (
@@ -131,22 +161,24 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
             const range = rangeByStart.get(i);
             if (range) {
               const label: Sidebar = {
-                title: stripBrackets(range.label),
+                line: i,
+                title: parseLabel(range.label).base,
+                repeat: parseLabel(range.label).count,
                 mark: markFor(marks, range.label, range.occurrence),
                 passes: passNotes.get(i),
               };
               if (pendingSidebar) {
                 // Empty section before this one: fall back to a compact row.
-                body.push(compactLabel(`orphan-${i}`, pendingSidebar));
+                pushHeading(compactLabel(`orphan-${i}`, pendingSidebar));
                 pendingSidebar = null;
               }
               if (twoCol) {
                 // Chords placed on the label line print above the label.
-                if (row.length > 0) body.push(pair(`label-chords-${i}`, i, null, null));
-                body.push(compactLabel(i, label));
+                if (row.length > 0) pushHeading(pair(`label-chords-${i}`, i, null, null, true));
+                pushHeading(compactLabel(i, label, row.length === 0));
               } else if (row.length > 0) {
                 // Chords on the label line get their own row, which carries the title.
-                body.push(pair(i, i, label, null));
+                pushHeading(pair(i, i, label, null));
               } else {
                 // The title leaves the flow and rides the next content pair.
                 pendingSidebar = label;
@@ -154,18 +186,21 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
               return;
             }
             if (line.length === 0 && row.length === 0) {
-              body.push(<div className="print-gap" key={i} />);
+              const gap = <div className="print-gap" key={i} />;
+              if (heading.length > 0 || pendingSidebar) pushHeading(gap);
+              else body.push(gap);
               return;
             }
             const sidebar = pendingSidebar;
             pendingSidebar = null;
-            body.push(pair(i, i, sidebar, line));
+            pushContent(i, pair(i, i, sidebar, line));
           });
           // TS cannot see the callback writes; re-widen before the last check.
           const leftover = pendingSidebar as Sidebar | null;
           if (leftover) {
-            body.push(compactLabel("orphan-end", leftover));
+            heading.push(compactLabel("orphan-end", leftover));
           }
+          body.push(...heading);
           return body;
         })()}
       </div>

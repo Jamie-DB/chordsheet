@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
-import type { MarkColor, MarkKind, SectionMark } from "../../shared/types";
+import type { MarkKind, SectionMark } from "../../shared/types";
 import { xToCol } from "../lib/grid";
+import type { SectionType } from "../lib/sectionMarks";
 import { ChordChip } from "./ChordChip";
 import { ChordEditPopover } from "./ChordEditPopover";
 import { SectionMarkPicker } from "./SectionMarkPicker";
@@ -11,11 +12,12 @@ export interface SectionUi {
   title: string;
   /** Displayed term when marked (preset name or note override), else null. */
   name: string | null;
-  color: MarkColor | null;
+  /** Section type; the tag and side bar take its color. */
+  type: SectionType;
   pickerOpen: boolean;
   current: SectionMark | null;
   onOpen(): void;
-  onPick(kind: MarkKind, text?: string, color?: MarkColor): void;
+  onPick(kind: MarkKind, text?: string): void;
   onClear(): void;
   onClose(): void;
 }
@@ -195,7 +197,7 @@ export function LyricLine(props: Props) {
         />
       ) : sectionUi && readOnly ? (
         <div className="label-side">
-          <span className={`section-tag read-only${sectionUi.color ? ` pill-${sectionUi.color}` : ""}`}>
+          <span className={`section-tag read-only pill-${sectionUi.type}`}>
             {sectionUi.title}
             {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
           </span>
@@ -203,7 +205,7 @@ export function LyricLine(props: Props) {
       ) : sectionUi ? (
         <div className="label-side">
           <button
-            className={`section-tag${sectionUi.color ? ` pill-${sectionUi.color}` : ""}`}
+            className={`section-tag pill-${sectionUi.type}`}
             onClick={(e) => {
               e.stopPropagation();
               sectionUi.onOpen();

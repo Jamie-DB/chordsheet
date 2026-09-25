@@ -57,35 +57,42 @@
     color: black;
   }
 
-  .print-notes {
-    font-size: 9pt;
-    white-space: pre-wrap;
-    margin: 0 0 6pt;
-  }
-
   /* Section titles live in a left sidebar gutter (single-column layout). */
   .print-sheet.with-sidebar {
-    padding-left: 21mm;
+    padding-left: 30mm;
   }
 
   .print-pair {
     position: relative;
-    /* Contains the floated sidebar label, so a label taller than its
-       section extends the section instead of overlapping the next one. */
-    display: flow-root;
+  }
+
+  /* The floated sidebar label sits wholly in the gutter, so it takes no
+     room in the flow and a tall one (per-pass notes) hangs down beside
+     the section's rows. Each section clears it, so it never overlaps the
+     next section's label. */
+  .with-sidebar .section-start,
+  .with-sidebar .print-body::after {
+    clear: left;
+  }
+
+  .with-sidebar .print-body::after {
+    content: "";
+    display: block;
   }
 
   .print-side-label {
     float: left;
-    width: 17mm;
-    margin-left: -20.5mm;
-    margin-bottom: 1pt;
+    width: 26mm;
+    margin-left: -29.5mm;
+    /* Keeps the section gap when a hanging label outlasts its section. */
+    margin-bottom: 5pt;
     text-align: right;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 8pt;
-    font-weight: 600;
-    color: #6b7280;
-    line-height: 1.25;
+    font-size: 10pt;
+    font-weight: 800;
+    color: black;
+    line-height: 1.2;
+    overflow-wrap: break-word;
   }
 
   .print-side-label .print-mark-name {
@@ -95,45 +102,115 @@
   /* Compact in-flow label: two-column layout and empty-section fallback. */
   .print-label-compact .print-lyric {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 8pt;
-    font-weight: 600;
-    color: #6b7280;
+    font-size: 10pt;
+    font-weight: 800;
+    color: black;
+    /* Long dynamics wrap inside the column instead of running into the
+       next one. */
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
   }
 
-  /* Section dynamics: no backgrounds; a thin colored edge bar (borders
-     always print) plus the tag name. Margin/padding cancel so columns hold. */
-  .print-pair.sec-red,
-  .print-pair.sec-blue,
-  .print-pair.sec-amber,
-  .print-pair.sec-green {
+  /* Section type bars: no backgrounds; a colored edge bar (borders always
+     print) runs the full height of each section, so verse, chorus, and
+     bridge read apart at a glance. Margin/padding cancel so columns hold. */
+  .print-pair.sec-intro,
+  .print-pair.sec-verse,
+  .print-pair.sec-prechorus,
+  .print-pair.sec-chorus,
+  .print-pair.sec-bridge,
+  .print-pair.sec-tag,
+  .print-pair.sec-outro,
+  .print-pair.sec-instrumental,
+  .print-pair.sec-other {
     margin-left: -8pt;
-    padding-left: 6.5pt;
-    border-left-width: 1.5pt;
+    padding-left: 5pt;
+    border-left-width: 3pt;
     border-left-style: solid;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  .print-pair.sec-red { border-left-color: #dc2626; }
-  .print-pair.sec-blue { border-left-color: #2563eb; }
-  .print-pair.sec-amber { border-left-color: #d97706; }
-  .print-pair.sec-green { border-left-color: #16a34a; }
+  .print-pair[class*="sec-"] { border-left-color: var(--sec); }
+
+  /* A gap above each section breaks the bar between back-to-back sections. */
+  .section-start {
+    margin-top: 5pt;
+  }
+
+  /* The first section needs no gap; it would push the left column below
+     the right one. */
+  .print-body > .section-start:first-child,
+  .print-body > .print-keep:first-child > .section-start:first-child {
+    margin-top: 0;
+  }
 
   /* Tacet sections tighten up and move out of the way. */
   .print-pair.tacet-small {
     font-size: 67%;
   }
 
-  .print-mark-name {
-    font-size: 6.5pt;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+  /* Repeat badge: highlighter yellow, a color no section bar uses, with a
+     dark outline so it survives grayscale printing too. */
+  .print-repeat {
+    display: inline-block;
+    white-space: nowrap;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 10pt;
+    font-weight: 800;
+    line-height: 1.15;
+    color: black;
+    background: #fde047;
+    border: 1.2pt solid black;
+    border-radius: 3pt;
+    padding: 0 3pt;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
-  .print-mark-name.name-red { color: #dc2626; }
-  .print-mark-name.name-blue { color: #2563eb; }
-  .print-mark-name.name-amber { color: #b45309; }
-  .print-mark-name.name-green { color: #16a34a; }
+  /* Per-pass dynamics of a repeated section: one line each, led by a
+     small ordinal badge that matches the repeat badge. */
+  .print-pass {
+    display: block;
+    margin-top: 2pt;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1.25;
+    color: #374151;
+    white-space: normal;
+  }
+
+  /* Pass badges: fully rounded and outlined in their own shade, so they
+     never read as the square, black-outlined repeat badge. Warm colors
+     from the same family deepen with each pass. */
+  .print-pass-num {
+    display: inline-block;
+    white-space: nowrap;
+    font-size: 8.5pt;
+    font-weight: 800;
+    letter-spacing: 0;
+    color: #3b2604;
+    border: 1pt solid;
+    border-radius: 999px;
+    padding: 0 4pt;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .print-pass-num.pass-1 { background: #ffef9e; border-color: #c9a100; }
+  .print-pass-num.pass-2 { background: #ffd98a; border-color: #d08c00; }
+  .print-pass-num.pass-3 { background: #ffb98a; border-color: #d4692a; }
+  .print-pass-num.pass-4 { background: #f7a1a1; border-color: #c24848; }
+
+  /* Dynamics are plain notes; color belongs to the section type. */
+  .print-mark-name {
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #374151;
+  }
 
   /* Diagram row spans the page above the columns. */
   .print-diagrams .chord-chart-row {
@@ -157,6 +234,9 @@
     column-count: 2;
     column-gap: 7mm;
     column-fill: auto;
+    /* Room for the section bars, which hang 8pt left of the text. Chrome
+       clips anything left of the first column when printing. */
+    padding-left: 8pt;
   }
 
   .print-sheet pre {
@@ -165,8 +245,13 @@
     white-space: pre;
   }
 
+  /* One row: title, then the key, capo, and tempo tagline beside it. */
   .print-header {
-    margin-bottom: 9pt;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 12pt;
+    margin-bottom: 6pt;
     break-inside: avoid;
     break-after: avoid;
     page-break-after: avoid;
@@ -174,18 +259,7 @@
 
   .print-header h1 {
     font-size: 16pt;
-    margin: 0 0 2pt;
-  }
-
-  .print-artist {
-    font-size: 10pt;
-    margin-bottom: 2pt;
-  }
-
-  .print-version {
-    font-size: 10pt;
-    font-style: italic;
-    margin-bottom: 2pt;
+    margin: 0;
   }
 
   .print-key {
@@ -196,7 +270,8 @@
   .print-pair {
     break-inside: avoid;
     page-break-inside: avoid;
-    margin-bottom: 1.5pt;
+    /* Padding, not margin, so a section's bar has no gaps between rows. */
+    padding-bottom: 1.5pt;
   }
 
   .print-chords {
@@ -207,6 +282,13 @@
     overflow: visible;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+  }
+
+  /* A section title and its first row, kept together across page and
+     column breaks. */
+  .print-keep {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .print-gap {

@@ -13,6 +13,14 @@ export function headerKeyLine(soundingKey: string | null, capo: number): string 
 }
 
 /**
+ * The printed sheet's one-line tagline beside the title, e.g.
+ * "Key: Eb, Capo 3, 72 BPM". Tempo shows only when the song sets one.
+ */
+export function printTagline(soundingKey: string | null, capo: number, bpm?: number): string {
+  return [headerKeyLine(soundingKey, capo), bpm ? `${bpm} BPM` : ""].filter(Boolean).join(", ");
+}
+
+/**
  * The @page rule that puts the song name on the left of every printed page's
  * footer and "Page 1 of 3" on the right, so loose pages sort back into songs
  * and order. The name is embedded as a CSS string, since margin boxes cannot
