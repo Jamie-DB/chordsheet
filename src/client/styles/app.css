@@ -960,21 +960,190 @@ button.mini {
 }
 
 .arr-empty {
-  margin: 0.3rem 0;
+  align-self: center;
 }
 
-.arr-steps {
+.arr-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.arr-head .toolbar-label {
+  padding-top: 0.25rem;
+}
+
+.arr-edit {
+  margin-left: auto;
+  margin-top: 0.15rem;
+}
+
+/* The order as a strip of section bubbles, colored by section type like
+   the sheet's tags. */
+.arr-strip {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
-.arr-step {
+.arr-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.3;
+  padding: 0.14rem 0.6rem 0.14rem 0.35rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--sec, var(--border));
+  background: white;
+  color: color-mix(in srgb, var(--sec, var(--muted)) 70%, black);
+}
+
+button.arr-bubble {
+  cursor: pointer;
+}
+
+button.arr-bubble:hover {
+  background: color-mix(in srgb, var(--sec) 12%, white);
+}
+
+.arr-bubble.selected {
+  background: color-mix(in srgb, var(--sec) 22%, white);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.arr-bubble-num {
+  min-width: 1.1rem;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.arr-bubble-x {
+  font-family: var(--mono);
+}
+
+.arr-bubble-hold,
+.section-tag .tag-hold {
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.arr-bubble .tag-out {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 0 0.25rem;
+  color: var(--out-ink);
+  border: 1.5px solid var(--out-ink);
+  border-radius: 2px;
+  transform: rotate(-6deg);
+}
+
+.arr-bubble.out {
+  border-style: dashed;
+}
+
+.arr-bubble.missing {
+  color: #b45309;
+  border-color: #f59e0b;
+  background: #fef3c7;
+  text-decoration: line-through;
+}
+
+.arr-hint {
+  font-size: 0.8rem;
+  margin-right: auto;
+}
+
+/* One step's controls: under the strip, or above its tag on the sheet so
+   the section itself stays in view while it changes. */
+.step-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: max-content;
+  max-width: min(36rem, 90vw);
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.6rem 0.5rem;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  font-weight: normal;
+  cursor: default;
+}
+
+.step-controls select {
+  font: inherit;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+  color: var(--ink);
+}
+
+.sc-head,
+.sc-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.2rem 0;
-  border-bottom: 1px solid #eef0f3;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.sc-close {
+  margin-left: auto;
+}
+
+.sc-remove {
+  margin-left: auto;
+}
+
+.sc-row .arr-note {
+  flex: 1;
+}
+
+.sc-hold.on {
+  color: white;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.step-controls .arr-mark {
+  width: auto;
+}
+
+.step-controls-anchor {
+  position: absolute;
+  left: 0;
+  bottom: 0.6em;
+  z-index: 20;
+}
+
+.step-controls-anchor .step-controls {
+  margin: 0;
+}
+
+/* The lines of the step whose controls are open. */
+.line-pair.step-selected {
+  background: color-mix(in srgb, var(--accent-soft) 55%, transparent);
+}
+
+.section-tag.step-tag {
+  cursor: pointer;
+}
+
+.section-tag.step-tag.selected {
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 .arr-num {
@@ -982,11 +1151,6 @@ button.mini {
   text-align: right;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
-}
-
-.arr-title {
-  font-weight: 600;
-  min-width: 7.5rem;
 }
 
 .arr-repeat {
@@ -1014,26 +1178,11 @@ button.mini {
   width: 11.5rem;
 }
 
-.arr-tools {
-  display: inline-flex;
-  gap: 2px;
-  margin-left: auto;
-}
-
-/* Out toggle: pen ink when on, and the step's title fades to match. */
+/* Out toggle: pen ink when on. */
 .arr-out.on {
   color: white;
   background: var(--out-ink);
   border-color: var(--out-ink);
-}
-
-.arr-step.out .arr-title {
-  color: var(--muted);
-}
-
-.arr-step.missing .arr-title {
-  color: var(--muted);
-  text-decoration: line-through;
 }
 
 .arr-missing {

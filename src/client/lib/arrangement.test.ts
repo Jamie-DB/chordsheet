@@ -7,6 +7,7 @@ import {
   createArrangement,
   defaultSteps,
   duplicateStep,
+  insertStep,
   moveStep,
   removeStep,
   renderArrangement,
@@ -608,5 +609,66 @@ describe("out steps", () => {
     const on = updateStep(steps, 0, { out: true });
     expect(on[0]).toEqual({ section: "[Chorus]", occurrence: 1, out: true });
     expect(updateStep(on, 0, { out: false })[0]).toEqual({ section: "[Chorus]", occurrence: 1 });
+  });
+});
+
+describe("insertStep", () => {
+  const a = step("[Verse 1]");
+  const b = step("[Chorus]");
+  const n = step("[Verse 4]");
+
+  it.each<[string, number, ArrangementStep[]]>([
+    ["at the front", 0, [n, a, b]],
+    ["between two steps", 1, [a, n, b]],
+    ["at the end", 2, [a, b, n]],
+    ["past the end clamps to the end", 9, [a, b, n]],
+    ["before the front clamps to the front", -3, [n, a, b]],
+  ])("%s", (_name, index, expected) => {
+    expect(insertStep([a, b], index, n)).toEqual(expected);
+  });
+});
+
+describe("hold steps", () => {
+  it("marks every chord in a hold step as a hold and leaves other steps alone", () => {
+    const { song } = renderArrangement(WELL, arr([step("[Verse 1]"), step("[Chorus]", 1, { hold: true })]));
+    const byLine = song.placements.map((p) => [p.chord, p.hold === true]);
+    expect(byLine).toEqual([["D", false], ["A", false], ["D", true], ["A", true]]);
+  });
+
+  it("keeps the song as written untouched", () => {
+    renderArrangement(WELL, arr([step("[Chorus]", 1, { hold: true })]));
+    expect(WELL.placements.every((p) => p.hold === undefined)).toBe(true);
+  });
+
+  it("keeps a chord already held in the song held in a plain step", () => {
+    const held = mk(["[Chorus]", CHA], [{ ...pc("c", 1, "D"), hold: true }]);
+    expect(renderArrangement(held, arr([step("[Chorus]")])).song.placements[0].hold).toBe(true);
+  });
+
+  it("updateStep sets hold and drops it again when cleared", () => {
+    const on = updateStep([step("[Chorus]")], 0, { hold: true });
+    expect(on[0]).toEqual({ section: "[Chorus]", occurrence: 1, hold: true });
+    expect(updateStep(on, 0, { hold: false })[0]).toEqual({ section: "[Chorus]", occurrence: 1 });
+  });
+});
+
+describe("stepLines", () => {
+  it("maps each step to its label and rendered lines, cue included", () => {
+    const { song, stepLines } = renderArrangement(
+      WELL,
+      arr([step("[Verse 1]"), step("[Chorus]", 1, { note: "softly" }), step("[Verse 4]")]),
+    );
+    expect(song.lyrics).toEqual(["[Verse 1]", V1A, V1B, "", "[Chorus]", "(softly)", CHA, CHB, "", "[Verse 4]", V4A]);
+    expect(stepLines).toEqual([
+      { label: 0, start: 0, end: 2 },
+      { label: 4, start: 4, end: 7 },
+      { label: 9, start: 9, end: 10 },
+    ]);
+  });
+
+  it("is null for a missing step and has no label for a plain opening", () => {
+    const opened = mk([AG, "", "[Verse 1]", V1A], [pc("o", 0, "G")]);
+    const { stepLines } = renderArrangement(opened, arr([step(OPENING), step("[Bridge]"), step("[Verse 1]")]));
+    expect(stepLines).toEqual([{ label: null, start: 0, end: 0 }, null, { label: 2, start: 2, end: 3 }]);
   });
 });

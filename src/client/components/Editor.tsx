@@ -21,13 +21,14 @@ import { sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
 import { findArrangement } from "../lib/versions";
-import { ArrangementPanel } from "./ArrangementPanel";
+import { ArrangementPanel, type StepSelection } from "./ArrangementPanel";
 import { AutoScrollBar } from "./AutoScrollBar";
 import { CapoSuggestions } from "./CapoSuggestions";
 import { ChordChartRow } from "./ChordChartRow";
 import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportReview";
 import { LyricLine, type EditingModel } from "./LyricLine";
 import { PrintSheet } from "./PrintSheet";
+import { StepControls } from "./StepControls";
 import { Toolbar } from "./Toolbar";
 import { VersionBar } from "./VersionBar";
 
@@ -72,6 +73,13 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
   const [playing, setPlaying] = useState(false);
   const [autoEditLine, setAutoEditLine] = useState<number | null>(null);
   const [markPickerLine, setMarkPickerLine] = useState<number | null>(null);
+  const [orderEditing, setOrderEditing] = useState(false);
+  const [selectedStep, setSelectedStep] = useState<StepSelection | null>(null);
+  const stepByLabel = new Map<number, number>();
+  arranged?.stepLines.forEach((l, k) => {
+    if (l?.label != null) stepByLabel.set(l.label, k);
+  });
+  const selectedLines = selectedStep ? arranged?.stepLines[selectedStep.index] ?? null : null;
 
   const marks = shown.sectionMarks ?? [];
   const ranges = sectionRanges(shown.lyrics);
@@ -116,6 +124,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
         setShowSuggestions(false);
         setPlaying(false);
         setMarkPickerLine(null);
+        setSelectedStep(null);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -230,6 +239,8 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
     setActiveId(id);
     setEditing(null);
     setMarkPickerLine(null);
+    setOrderEditing(false);
+    setSelectedStep(null);
     setReview(null);
     setPasteOpen(false);
   }
@@ -408,6 +419,13 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
           song={song}
           arrangement={active}
           missing={arranged.missing}
+          editing={orderEditing}
+          onToggleEditing={() => {
+            setOrderEditing((v) => !v);
+            setSelectedStep(null);
+          }}
+          selected={selectedStep}
+          onSelect={setSelectedStep}
           onChange={(next) => onChange(withArrangement(song, next))}
         />
       )}
@@ -438,8 +456,9 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
           </span>
           {active ? (
             <p className="sheet-hint muted">
-              {active.name}: hover a chord for its diagram. Order, repeats, cues, and marks are set
-              in the panel above.
+              {orderEditing
+                ? `${active.name}: click a section tag to repeat it, sit it out, turn its chords to diamonds, move it, remove it, or add one after it.`
+                : `${active.name}: hover a chord for its diagram. Click Edit next to the order to change sections.`}
             </p>
           ) : (
             <p className="sheet-hint muted">
@@ -521,6 +540,28 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
                 onChange(deleteLine(song, line2));
               }}
               sectionClass={sectionClassFor(i)}
+              stepSelected={selectedLines !== null && i >= selectedLines.start && i <= selectedLines.end}
+              stepUi={(() => {
+                const k = stepByLabel.get(i);
+                if (!active || !orderEditing || k === undefined) return undefined;
+                const open = selectedStep?.index === k && selectedStep.from === "sheet";
+                return {
+                  selected: selectedStep?.index === k,
+                  hold: active.steps[k]?.hold === true,
+                  onToggle: () => setSelectedStep(open ? null : { index: k, from: "sheet" }),
+                  controls: open ? (
+                    <StepControls
+                      song={song}
+                      arrangement={active}
+                      index={k}
+                      missing={false}
+                      onChange={(next) => onChange(withArrangement(song, next))}
+                      onSelect={(index) => setSelectedStep(index === null ? null : { index, from: "sheet" })}
+                      onClose={() => setSelectedStep(null)}
+                    />
+                  ) : undefined,
+                };
+              })()}
               sectionUi={(() => {
                 const range = rangeByStart.get(i);
                 if (!range) return undefined;

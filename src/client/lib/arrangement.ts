@@ -100,11 +100,22 @@ export function resolveStep(
   return sections.find((s) => s.section === step.section && s.hasContent) ?? exact;
 }
 
+/** Where one step landed in the rendered song. */
+export interface StepLines {
+  /** The step's label line, or null for an unlabeled opening. */
+  label: number | null;
+  /** First and last rendered line of the step, label and cue included. */
+  start: number;
+  end: number;
+}
+
 export interface ArrangedSong {
   /** An ordinary Song holding the arranged lines; render it like any other. */
   song: Song;
   /** Indices of steps whose section no longer exists in the song. */
   missing: number[];
+  /** Per step, by index: its rendered lines, or null when the step is missing. */
+  stepLines: Array<StepLines | null>;
 }
 
 export function renderArrangement(song: Song, arrangement: Arrangement): ArrangedSong {
@@ -116,15 +127,19 @@ export function renderArrangement(song: Song, arrangement: Arrangement): Arrange
   const outSections: SectionRef[] = [];
   const labelCounts = new Map<string, number>();
   const missing: number[] = [];
+  const stepLines: Array<StepLines | null> = [];
 
   arrangement.steps.forEach((step, k) => {
     const source = resolveStep(sections, step);
     if (!source) {
       missing.push(k);
+      stepLines.push(null);
       return;
     }
     const first = lyrics.length === 0;
     if (!first) lyrics.push("");
+    const start = lyrics.length;
+    let labelLine: number | null = null;
 
     const repeat = step.repeat ?? 1;
     const suffix = repeat > 1 ? ` x${repeat}` : "";
@@ -138,6 +153,7 @@ export function renderArrangement(song: Song, arrangement: Arrangement): Arrange
       const label = `[${base}${suffix}]`;
       const occurrence = (labelCounts.get(label) ?? 0) + 1;
       labelCounts.set(label, occurrence);
+      labelLine = lyrics.length;
       lyrics.push(label);
       if (step.out) outSections.push({ section: label, occurrence });
 
@@ -162,8 +178,14 @@ export function renderArrangement(song: Song, arrangement: Arrangement): Arrange
     for (let i = source.start; i <= source.end; i++) lyrics.push(song.lyrics[i]);
     for (const p of song.placements) {
       if (p.line < source.start || p.line > source.end) continue;
-      placements.push({ ...p, id: `${p.id}~${k}`, line: p.line + offset });
+      placements.push({
+        ...p,
+        id: `${p.id}~${k}`,
+        line: p.line + offset,
+        ...(step.hold ? { hold: true } : {}),
+      });
     }
+    stepLines.push({ label: labelLine, start, end: lyrics.length - 1 });
   });
 
   return {
@@ -176,6 +198,7 @@ export function renderArrangement(song: Song, arrangement: Arrangement): Arrange
       arrangements: undefined,
     },
     missing,
+    stepLines,
   };
 }
 
@@ -225,6 +248,12 @@ export function duplicateStep(steps: ArrangementStep[], index: number): Arrangem
   return [...steps.slice(0, index + 1), { ...steps[index] }, ...steps.slice(index + 1)];
 }
 
+/** Put a step at this index, clamped to the ends: add a section after another. */
+export function insertStep(steps: ArrangementStep[], index: number, step: ArrangementStep): ArrangementStep[] {
+  const at = Math.min(steps.length, Math.max(0, index));
+  return [...steps.slice(0, at), step, ...steps.slice(at)];
+}
+
 export function removeStep(steps: ArrangementStep[], index: number): ArrangementStep[] {
   if (index < 0 || index >= steps.length) return steps;
   return steps.filter((_, i) => i !== index);
@@ -246,6 +275,7 @@ export function updateStep(
     else delete next.repeat;
     if (!next.note?.trim()) delete next.note;
     if (!next.out) delete next.out;
+    if (!next.hold) delete next.hold;
     return next;
   });
 }

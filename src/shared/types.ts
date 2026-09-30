@@ -80,6 +80,8 @@ export interface ArrangementStep {
   mark?: MarkStyle | null;
   /** The player sits this step out: it prints small under an OUT stamp. */
   out?: boolean;
+  /** Every chord in this step prints as a full-measure hold (diamond). */
+  hold?: boolean;
 }
 
 /**
