@@ -23,6 +23,7 @@ export const arrangementStepSchema = z.object({
   note: z.string().optional(),
   mark: sectionMarkSchema.pick({ kind: true, text: true, color: true }).nullable().optional(),
   out: z.boolean().optional(),
+  hold: z.boolean().optional(),
 });
 
 export const arrangementSchema = z.object({

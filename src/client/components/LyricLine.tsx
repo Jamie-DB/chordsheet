@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
+import type { ReactNode, PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import type { MarkKind, SectionMark } from "../../shared/types";
 import { xToCol } from "../lib/grid";
 import type { SectionType } from "../lib/sectionMarks";
@@ -22,6 +22,16 @@ export interface SectionUi {
   onPick(kind: MarkKind, text?: string): void;
   onClear(): void;
   onClose(): void;
+}
+
+/** A version's section tag while its order is being edited. */
+export interface StepUi {
+  selected: boolean;
+  /** Diamonds on every chord of the step; the tag shows a diamond. */
+  hold: boolean;
+  onToggle(): void;
+  /** The step's controls, shown by the tag when it is selected. */
+  controls?: ReactNode;
 }
 
 export interface ChipModel {
@@ -68,6 +78,10 @@ interface Props {
   sectionUi?: SectionUi;
   /** Tint/bar class when this line sits inside a marked section. */
   sectionClass?: string;
+  /** Present on a version's label lines while its order is being edited. */
+  stepUi?: StepUi;
+  /** The line belongs to the version step whose controls are open. */
+  stepSelected?: boolean;
   /**
    * A version's sheet: chords show with hover diagrams, but nothing places,
    * moves, or edits chords, words, lines, or marks. The edit callbacks are
@@ -113,7 +127,7 @@ export function LyricLine(props: Props) {
 
   return (
     <div
-      className={`line-pair${props.sectionClass ? ` ${props.sectionClass}` : ""}${collapsed ? " label-collapsed" : ""}${readOnly ? " read-only" : ""}`}
+      className={`line-pair${props.sectionClass ? ` ${props.sectionClass}` : ""}${collapsed ? " label-collapsed" : ""}${readOnly ? " read-only" : ""}${props.stepSelected ? " step-selected" : ""}`}
       data-line={index}
     >
       {!readOnly && (
@@ -184,6 +198,8 @@ export function LyricLine(props: Props) {
           />
         )}
       </div>
+      {/* Outside the lane: an out section fades its lane, and the controls must not fade with it. */}
+      {props.stepUi?.controls && <div className="step-controls-anchor">{props.stepUi.controls}</div>}
       {draft !== null ? (
         <input
           ref={inputRef}
@@ -197,6 +213,23 @@ export function LyricLine(props: Props) {
           }}
           aria-label={`Edit line ${index + 1}`}
         />
+      ) : sectionUi && readOnly && props.stepUi ? (
+        <div className="label-side">
+          <button
+            className={`section-tag step-tag pill-${sectionUi.type}${props.stepUi.selected ? " selected" : ""}`}
+            aria-pressed={props.stepUi.selected}
+            onClick={(e) => {
+              e.stopPropagation();
+              props.stepUi?.onToggle();
+            }}
+            title="Click for this section's controls in this version"
+          >
+            {sectionUi.title}
+            {props.stepUi.hold && <span className="tag-hold">&#9671;</span>}
+            {sectionUi.outStart && <span className="tag-out">OUT</span>}
+            {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
+          </button>
+        </div>
       ) : sectionUi && readOnly ? (
         <div className="label-side">
           <span className={`section-tag read-only pill-${sectionUi.type}`}>
@@ -209,16 +242,14 @@ export function LyricLine(props: Props) {
         <div className="label-side">
           <button
             className={`section-tag pill-${sectionUi.type}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              sectionUi.onOpen();
-            }}
+            // The dynamics mark picker is off pending removal (#75); the click still must not place a chord.
+            onClick={(e) => e.stopPropagation()}
             onDoubleClick={(e) => {
               e.stopPropagation();
               props.onCancelEdit();
               setDraft(text);
             }}
-            title="Click for a dynamics mark, double-click to rename the section"
+            title="Double-click to rename the section"
           >
             {sectionUi.title}
             {sectionUi.outStart && <span className="tag-out">OUT</span>}
