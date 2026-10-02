@@ -296,6 +296,38 @@ describe("section operations", () => {
     });
   });
 
+  describe("an unlabeled opening placed after another section", () => {
+    const opened = () => mk([AG, "", "[Verse 1]", V1A, "", "[Chorus]", CHA], [pc("o", 0, "G"), pc("v", 3, "D")]);
+    const titles = (song: Song) => sectionSummaries(song).map((s) => s.title);
+
+    it("takes an [Opening] label when moved later, instead of joining the section above", () => {
+      const moved = moveSection(opened(), 0, 1);
+      expect(moved.lyrics.slice(0, 5)).toEqual(["[Verse 1]", V1A, "", "[Opening]", AG]);
+      expect(moved.placements.find((p) => p.id === "o")?.line).toBe(4);
+      expect(titles(moved)).toEqual(["Verse 1", "Opening", "Chorus"]);
+    });
+
+    it("takes a label when the next section moves above it", () => {
+      expect(titles(moveSection(opened(), 1, -1))).toEqual(["Verse 1", "Opening", "Chorus"]);
+    });
+
+    it("doubles into two sections, the copy labeled", () => {
+      const doubled = duplicateSection(opened(), 0);
+      expect(doubled.lyrics.slice(0, 4)).toEqual([AG, "", "[Opening]", AG]);
+      expect(titles(doubled)).toEqual(["Opening", "Opening", "Verse 1", "Chorus"]);
+    });
+
+    it("copied in, stays its own section wherever it lands", () => {
+      const opening = toBlocks(opened())[0];
+      expect(titles(insertSection(opened(), 3, opening))).toEqual(["Opening", "Verse 1", "Chorus", "Opening"]);
+      expect(titles(insertSection(opened(), 0, opening))).toEqual(["Opening", "Opening", "Verse 1", "Chorus"]);
+    });
+
+    it("stays unlabeled while it is first", () => {
+      expect(moveSection(opened(), 1, 1).lyrics.slice(0, 3)).toEqual([AG, "", "[Chorus]"]);
+    });
+  });
+
   it("every layout leaves exactly one blank line between sections and none at the ends", () => {
     const messy = mk(["", "[Verse 1]", V1A, "", "", "", "[Chorus]", CHA, ""]);
     const out = fromBlocks(messy, toBlocks(messy));

@@ -7,11 +7,13 @@
  *   npm run print-preview -- <song.json> [--version <id>] [--no-diagrams]
  *   npm run print-preview -- --set <setId> --dir <library folder> [--no-diagrams]
  *
- * Pages land in a temp folder (or --out), never in the repo. Needs Chrome
+ * Pages land in a fresh temp folder each run (or --out, cleared of old pages
+ * first), never in the repo, so no page from an earlier run is listed and a
+ * page path is never reused. Needs Chrome
  * (CHROME=/path to override the macOS default) and pdftoppm (poppler).
  */
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,9 +21,10 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { PrintSheet } from "../src/client/components/PrintSheet";
 import { SetPrint } from "../src/client/components/SetPrint";
-import { chartOf } from "../src/client/lib/charts";
+import { chartOf, soundingKeyOf } from "../src/client/lib/charts";
 import { cleanSong } from "../src/client/lib/cleanSong";
-import { detectKey, shapedKey } from "../src/engine";
+import { findArrangement } from "../src/client/lib/versions";
+import { shapedKey } from "../src/engine";
 import { setlistSchema, songSchema } from "../src/shared/schemas";
 import type { Song } from "../src/shared/types";
 
@@ -33,8 +36,11 @@ const option = (name: string) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 const showDiagrams = !flag("no-diagrams");
-const out = resolve(option("out") ?? join(tmpdir(), "chordsheet-print-preview"));
+const outOption = option("out");
+const out = outOption ? resolve(outOption) : mkdtempSync(join(tmpdir(), "chordsheet-print-preview-"));
 mkdirSync(out, { recursive: true });
+const isPage = (f: string) => /^page-\d+\.png$/.test(f);
+for (const f of readdirSync(out).filter(isPage)) rmSync(join(out, f));
 
 const loadSong = (path: string): Song => cleanSong(songSchema.parse(JSON.parse(readFileSync(path, "utf8")))).song;
 
@@ -57,14 +63,19 @@ if (setId !== undefined) {
   if (!file) throw new Error("Give a song.json, or --set <id> --dir <folder>");
   const written = loadSong(file);
   const versionId = option("version");
-  const chart = chartOf(written, versionId);
-  const soundingKey = chart.keyOverride ?? detectKey(chart.placements.map((p) => p.chord))?.name ?? null;
+  const version = versionId === undefined ? null : findArrangement(written, versionId);
+  if (versionId !== undefined && !version) {
+    const ids = (written.arrangements ?? []).map((a) => a.id).join(", ") || "none";
+    throw new Error(`No version "${versionId}" in ${file}. Versions: ${ids}`);
+  }
+  const chart = chartOf(written, version?.id);
+  const soundingKey = soundingKeyOf(chart);
   body = renderToStaticMarkup(
     createElement(PrintSheet, {
       song: chart,
       soundingKey,
       shapedKeyName: soundingKey ? shapedKey(soundingKey, chart.capo) : "C",
-      versionName: versionId ? written.arrangements?.find((a) => a.id === versionId)?.name : undefined,
+      versionName: version?.name,
       showDiagrams,
     }),
   );
@@ -78,6 +89,6 @@ writeFileSync(html, `<!doctype html><meta charset="utf-8"><style>${css}</style><
 const chrome = process.env.CHROME ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 execFileSync(chrome, ["--headless=new", "--disable-gpu", "--no-pdf-header-footer", `--print-to-pdf=${pdf}`, html], { stdio: "ignore" });
 execFileSync("pdftoppm", ["-r", "60", "-png", pdf, join(out, "page")]);
-const pages = readdirSync(out).filter((f) => /^page-\d+\.png$/.test(f)).sort();
+const pages = readdirSync(out).filter(isPage).sort();
 console.log(`${pages.length} page(s) in ${out}`);
 for (const page of pages) console.log(join(out, page));

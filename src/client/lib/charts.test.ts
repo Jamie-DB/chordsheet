@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Song } from "../../shared/types";
-import { removeSection, toggleOut } from "./arrangement";
+import { insertSection, removeSection, toggleOut } from "./arrangement";
 import {
   WRITTEN_NAME,
   allCharts,
@@ -148,5 +148,42 @@ describe("version list", () => {
     const live = { ...chartOf(base, null), lyrics: ["[Bridge]", "Was blind"], placements: [] };
     const labels = sectionChoices(base, live, null).map((c) => c.label);
     expect(labels).toEqual(["As written: Bridge", "Short: Chorus"]);
+  });
+
+  it("sectionChoices brings a section from a chart in another key into the edited chart's key", () => {
+    const base = withShort();
+    const up = withChart(base, "short", transposeSong(chartOf(base, "short"), "G", 2));
+    const intoShort = sectionChoices(up, chartOf(up, "short"), "short");
+    expect(intoShort.find((c) => c.label === "As written: Verse 1")?.block.chords.map((c) => c.chord)).toEqual(["A"]);
+    expect(intoShort.find((c) => c.label === "Short: Chorus")?.block.chords.map((c) => c.chord)).toEqual(["D"]);
+    const intoWritten = sectionChoices(up, chartOf(up, null), null);
+    expect(intoWritten.find((c) => c.label === "Short: Chorus")?.block.chords.map((c) => c.chord)).toEqual(["C"]);
+  });
+
+  it("sectionChoices spells a transposed copy for the edited chart's key", () => {
+    const base = withShort();
+    const flat = withChart(base, "short", transposeSong(chartOf(base, "short"), "G", 3));
+    const intoFlat = sectionChoices(flat, chartOf(flat, "short"), "short");
+    expect(flat.arrangements?.[0].keyOverride).toBe("Bb");
+    expect(intoFlat.find((c) => c.label === "As written: Verse 1")?.block.chords.map((c) => c.chord)).toEqual(["Bb"]);
+  });
+
+  it("sectionChoices copies chords unchanged when either chart's key is unknown", () => {
+    const base = withShort();
+    const noKey = withChart(base, "short", { ...chartOf(base, "short"), keyOverride: null, placements: [] });
+    const choice = sectionChoices(noKey, chartOf(noKey, "short"), "short").find((c) => c.label === "As written: Verse 1");
+    expect(choice?.block.chords.map((c) => c.chord)).toEqual(["G"]);
+  });
+
+  it("sectionChoices keys a section by its chart, label, and occurrence, so adding a section keeps a pick", () => {
+    const base = withShort();
+    const before = sectionChoices(base, chartOf(base, null), null);
+    const chorus = before.find((c) => c.label === "As written: Chorus")!;
+    const grown = insertSection(chartOf(base, null), 0, chorus.block);
+    const after = sectionChoices(base, grown, null);
+    expect(after.find((c) => c.key === chorus.key)?.label).toBe("As written: Chorus");
+    const short = before.find((c) => c.label === "Short: Chorus")!;
+    expect(after.find((c) => c.key === short.key)?.label).toBe("Short: Chorus");
+    expect(new Set(after.map((c) => c.key)).size).toBe(after.length);
   });
 });

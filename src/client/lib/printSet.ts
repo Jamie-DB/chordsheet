@@ -1,6 +1,6 @@
-import { detectKey, shapedKey } from "../../engine";
+import { shapedKey } from "../../engine";
 import type { Setlist, Song } from "../../shared/types";
-import { chartOf } from "./charts";
+import { chartOf, soundingKeyOf } from "./charts";
 import { findArrangement } from "./versions";
 
 /** One set entry resolved to what PrintSheet needs. */
@@ -24,7 +24,7 @@ export function setSheets(set: Setlist, songs: Song[]): SetSheet[] {
     const version = findArrangement(written, entry.arrangementId);
     // Each version has its own key, capo, and chords.
     const chart = chartOf(written, version?.id);
-    const soundingKey = chart.keyOverride ?? detectKey(chart.placements.map((p) => p.chord))?.name ?? null;
+    const soundingKey = soundingKeyOf(chart);
     sheets.push({
       song: chart,
       soundingKey,

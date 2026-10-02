@@ -35,13 +35,12 @@ interface Props {
 export function ArrangementPanel({ stored, chart, chartId, chartName, editing, onToggleEditing, selected, onSelect, onChange }: Props) {
   const sections = sectionSummaries(chart);
   const choices = sectionChoices(stored, chart, chartId);
-  const [adding, setAdding] = useState(0);
-  const addIndex = Math.min(adding, Math.max(0, choices.length - 1));
+  const [addingKey, setAddingKey] = useState<string | null>(null);
+  const adding = choices.find((c) => c.key === addingKey) ?? choices[0];
 
   function addAtEnd() {
-    const choice = choices[addIndex];
-    if (!choice) return;
-    onChange(insertSection(chart, sections.length, choice.block));
+    if (!adding) return;
+    onChange(insertSection(chart, sections.length, adding.block));
     onSelect({ index: sections.length, from: "strip" });
   }
 
@@ -108,13 +107,13 @@ export function ArrangementPanel({ stored, chart, chartId, chartName, editing, o
         <div className="arr-foot">
           <span className="muted arr-hint">Click a bubble here or a section tag on the sheet for its controls.</span>
           <select
-            value={addIndex}
-            onChange={(e) => setAdding(Number(e.target.value))}
+            value={adding?.key ?? ""}
+            onChange={(e) => setAddingKey(e.target.value)}
             disabled={choices.length === 0}
             aria-label="Section to copy in at the end"
           >
-            {choices.map((c, k) => (
-              <option key={c.key} value={k}>
+            {choices.map((c) => (
+              <option key={c.key} value={c.key}>
                 {c.label}
               </option>
             ))}

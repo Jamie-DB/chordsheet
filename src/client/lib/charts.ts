@@ -1,6 +1,7 @@
+import { detectKey, keyPrefersFlat, semitonesBetweenKeys, transposeSymbol } from "../../engine";
 import type { Arrangement, Chart, Song } from "../../shared/types";
 import type { Block } from "./arrangement";
-import { sectionSummaries, toBlocks } from "./arrangement";
+import { arrangeableSections, sectionSummaries, toBlocks } from "./arrangement";
 import { slugify } from "./storage";
 import { findArrangement } from "./versions";
 
@@ -80,24 +81,52 @@ export function withoutArrangement(song: Song, id: string): Song {
   return { ...song, arrangements: rest.length > 0 ? rest : undefined };
 }
 
+/** The key a chart's header shows: its own pick, else the key its chords suggest. */
+export function soundingKeyOf(chart: Song): string | null {
+  return chart.keyOverride ?? detectKey(chart.placements.map((p) => p.chord))?.name ?? null;
+}
+
+/** A section's chords moved from one chart's key into another's; unchanged when either key is unknown. */
+function intoKey(block: Block, from: string | null, to: string | null): Block {
+  if (!from || !to) return block;
+  const shift = semitonesBetweenKeys(from, to);
+  if (!shift) return block;
+  const prefer = keyPrefersFlat(to) ? "flat" : "sharp";
+  return { ...block, chords: block.chords.map((c) => ({ ...c, chord: transposeSymbol(c.chord, shift, prefer) })) };
+}
+
 /** A section that can be copied into a chart, from any chart of the song. */
 export interface SectionChoice {
+  /** The chart plus the section's label and occurrence, so a pick survives sections being added or moved. */
   key: string;
   /** "Version name: Chorus". */
   label: string;
+  /** Already in the key of the chart being edited. */
   block: Block;
 }
 
 /**
  * Every section with content across the song's charts, for "add a section".
  * The chart being edited contributes its live state, not the stored one.
+ * Sections from a chart in another key come transposed into this one's.
  */
 export function sectionChoices(stored: Song, chart: Song, chartId: string | null): SectionChoice[] {
+  const targetKey = soundingKeyOf(chart);
   return allCharts(stored).flatMap(({ id, name, chart: source }) => {
     const live = id === chartId ? chart : source;
+    const sourceKey = soundingKeyOf(live);
+    const anchors = arrangeableSections(live);
     const blocks = toBlocks(live);
     return sectionSummaries(live).flatMap((s, k) =>
-      s.hasContent ? [{ key: `${id ?? ""}#${k}`, label: `${name}: ${s.title}`, block: blocks[k] }] : [],
+      s.hasContent
+        ? [
+            {
+              key: `${id ?? ""}#${anchors[k].section}#${anchors[k].occurrence}`,
+              label: `${name}: ${s.title}`,
+              block: intoKey(blocks[k], sourceKey, targetKey),
+            },
+          ]
+        : [],
     );
   });
 }

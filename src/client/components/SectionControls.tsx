@@ -36,8 +36,8 @@ interface Props {
 export function SectionControls({ stored, chart, chartId, index, onChange, onSelect, onClose }: Props) {
   const section = sectionSummaries(chart)[index];
   const choices = sectionChoices(stored, chart, chartId);
-  const [adding, setAdding] = useState(0);
-  const addIndex = Math.min(adding, Math.max(0, choices.length - 1));
+  const [addingKey, setAddingKey] = useState<string | null>(null);
+  const adding = choices.find((c) => c.key === addingKey) ?? choices[0];
   if (!section) return null;
 
   function move(delta: number) {
@@ -53,9 +53,8 @@ export function SectionControls({ stored, chart, chartId, index, onChange, onSel
   }
 
   function addAfter() {
-    const choice = choices[addIndex];
-    if (!choice) return;
-    onChange(insertSection(chart, index + 1, choice.block));
+    if (!adding) return;
+    onChange(insertSection(chart, index + 1, adding.block));
     onSelect(index + 1);
   }
 
@@ -137,13 +136,13 @@ export function SectionControls({ stored, chart, chartId, index, onChange, onSel
       <div className="sc-row">
         <span className="muted">Add after:</span>
         <select
-          value={addIndex}
-          onChange={(e) => setAdding(Number(e.target.value))}
+          value={adding?.key ?? ""}
+          onChange={(e) => setAddingKey(e.target.value)}
           disabled={choices.length === 0}
           aria-label="Section to copy in after this one"
         >
-          {choices.map((c, k) => (
-            <option key={c.key} value={k}>
+          {choices.map((c) => (
+            <option key={c.key} value={c.key}>
               {c.label}
             </option>
           ))}

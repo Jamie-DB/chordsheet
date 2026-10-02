@@ -109,6 +109,21 @@ export function toBlocks(song: Song): Block[] {
   });
 }
 
+/**
+ * A section with no label (the opening lines) gets one once it needs one:
+ * to carry a repeat count or an OUT stamp, or to sit after another section
+ * it would otherwise join.
+ */
+function labeled(block: Block): Block {
+  if (block.label !== null) return block;
+  return {
+    ...block,
+    label: "[Opening]",
+    lines: ["[Opening]", ...block.lines],
+    chords: block.chords.map((c) => ({ ...c, line: c.line + 1 })),
+  };
+}
+
 /** Lay blocks back out as a chart, keeping the rest of the song's fields. */
 export function fromBlocks(song: Song, blocks: Block[]): Song {
   const lyrics: string[] = [];
@@ -116,7 +131,8 @@ export function fromBlocks(song: Song, blocks: Block[]): Song {
   const sectionMarks: SectionMark[] = [];
   const outSections: SectionRef[] = [];
   const counts = new Map<string, number>();
-  blocks.forEach((block, k) => {
+  blocks.forEach((unlabeled, k) => {
+    const block = k > 0 ? labeled(unlabeled) : unlabeled;
     if (k > 0) lyrics.push("");
     const offset = lyrics.length;
     lyrics.push(...block.lines);
@@ -176,20 +192,6 @@ export function insertSection(song: Song, at: number, block: Block): Song {
   const blocks = toBlocks(song);
   const index = Math.min(blocks.length, Math.max(0, at));
   return fromBlocks(song, [...blocks.slice(0, index), freshened(block), ...blocks.slice(index)]);
-}
-
-/**
- * A section with no label (the opening lines) gets one once it needs one
- * to carry a repeat count or an OUT stamp.
- */
-function labeled(block: Block): Block {
-  if (block.label !== null) return block;
-  return {
-    ...block,
-    label: "[Opening]",
-    lines: ["[Opening]", ...block.lines],
-    chords: block.chords.map((c) => ({ ...c, line: c.line + 1 })),
-  };
 }
 
 /** Play the section this many times, printed once as "x3" on its label. */

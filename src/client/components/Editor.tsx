@@ -230,7 +230,7 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
       lost.push(`${result.droppedChords} chord(s) lost their line and were removed. Check placements.`);
     }
     if (result.droppedRefs > 0) {
-      lost.push(`${result.droppedRefs} section mark(s) or version step(s) lost their section label and were removed.`);
+      lost.push(`${result.droppedRefs} section mark(s) or OUT section(s) lost their section label and were removed.`);
     }
     setNotice(lost.length > 0 ? `Lyrics updated. ${lost.join(" ")}` : null);
   }
