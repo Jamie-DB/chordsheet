@@ -72,3 +72,41 @@ describe("cleanSong", () => {
     expect(twice.song).toBe(once);
   });
 });
+
+describe("cleanSong upgrades old-form versions", () => {
+  const stored = {
+    version: 1 as const,
+    id: "amazing-grace",
+    title: "Amazing Grace",
+    lyrics: ["[Verse 1]", "Amazing grace", "", "[Chorus]", "How sweet the sound"],
+    placements: [{ id: "a", line: 1, col: 0, chord: "G" }],
+    keyOverride: null,
+    capo: 0,
+    arrangements: [
+      {
+        id: "short",
+        name: "Short",
+        steps: [{ section: "[Chorus]", occurrence: 1 }],
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  };
+
+  it("turns each old version into its own chart and reports a change", () => {
+    const result = cleanSong(stored);
+    expect(result.changed).toBe(true);
+    expect(result.song.arrangements?.[0]).toMatchObject({ id: "short", lyrics: ["[Chorus]", "How sweet the sound"] });
+    expect(result.song.arrangements?.[0]).not.toHaveProperty("steps");
+    expect(result.song.updatedAt).toBe(stored.updatedAt);
+  });
+
+  it("is a no-op the second time", () => {
+    const once = cleanSong(stored).song;
+    const twice = cleanSong(once);
+    expect(twice.changed).toBe(false);
+    expect(twice.song).toBe(once);
+  });
+});

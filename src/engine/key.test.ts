@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectKey, keyName, keyPrefersFlat, parseKeyName, transposeKeyName } from "./key";
+import { detectKey, keyName, keyPrefersFlat, parseKeyName, semitonesBetweenKeys, transposeKeyName } from "./key";
 
 describe("parseKeyName", () => {
   it("parses major and minor names", () => {
@@ -37,6 +37,26 @@ describe("keyName and transposeKeyName", () => {
     expect(transposeKeyName("Am", 2)).toBe("Bm");
     expect(transposeKeyName("E", 1)).toBe("F");
   });
+});
+
+describe("semitonesBetweenKeys", () => {
+  it.each([
+    ["G", "G", 0],
+    ["G", "A", 2],
+    ["A", "G", 10],
+    ["Eb", "C", 9],
+    ["Em", "F#m", 2],
+    ["G", "Em", 0],
+    ["Em", "G", 0],
+    ["G", "Am", 5],
+    ["Bb", "Gm", 0],
+  ])("%s to %s is %i up", (from, to, n) => expect(semitonesBetweenKeys(from, to)).toBe(n));
+
+  it.each([
+    ["X", "G"],
+    ["G", ""],
+    ["Cmaj", "C"],
+  ])("%j to %j is null", (from, to) => expect(semitonesBetweenKeys(from, to)).toBeNull());
 });
 
 describe("detectKey", () => {

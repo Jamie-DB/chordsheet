@@ -21,11 +21,7 @@ interface ChordPlacement {
   hold?: boolean;        // full-measure hold, drawn as a diamond
 }
 
-interface Song {
-  version: 1;
-  id: string;            // slug; export filename <id>.json
-  title: string;
-  artist?: string;
+interface Chart {            // what one playable chart holds; the song as written and each version carry their own
   lyrics: string[];      // lines verbatim from paste; tabs expanded, trailing whitespace trimmed
   placements: ChordPlacement[];
   keyOverride: string | null;   // "Eb", "Cm", ...; null = auto-detect
@@ -33,7 +29,15 @@ interface Song {
   bpm?: number;          // auto-scroll tempo; absent = 80
   notes?: string;        // free text under the header
   sectionMarks?: SectionMark[];
-  arrangements?: Arrangement[];   // named playing versions, see Arrangements
+  outSections?: SectionRef[];   // sections the player sits out, anchored like marks
+}
+
+interface Song extends Chart {   // the top-level chart is "As written"
+  version: 1;
+  id: string;            // slug; export filename <id>.json
+  title: string;
+  artist?: string;
+  arrangements?: Arrangement[];   // named versions, each a full chart of its own, see Arrangements
   createdAt: string;     // ISO 8601
   updatedAt: string;
 }
@@ -46,21 +50,11 @@ interface SectionMark {
   color?: "red" | "blue" | "amber" | "green";   // legacy, ignored: colors follow the section type
 }
 
-interface Arrangement {
+interface Arrangement extends Chart {
   id: string;            // slug, unique within the song
   name: string;          // "Aug 23 version"
-  steps: ArrangementStep[];
   createdAt: string;
   updatedAt: string;
-}
-
-interface ArrangementStep {
-  section: string;       // label line text, or "" for unlabeled lines above the first label
-  occurrence: number;    // same anchor as SectionMark
-  repeat?: number;       // 2-16, printed once as "Chorus x2"; absent = once
-  note?: string;         // cue printed under the label
-  mark?: { kind; text?; color? } | null;   // overrides the section's mark; null clears it
-  out?: boolean;         // the player sits this step out: small, faded, under an OUT stamp
 }
 
 interface Setlist {
@@ -130,23 +124,21 @@ The library's "Import PDF" button reads a chord chart PDF that carries a text la
 
 A CHORDS row shows SVG fretboard grids for the song's unique displayed shapes (post-capo) in first-appearance order: collapsible panel on screen, a row under the print header spanning both columns. Voicings resolve in order: curated open-chord table, known slash voicings, movable E-form and A-form templates (lower position wins). Chords outside the dictionary walk a simplification ladder (drop slash bass, maj9 to maj7, 13/9/11 and altered dominants like 7b9 or +7 to 7, 9sus4 and 13sus4 to 7sus4, m11 to m7 to m, dim family to m7b5/dim7, 2 to sus2 as a pure alias) so every parseable chord gets the closest reasonable shape, labeled with the song's own symbol, and screen tooltips name the substitution. Dots only, no fingering numbers, by Jamie's choice. Hovering a chord chip in the editor for 330 ms pops the same diagram in a fixed-position card (above the chip, below for the top line). It hides on pointer-out, never appears mid-drag, and approximated shapes carry a "shows X" note.
 
-## Arrangements (src/client/lib/arrangement.ts, ArrangementPanel.tsx, VersionBar.tsx)
+## Versions (src/client/lib/charts.ts, arrangement.ts, legacyVersions.ts, ArrangementPanel.tsx, VersionBar.tsx)
 
-A finished song often gets played differently from the chart: a double chorus, an extra bridge, an outro repeated while someone speaks. Each named version is an ordering over the song's own sections, stored inside the song. Steps find their section the way section marks do, by label text and occurrence, so words and chords live only in the song as written and a chord fix there reaches every version.
+A finished song often gets played differently from the chart: a double chorus, an extra bridge, a different key for a different singer. Each version is a complete chart of its own (lines, chords, marks, OUT sections, key, capo, tempo, notes), and the song as written is simply the first one. Nothing is shared: editing, transposing, or changing the capo in one version never touches another. Title and artist belong to the song.
 
-- `renderArrangement(song, arrangement)` materializes a version into an ordinary Song: each step's label (with " x3" for a repeat), its cue as a "(cue)" line, its lines and chords copied with remapped line numbers, exactly one blank between steps. PrintSheet, sheetText, ChordChartRow, and LyricLine render that Song unchanged. The sounding key always comes from the song as written, because reordering can change what detectKey guesses.
-- A bare label with nothing under it (a chart's "[Chorus]" as a repeat marker) plays the first same-named section that has content.
-- Unlabeled lines above the first label are an "Opening" section. They print without a label unless they repeat, carry a cue or mark, or play after another section.
-- References follow their label line through every lyric edit (`retargetSections` in lineOps.ts), because deleting or adding a label shifts the occurrence of every later label with the same text. Single-line edits know exactly where each line went. The whole-text Edit lyrics path matches unchanged lines first (longest common subsequence), then pairs leftover labels in order when the counts agree, which is a rename. A label that is gone takes its marks and steps with it, rather than letting them resolve to whichever section now holds the old anchor. Its lines joined the section above, so the version still plays them. Deleting a label that versions use asks first, and Edit lyrics reports how many references it dropped.
-- A step whose section no longer exists for any other reason is skipped in the render and flagged in the panel.
-- The version's sheet is read-only. Key, capo, transpose, notes, and BPM belong to the song and apply to every version.
-- Printing repeats a section in full each time it appears in the order, since the sheet is for playing along, and a step's repeat count prints once as "x2" on its label.
-- Sets pick a version per entry. Deleting a version drops it from set entries, which fall back to the song as written.
+- A new version is a full copy of the version you are viewing, then fully separate (`createArrangement`). It starts with everything the source had, so there is nothing to rebuild.
+- `chartOf(song, id)` gives the editor, print, and every chart tool one chart as an ordinary Song (the song's identity with that chart's content); `withChart` writes an edited chart back to where it came from and leaves every other chart alone. The editor works on that Song, so line editing, chord placing, dragging, transpose, and capo behave the same in every version.
+- The order strip works on the chart's own sections, in either an As written or a version sheet. `arrangement.ts` cuts a chart into blocks, one per section with its chords, mark, and OUT flag, and lays them back out with exactly one blank line between sections. Move, double, remove, repeat (an "x3" suffix on the label), OUT, diamonds (every chord in the section becomes a hold), and "copy a section in from any version" are edits to those blocks. Marks and OUT sections are anchored by label text and occurrence, so every layout re-anchors them from the blocks instead of patching them.
+- An unlabeled opening gets an "[Opening]" label once it needs one for a repeat or an OUT.
+- References follow their label line through every lyric edit (`retargetSections` in lineOps.ts), because deleting or adding a label shifts the occurrence of every later label with the same text. A label that is gone takes its marks and OUT flag with it.
+- Printing repeats a section in full each time it appears, since the sheet is for playing along, and a repeat count prints once as "x2" on its label.
+- Sets pick a version per entry; each prints with its own key, capo, and chords. Deleting a version drops it from set entries, which fall back to the song as written.
+- Versions saved before this model were only an ordering over the song's sections. `upgradeVersions` (legacyVersions.ts) renders each one once, through the same logic print used, and stores the result as the version's own chart with the song's key, capo, tempo, and notes. It runs in `cleanSong` (the load-time migration and `npm run repair-songs`) and on import, and an upgraded song re-saves.
+- AI placement (Copy AI prompt, Paste AI reply) acts on the chart being edited.
 
 ## Later ideas (not scheduled)
-
-- Self-contained versions (Jamie, Oct 2, 2026): As written becomes just another version, and every version owns its own lines, chords, marks, and outs, so a version can be edited directly without touching any other. Today a version only orders the song's sections and its sheet is read-only. Key, capo, tempo, notes, and Transpose would stay song-level. Existing versions convert once on load through `renderArrangement`, so printed output does not change.
-- Per-version key and capo, for a service led in a different key.
 
 - Short tablature snippets for riffs.
 - Smarter placement re-anchoring when lyrics are edited after placement.

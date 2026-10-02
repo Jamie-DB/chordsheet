@@ -8,12 +8,11 @@ export interface ChordPlacement {
   hold?: boolean;
 }
 
-export interface Song {
-  version: 1;
-  /** Slug; the export filename is `${id}.json`. */
-  id: string;
-  title: string;
-  artist?: string;
+/**
+ * What one playable chart of a song holds. The song as written and every
+ * version each carry their own, fully separate once made.
+ */
+export interface Chart {
   /** Lines verbatim from paste; tabs expanded, trailing whitespace trimmed. */
   lyrics: string[];
   placements: ChordPlacement[];
@@ -25,14 +24,20 @@ export interface Song {
   bpm?: number;
   /** Free-text block under the header: tuning, strum pattern, reminders. */
   notes?: string;
-  /** Per-section dynamics marks for the song as written. */
+  /** Per-section dynamics marks. */
   sectionMarks?: SectionMark[];
-  /**
-   * Sections the player sits out, anchored like marks. Set only on a
-   * rendered version (from its steps), never on a stored song.
-   */
+  /** Sections the player sits out, anchored like marks. */
   outSections?: SectionRef[];
-  /** Named playing versions (double chorus, extended ending) over these sections. */
+}
+
+/** The song as written is the top-level chart; versions hold the others. */
+export interface Song extends Chart {
+  version: 1;
+  /** Slug; the export filename is `${id}.json`. */
+  id: string;
+  title: string;
+  artist?: string;
+  /** Named versions (double chorus, extended ending), each its own chart. */
   arrangements?: Arrangement[];
   createdAt: string;
   updatedAt: string;
@@ -61,38 +66,18 @@ export interface SectionMark {
   color?: MarkColor;
 }
 
-/** A mark's look without its anchor; arrangement steps carry their own. */
+/** A mark's look without its anchor. */
 export type MarkStyle = Pick<SectionMark, "kind" | "text" | "color">;
 
 /**
- * One block of an arrangement: a section of the song, found the same way
- * section marks are (label line text plus occurrence). OPENING ("") names
- * the unlabeled lines above the first label.
+ * A named version of the song for a service ("Aug 23 version"). A version is
+ * a complete chart of its own: it starts as a copy of the chart it was made
+ * from and shares nothing with it afterward.
  */
-export interface ArrangementStep {
-  section: string;
-  occurrence: number;
-  /** Played this many times, printed once as "x3"; absent means once. */
-  repeat?: number;
-  /** Cue printed under the label, e.g. "vamp while the pastor speaks". */
-  note?: string;
-  /** Overrides the section's own mark; null clears it for this step. */
-  mark?: MarkStyle | null;
-  /** The player sits this step out: it prints small under an OUT stamp. */
-  out?: boolean;
-  /** Every chord in this step prints as a full-measure hold (diamond). */
-  hold?: boolean;
-}
-
-/**
- * A named version of the song for a service ("Aug 23 version"). Words and
- * chords stay in the song; the arrangement only orders its sections.
- */
-export interface Arrangement {
+export interface Arrangement extends Chart {
   /** Slug, unique within the song. */
   id: string;
   name: string;
-  steps: ArrangementStep[];
   createdAt: string;
   updatedAt: string;
 }

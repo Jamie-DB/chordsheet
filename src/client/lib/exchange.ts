@@ -2,6 +2,7 @@ import { resolveAnchor } from "../../engine";
 import { importedSongSchema, setlistSchema, songSchema } from "../../shared/schemas";
 import type { ChordPlacement, Setlist, Song } from "../../shared/types";
 import { freshId } from "./ids";
+import { upgradeVersions, type StoredSong } from "./legacyVersions";
 import { normalizeSections } from "./normalize";
 
 export interface UnresolvedPlacement {
@@ -49,7 +50,7 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
   const imported = result.data;
 
   // For an existing song, everything but placements comes from the library copy.
-  const base: Song = existing ?? {
+  const base: StoredSong = existing ?? {
     version: 1,
     id: imported.id,
     title: imported.title,
@@ -61,6 +62,7 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
     bpm: imported.bpm,
     notes: imported.notes,
     sectionMarks: imported.sectionMarks,
+    outSections: imported.outSections,
     arrangements: imported.arrangements,
     createdAt: imported.createdAt,
     updatedAt: imported.updatedAt,
@@ -138,7 +140,7 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
   const normalized = existing ? { lyrics: base.lyrics, placements } : normalizeSections(base.lyrics, placements);
   return {
     ok: true,
-    song: { ...base, lyrics: normalized.lyrics, placements: normalized.placements },
+    song: upgradeVersions({ ...base, lyrics: normalized.lyrics, placements: normalized.placements }),
     unresolved,
     lyricsRejected,
   };
@@ -187,7 +189,7 @@ export function parseLibraryFile(jsonText: string): LibraryImport | null {
   let invalid = 0;
   for (const item of (raw as { songs: unknown[] }).songs) {
     const result = songSchema.safeParse(item);
-    if (result.success) songs.push(result.data);
+    if (result.success) songs.push(upgradeVersions(result.data));
     else invalid += 1;
   }
   // Older backups have no setlists field; that is fine.

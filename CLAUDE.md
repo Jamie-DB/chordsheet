@@ -7,6 +7,7 @@ Personal tool for making play-along guitar chord sheets. Jamie pastes lyrics, pl
 - `npm run dev` starts Vite on 5173
 - `npm test` runs Vitest once; `npm run test:watch` watches
 - `npm run build` type-checks and builds; `npm run preview` serves the build
+- `npm run print-preview -- <song.json> [--version <id>]` (or `--set <id> --dir <folder>`) renders the print sheet exactly as it prints and writes one PNG per page to a fresh temp folder each run, never the repo. Needs Chrome and pdftoppm.
 - `npm run ingest-pdf -- <chart.pdf>` turns a text-layer chart PDF into a library song, the same path as the app's Import PDF button (see docs/PDF-INGEST.md)
 
 ## Architecture

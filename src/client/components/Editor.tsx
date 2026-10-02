@@ -2,10 +2,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { detectKey, displayChord, isChordSymbol, shapedKey, soundingFromShape } from "../../engine";
 import type { Song } from "../../shared/types";
 import { buildAiPrompt } from "../lib/aiPrompt";
-import { renderArrangement, withArrangement } from "../lib/arrangement";
+import { sectionSummaries } from "../lib/arrangement";
+import { WRITTEN_NAME, chartOf, withChart } from "../lib/charts";
 import { parseImport } from "../lib/exchange";
 import { freshId } from "../lib/ids";
-import { chordsOnLine, deleteLine, editLine, insertLine, replaceLyrics, stepsUsingLabel } from "../lib/lineOps";
+import { chordsOnLine, deleteLine, editLine, insertLine, replaceLyrics } from "../lib/lineOps";
 import {
   markFor,
   markName,
@@ -22,14 +23,14 @@ import { capoBadge, sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
 import { findArrangement } from "../lib/versions";
-import { ArrangementPanel, type StepSelection } from "./ArrangementPanel";
+import { ArrangementPanel, type SectionSelection } from "./ArrangementPanel";
 import { AutoScrollBar } from "./AutoScrollBar";
 import { CapoSuggestions } from "./CapoSuggestions";
 import { ChordChartRow } from "./ChordChartRow";
 import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportReview";
 import { LyricLine, type EditingModel } from "./LyricLine";
 import { PrintSheet } from "./PrintSheet";
-import { StepControls } from "./StepControls";
+import { SectionControls } from "./SectionControls";
 import { Toolbar } from "./Toolbar";
 import { VersionBar } from "./VersionBar";
 
@@ -50,18 +51,17 @@ interface Props {
   setNav?: SetNav;
 }
 
-export function Editor({ song, initialArrangementId, onBack, onChange, setNav }: Props) {
-  // Key detection always reads the song as written: a reordered version
-  // could tip detectKey another way.
+export function Editor({ song: stored, initialArrangementId, onBack, onChange: saveStored, setNav }: Props) {
+  const [activeId, setActiveId] = useState<string | null>(initialArrangementId ?? null);
+  const active = findArrangement(stored, activeId);
+  /** The chart being edited: the song as written or one version, each wholly its own. */
+  const song = chartOf(stored, active?.id);
+  /** Writes an edited chart back to its own place; no other chart changes. */
+  const onChange = (next: Song) => saveStored(withChart(stored, active?.id, next));
   const detectedKey = detectKey(song.placements.map((p) => p.chord))?.name ?? null;
   const soundingKey = song.keyOverride ?? detectedKey;
   const shaped = soundingKey ? shapedKey(soundingKey, song.capo) : "C";
 
-  const [activeId, setActiveId] = useState<string | null>(initialArrangementId ?? null);
-  const active = findArrangement(song, activeId);
-  const arranged = active ? renderArrangement(song, active) : null;
-  /** What the sheet, print, and copy show: the version when one is active. */
-  const shown = arranged?.song ?? song;
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showDiagrams, setShowDiagrams] = usePrintDiagrams();
 
@@ -76,18 +76,19 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
   const [autoEditLine, setAutoEditLine] = useState<number | null>(null);
   const [markPickerLine, setMarkPickerLine] = useState<number | null>(null);
   const [orderEditing, setOrderEditing] = useState(false);
-  const [selectedStep, setSelectedStep] = useState<StepSelection | null>(null);
-  const stepByLabel = new Map<number, number>();
-  arranged?.stepLines.forEach((l, k) => {
-    if (l?.label != null) stepByLabel.set(l.label, k);
+  const [selectedSection, setSelectedSection] = useState<SectionSelection | null>(null);
+  const sections = sectionSummaries(song);
+  const sectionByLabel = new Map<number, number>();
+  sections.forEach((s, k) => {
+    if (s.labelLine !== null) sectionByLabel.set(s.labelLine, k);
   });
-  const selectedLines = selectedStep ? arranged?.stepLines[selectedStep.index] ?? null : null;
+  const selectedLines = selectedSection ? sections[selectedSection.index] ?? null : null;
 
-  const marks = shown.sectionMarks ?? [];
-  const ranges = sectionRanges(shown.lyrics);
+  const marks = song.sectionMarks ?? [];
+  const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
-  const { typeByLine, tacetLines } = sectionStyling(shown.lyrics, marks);
-  const outRuns = outStyling(shown.lyrics, shown.outSections ?? [], new Set(shown.placements.map((p) => p.line)));
+  const { typeByLine, tacetLines } = sectionStyling(song.lyrics, marks);
+  const outRuns = outStyling(song.lyrics, song.outSections ?? [], new Set(song.placements.map((p) => p.line)));
   const sectionClassFor = (i: number): string | undefined => {
     const type = typeByLine.get(i);
     if (!type) return undefined;
@@ -126,7 +127,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
         setShowSuggestions(false);
         setPlaying(false);
         setMarkPickerLine(null);
-        setSelectedStep(null);
+        setSelectedSection(null);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -146,7 +147,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
     // Collapsed label rows measure 0 and tacet rows are smaller, so skip both.
     const pair = sheetRef.current?.querySelector(".line-pair:not(.label-collapsed):not(.tacet-small)");
     if (pair instanceof HTMLElement && pair.offsetHeight > 0) setPairHeight(pair.offsetHeight);
-  }, [shown.lyrics.length, lyricsDraft, active?.id]);
+  }, [song.lyrics.length, lyricsDraft, active?.id]);
 
   // Auto-scroll: one line pair is assumed to span 8 beats (two 4/4 bars).
   useEffect(() => {
@@ -229,7 +230,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
       lost.push(`${result.droppedChords} chord(s) lost their line and were removed. Check placements.`);
     }
     if (result.droppedRefs > 0) {
-      lost.push(`${result.droppedRefs} section mark(s) or version step(s) lost their section label and were removed.`);
+      lost.push(`${result.droppedRefs} section mark(s) or OUT section(s) lost their section label and were removed.`);
     }
     setNotice(lost.length > 0 ? `Lyrics updated. ${lost.join(" ")}` : null);
   }
@@ -237,12 +238,12 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
   const longLines = song.lyrics.filter((l) => l.length > 90).length;
 
   function selectVersion(id: string | null) {
-    // Chord edits, marks, and AI review act on the original's line numbers.
+    // Chord edits, marks, and AI review act on one chart's line numbers.
     setActiveId(id);
     setEditing(null);
     setMarkPickerLine(null);
     setOrderEditing(false);
-    setSelectedStep(null);
+    setSelectedSection(null);
     setReview(null);
     setPasteOpen(false);
   }
@@ -322,11 +323,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
             </button>
           </span>
         )}
-        {active ? (
-          <span className="version-hint muted">
-            Words and chords are edited in As written. Changes there flow into every version.
-          </span>
-        ) : lyricsDraft === null ? (
+        {lyricsDraft === null ? (
           <>
             <button onClick={() => void copyPrompt()}>{copied ? "Copied" : "Copy AI prompt"}</button>
             <button onClick={() => setPasteOpen(true)}>Paste AI reply</button>
@@ -341,16 +338,15 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
       </div>
 
       <VersionBar
-        song={song}
+        song={stored}
         activeId={active?.id ?? null}
         disabled={lyricsDraft !== null}
         onSelect={selectVersion}
-        onChange={onChange}
+        onChange={saveStored}
       />
 
       <Toolbar
         song={song}
-        hasVersions={(song.arrangements?.length ?? 0) > 0}
         soundingKey={soundingKey}
         detectedKey={detectedKey}
         onChange={onChange}
@@ -362,7 +358,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
         copiedText={copiedText}
         onCopyText={() => {
           void navigator.clipboard
-            .writeText(sheetText(shown, soundingKey, shaped, active?.name))
+            .writeText(sheetText(song, soundingKey, shaped, active?.name))
             .then(() => {
               setCopiedText(true);
               setTimeout(() => setCopiedText(false), 2500);
@@ -372,7 +368,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
       />
 
       <PrintSheet
-        song={shown}
+        song={song}
         soundingKey={soundingKey}
         shapedKeyName={shaped}
         versionName={active?.name}
@@ -418,26 +414,27 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
         </details>
       )}
 
-      {shown.placements.length > 0 && lyricsDraft === null && (
+      {song.placements.length > 0 && lyricsDraft === null && (
         <details className="chord-panel" open>
           <summary>Chords</summary>
-          <ChordChartRow song={shown} shapedKeyName={shaped} />
+          <ChordChartRow song={song} shapedKeyName={shaped} />
         </details>
       )}
 
-      {active && arranged && (
+      {lyricsDraft === null && (
         <ArrangementPanel
-          song={song}
-          arrangement={active}
-          missing={arranged.missing}
+          stored={stored}
+          chart={song}
+          chartId={active?.id ?? null}
+          chartName={active?.name ?? WRITTEN_NAME}
           editing={orderEditing}
           onToggleEditing={() => {
             setOrderEditing((v) => !v);
-            setSelectedStep(null);
+            setSelectedSection(null);
           }}
-          selected={selectedStep}
-          onSelect={setSelectedStep}
-          onChange={(next) => onChange(withArrangement(song, next))}
+          selected={selectedSection}
+          onSelect={setSelectedSection}
+          onChange={onChange}
         />
       )}
 
@@ -465,32 +462,24 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
           <span className="measure" ref={measureRef} aria-hidden>
             {"0".repeat(10)}
           </span>
-          {active ? (
-            <p className="sheet-hint muted">
-              {orderEditing
-                ? `${active.name}: click a section tag to repeat it, sit it out, turn its chords to diamonds, move it, remove it, or add one after it.`
-                : `${active.name}: hover a chord for its diagram. Click Edit next to the order to change sections.`}
-            </p>
-          ) : (
-            <p className="sheet-hint muted">
-              Click a spot to add a chord. Click a chord to edit it, or drag to move it. Double-click
-              a line to edit its words. Hover the left edge for line tools.
-              {song.capo > 0 && ` Entry is in shape space for capo ${song.capo}.`}
-            </p>
-          )}
+          <p className="sheet-hint muted">
+            {orderEditing
+              ? "Click a section tag to repeat it, sit it out, turn its chords to diamonds, move it, remove it, or copy one in after it."
+              : "Click a spot to add a chord. Click a chord to edit it, or drag to move it. Double-click a line to edit its words. Hover the left edge for line tools."}
+            {song.capo > 0 && !orderEditing && ` Entry is in shape space for capo ${song.capo}.`}
+          </p>
           <AutoScrollBar
             bpm={bpm}
             playing={playing}
             onToggle={() => setPlaying((v) => !v)}
             onBpm={(next) => onChange({ ...song, bpm: next })}
           />
-          {shown.lyrics.map((line, i) => (
+          {song.lyrics.map((line, i) => (
             <LyricLine
               key={i}
               index={i}
               text={line}
-              readOnly={active !== null}
-              chips={shown.placements
+              chips={song.placements
                 .filter((p) => p.line === i)
                 .sort((a, b) => a.col - b.col)
                 .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
@@ -499,7 +488,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
                 .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
               charWidth={tacetLines.has(i) ? charWidth * 0.67 : charWidth}
               pairHeight={pairHeight}
-              lineCount={shown.lyrics.length}
+              lineCount={song.lyrics.length}
               editing={editing}
               maxColForLine={maxColForLine}
               validate={isChordSymbol}
@@ -539,36 +528,27 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
               onDeleteLine={(line2) => {
                 const n = chordsOnLine(song, line2);
                 if (n > 0 && !window.confirm(`Delete this line and its ${n} chord(s)?`)) return;
-                const used = stepsUsingLabel(song, line2);
-                if (
-                  used > 0 &&
-                  !window.confirm(
-                    `This label starts a section that ${used} version step(s) play. Delete it and remove those steps from their versions?`,
-                  )
-                ) {
-                  return;
-                }
                 onChange(deleteLine(song, line2));
               }}
               sectionClass={sectionClassFor(i)}
               stepSelected={selectedLines !== null && i >= selectedLines.start && i <= selectedLines.end}
               stepUi={(() => {
-                const k = stepByLabel.get(i);
-                if (!active || !orderEditing || k === undefined) return undefined;
-                const open = selectedStep?.index === k && selectedStep.from === "sheet";
+                const k = sectionByLabel.get(i);
+                if (!orderEditing || k === undefined) return undefined;
+                const open = selectedSection?.index === k && selectedSection.from === "sheet";
                 return {
-                  selected: selectedStep?.index === k,
-                  hold: active.steps[k]?.hold === true,
-                  onToggle: () => setSelectedStep(open ? null : { index: k, from: "sheet" }),
+                  selected: selectedSection?.index === k,
+                  hold: sections[k].diamonds,
+                  onToggle: () => setSelectedSection(open ? null : { index: k, from: "sheet" }),
                   controls: open ? (
-                    <StepControls
-                      song={song}
-                      arrangement={active}
+                    <SectionControls
+                      stored={stored}
+                      chart={song}
+                      chartId={active?.id ?? null}
                       index={k}
-                      missing={false}
-                      onChange={(next) => onChange(withArrangement(song, next))}
-                      onSelect={(index) => setSelectedStep(index === null ? null : { index, from: "sheet" })}
-                      onClose={() => setSelectedStep(null)}
+                      onChange={onChange}
+                      onSelect={(index) => setSelectedSection(index === null ? null : { index, from: "sheet" })}
+                      onClose={() => setSelectedSection(null)}
                     />
                   ) : undefined,
                 };

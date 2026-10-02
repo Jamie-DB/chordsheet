@@ -41,6 +41,19 @@ export function transposeKeyName(name: string, semitones: number): string {
   return keyName(mod12(k.tonicPc + semitones), k.mode);
 }
 
+/**
+ * Semitones up (0-11) that move music in key `from` into key `to`. Relative
+ * keys share their notes (G and Em), so they are 0 apart. Null when either
+ * name is not a key.
+ */
+export function semitonesBetweenKeys(from: string, to: string): number | null {
+  const a = parseKeyName(from);
+  const b = parseKeyName(to);
+  if (!a || !b) return null;
+  const relativeMajor = (k: { tonicPc: number; mode: Mode }) => (k.mode === "minor" ? k.tonicPc + 3 : k.tonicPc);
+  return mod12(relativeMajor(b) - relativeMajor(a));
+}
+
 // Scale degrees as [interval from tonic, expected triad family].
 // Minor includes the harmonic-minor dominant (major/dominant on degree 5).
 const MAJOR_DEGREES: Array<[number, ChordFamily[]]> = [

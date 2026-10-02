@@ -105,7 +105,10 @@ describe("parseImport", () => {
     const version = {
       id: "sep-24-version",
       name: "Sep 24 version",
-      steps: [{ section: "", occurrence: 1, repeat: 2, note: "vamp" }],
+      lyrics: ["[Verse 1]", "Amazing grace"],
+      placements: [],
+      keyOverride: null,
+      capo: 0,
       createdAt: "2026-09-24T00:00:00.000Z",
       updatedAt: "2026-09-24T00:00:00.000Z",
     };
@@ -127,7 +130,7 @@ describe("parseImport", () => {
     });
 
     it("rejects a malformed version with a path", () => {
-      const bad = { ...song, arrangements: [{ ...version, steps: [{ section: "[Chorus]", occurrence: 0 }] }] };
+      const bad = { ...song, arrangements: [{ ...version, capo: 12 }] };
       const result = parseImport(JSON.stringify(bad));
       expect(result.ok).toBe(false);
       if (!result.ok) expect(result.error).toContain("arrangements");

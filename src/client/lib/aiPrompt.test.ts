@@ -15,7 +15,10 @@ const song: Song = {
     {
       id: "sep-24-version",
       name: "Sep 24 version",
-      steps: [{ section: "[Verse 1]", occurrence: 1, repeat: 2 }],
+      lyrics: ["[Verse 1]"],
+      placements: [],
+      keyOverride: null,
+      capo: 0,
       createdAt: "2026-09-24T00:00:00.000Z",
       updatedAt: "2026-09-24T00:00:00.000Z",
     },

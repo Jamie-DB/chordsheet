@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "repair-songs": "tsx scripts/repair-songs.mts",
-    "ingest-pdf": "tsx scripts/ingest-pdf.mts"
+    "ingest-pdf": "tsx scripts/ingest-pdf.mts",
+    "print-preview": "tsx scripts/print-preview.mts"
   },
   "dependencies": {
     "pdfjs-dist": "^6.3.289",

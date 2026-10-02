@@ -1,16 +1,18 @@
 import type { Setlist, Song } from "../../shared/types";
+import type { StoredSong } from "./legacyVersions";
 import { setlistSchema, songSchema } from "../../shared/schemas";
 
 const KEY = "chordsheet.songs.v1";
 const SETS_KEY = "chordsheet.setlists.v1";
 
-export function loadLibrary(): Song[] {
+/** Songs as stored: versions may still be in the old form until cleanSong upgrades them. */
+export function loadLibrary(): StoredSong[] {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    const songs: Song[] = [];
+    const songs: StoredSong[] = [];
     for (const item of parsed) {
       const result = songSchema.safeParse(item);
       if (result.success) songs.push(result.data);

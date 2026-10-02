@@ -5,7 +5,10 @@ import { reducer, type AppState } from "./songStore";
 const version = (id: string): Arrangement => ({
   id,
   name: id,
-  steps: [],
+  lyrics: [],
+  placements: [],
+  keyOverride: null,
+  capo: 0,
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-01T00:00:00.000Z",
 });

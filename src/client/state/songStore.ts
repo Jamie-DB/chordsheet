@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import type { Setlist, Song } from "../../shared/types";
 import { cleanSong } from "../lib/cleanSong";
+import type { StoredSong } from "../lib/legacyVersions";
 import {
   addSongToSet,
   createSetlist,
@@ -56,7 +57,7 @@ function stamp(song: Song): Song {
  * deliberately untouched so cleaned browser and disk copies stay identical
  * and folder sync keeps skipping them.
  */
-function migrate(songs: Song[]): Song[] {
+function migrate(songs: StoredSong[]): Song[] {
   let anyChanged = false;
   const migrated = songs.map((song) => {
     const result = cleanSong(song);

@@ -13,6 +13,7 @@ export {
   keyName,
   keyPrefersFlat,
   parseKeyName,
+  semitonesBetweenKeys,
   transposeKeyName,
   type KeyGuess,
   type Mode,

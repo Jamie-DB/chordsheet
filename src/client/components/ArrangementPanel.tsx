@@ -1,82 +1,70 @@
 import { useState } from "react";
-import type { Arrangement, Song } from "../../shared/types";
-import { OPENING, arrangeableSections, defaultSteps, stepTitle } from "../lib/arrangement";
+import type { Song } from "../../shared/types";
+import { insertSection, sectionSummaries } from "../lib/arrangement";
+import { sectionChoices } from "../lib/charts";
 import { sectionType } from "../lib/sectionMarks";
-import { StepControls } from "./StepControls";
+import { SectionControls } from "./SectionControls";
 
-/** Which step's controls are open, and where: its bubble here, or its tag on the sheet. */
-export interface StepSelection {
+/** Which section's controls are open, and where: its bubble here, or its tag on the sheet. */
+export interface SectionSelection {
   index: number;
   from: "strip" | "sheet";
 }
 
 interface Props {
-  /** The song as written; sections come from here. */
-  song: Song;
-  arrangement: Arrangement;
-  /** Indices of steps whose section no longer exists. */
-  missing: number[];
-  /** Bubbles and sheet tags open step controls only while editing. */
+  /** The song being edited; the stored song supplies the other charts. */
+  stored: Song;
+  /** The chart being edited. */
+  chart: Song;
+  chartId: string | null;
+  /** The name shown for the chart: a version's name, or "As written". */
+  chartName: string;
+  /** Bubbles and sheet tags open section controls only while editing. */
   editing: boolean;
   onToggleEditing(): void;
-  selected: StepSelection | null;
-  onSelect(selection: StepSelection | null): void;
-  onChange(arrangement: Arrangement): void;
+  selected: SectionSelection | null;
+  onSelect(selection: SectionSelection | null): void;
+  onChange(chart: Song): void;
 }
 
 /**
- * The order of one version as a strip of section bubbles. Each bubble shows
- * its repeats, OUT, and diamonds at a glance; in edit mode a click opens
- * that one step's controls.
+ * The order of the chart being edited as a strip of section bubbles. Each
+ * bubble shows its repeats, OUT, and diamonds at a glance; in edit mode a
+ * click opens that one section's controls.
  */
-export function ArrangementPanel({
-  song,
-  arrangement,
-  missing,
-  editing,
-  onToggleEditing,
-  selected,
-  onSelect,
-  onChange,
-}: Props) {
-  const steps = arrangement.steps;
-  const missingSet = new Set(missing);
-  const addable = arrangeableSections(song).filter((s) => s.hasContent);
-  const [adding, setAdding] = useState(0);
-  const addIndex = Math.min(adding, Math.max(0, addable.length - 1));
+export function ArrangementPanel({ stored, chart, chartId, chartName, editing, onToggleEditing, selected, onSelect, onChange }: Props) {
+  const sections = sectionSummaries(chart);
+  const choices = sectionChoices(stored, chart, chartId);
+  const [addingKey, setAddingKey] = useState<string | null>(null);
+  const adding = choices.find((c) => c.key === addingKey) ?? choices[0];
 
   function addAtEnd() {
-    const section = addable[addIndex];
-    if (!section) return;
-    onChange({ ...arrangement, steps: [...steps, { section: section.section, occurrence: section.occurrence }] });
-    onSelect({ index: steps.length, from: "strip" });
+    if (!adding) return;
+    onChange(insertSection(chart, sections.length, adding.block));
+    onSelect({ index: sections.length, from: "strip" });
   }
 
   return (
-    <section className={`arrangement-panel${editing ? " editing" : ""}`} aria-label={`Order of ${arrangement.name}`}>
+    <section className={`arrangement-panel${editing ? " editing" : ""}`} aria-label={`Order of ${chartName}`}>
       <div className="arr-head">
         <span className="toolbar-label">Order</span>
         <ol className="arr-strip">
-          {steps.map((step, i) => {
-            const title = stepTitle(step.section, step.occurrence);
-            const repeat = step.repeat ?? 1;
-            const isMissing = missingSet.has(i);
-            const type = step.section === OPENING ? "other" : sectionType(step.section);
+          {sections.map((section, i) => {
+            const type = section.labelLine === null ? "other" : sectionType(chart.lyrics[section.labelLine]);
             const isSelected = selected?.index === i;
             const className =
-              `arr-bubble pill-${type}` +
-              `${step.out ? " out" : ""}${isMissing ? " missing" : ""}${isSelected ? " selected" : ""}`;
+              `arr-bubble pill-${type}` + `${section.out ? " out" : ""}${isSelected ? " selected" : ""}`;
             const body = (
               <>
                 <span className="arr-bubble-num">{i + 1}</span>
-                {title}
-                {repeat > 1 && <span className="arr-bubble-x">x{repeat}</span>}
-                {step.hold && (
+                {section.title}
+                {section.repeat > 1 && <span className="arr-bubble-x">x{section.repeat}</span>}
+                {section.diamonds && (
                   <span className="arr-bubble-hold" title="Diamonds">
                     &#9671;
                   </span>
                 )}
-                {step.out && <span className="tag-out">OUT</span>}
+                {section.out && <span className="tag-out">OUT</span>}
               </>
             );
             return (
@@ -85,20 +73,18 @@ export function ArrangementPanel({
                   <button
                     className={className}
                     aria-pressed={isSelected}
-                    title={isMissing ? `${title} is not in the song anymore` : `Controls for ${title}`}
+                    title={`Controls for ${section.title}`}
                     onClick={() => onSelect(isSelected ? null : { index: i, from: "strip" })}
                   >
                     {body}
                   </button>
                 ) : (
-                  <span className={className} title={isMissing ? `${title} is not in the song anymore` : undefined}>
-                    {body}
-                  </span>
+                  <span className={className}>{body}</span>
                 )}
               </li>
             );
           })}
-          {steps.length === 0 && <li className="muted arr-empty">No sections yet.</li>}
+          {sections.length === 0 && <li className="muted arr-empty">No sections yet.</li>}
         </ol>
         <button className={`mini arr-edit${editing ? " primary" : ""}`} onClick={onToggleEditing}>
           {editing ? "Done" : "Edit"}
@@ -106,11 +92,11 @@ export function ArrangementPanel({
       </div>
 
       {editing && selected?.from === "strip" && (
-        <StepControls
-          song={song}
-          arrangement={arrangement}
+        <SectionControls
+          stored={stored}
+          chart={chart}
+          chartId={chartId}
           index={selected.index}
-          missing={missingSet.has(selected.index)}
           onChange={onChange}
           onSelect={(index) => onSelect(index === null ? null : { index, from: "strip" })}
           onClose={() => onSelect(null)}
@@ -121,30 +107,19 @@ export function ArrangementPanel({
         <div className="arr-foot">
           <span className="muted arr-hint">Click a bubble here or a section tag on the sheet for its controls.</span>
           <select
-            value={addIndex}
-            onChange={(e) => setAdding(Number(e.target.value))}
-            disabled={addable.length === 0}
-            aria-label="Section to add at the end"
+            value={adding?.key ?? ""}
+            onChange={(e) => setAddingKey(e.target.value)}
+            disabled={choices.length === 0}
+            aria-label="Section to copy in at the end"
           >
-            {addable.map((s, k) => (
-              <option key={`${s.section}#${s.occurrence}`} value={k}>
-                {s.title}
+            {choices.map((c) => (
+              <option key={c.key} value={c.key}>
+                {c.label}
               </option>
             ))}
           </select>
-          <button className="mini" disabled={addable.length === 0} onClick={addAtEnd}>
-            Add at end
-          </button>
-          <button
-            className="mini arr-reset"
-            onClick={() => {
-              if (window.confirm("Reset this version to the song as written? Its order, repeats, cues, marks, outs, and diamonds are cleared.")) {
-                onChange({ ...arrangement, steps: defaultSteps(song) });
-                onSelect(null);
-              }
-            }}
-          >
-            Reset to as written
+          <button className="mini" disabled={choices.length === 0} onClick={addAtEnd}>
+            Add copy at end
           </button>
         </div>
       )}
