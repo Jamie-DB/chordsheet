@@ -57,49 +57,11 @@
     color: black;
   }
 
-  /* Section titles live in a left sidebar gutter (single-column layout). */
-  .print-sheet.with-sidebar {
-    padding-left: 30mm;
-  }
-
   .print-pair {
     position: relative;
   }
 
-  /* The floated sidebar label sits wholly in the gutter, so it takes no
-     room in the flow and a tall one (per-pass notes) hangs down beside
-     the section's rows. Each section clears it, so it never overlaps the
-     next section's label. */
-  .with-sidebar .section-start,
-  .with-sidebar .print-body::after {
-    clear: left;
-  }
-
-  .with-sidebar .print-body::after {
-    content: "";
-    display: block;
-  }
-
-  .print-side-label {
-    float: left;
-    width: 26mm;
-    margin-left: -29.5mm;
-    /* Keeps the section gap when a hanging label outlasts its section. */
-    margin-bottom: 5pt;
-    text-align: right;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 10pt;
-    font-weight: 800;
-    color: black;
-    line-height: 1.2;
-    overflow-wrap: break-word;
-  }
-
-  .print-side-label .print-mark-name {
-    display: block;
-  }
-
-  /* Compact in-flow label: two-column layout and empty-section fallback. */
+  /* In-flow section label above its first row. */
   .print-label-compact .print-lyric {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 10pt;
@@ -148,12 +110,7 @@
   /* Sections the player sits out, drawn like a pen markup: an OUT stamp
      by the first title, one line down the run (bridging the gaps between
      sections), and a foot where playing resumes. Words and chords fade. */
-  .print-gap.out {
-    position: relative;
-  }
-
-  .print-pair.out::after,
-  .print-gap.out::after {
+  .print-pair.out::after {
     content: "";
     position: absolute;
     top: 0;
@@ -162,10 +119,6 @@
     border-left: 1.5pt solid var(--out-ink);
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
-  }
-
-  .print-gap.out::after {
-    left: 4pt;
   }
 
   .print-pair.out.section-start:not(.out-start)::after {
@@ -194,7 +147,7 @@
 
   .print-out-stamp {
     display: inline-block;
-    /* Vertical room so the tilt clears the notes under a sidebar title. */
+    /* Vertical room so the tilt clears the notes under a section title. */
     margin: 1.5pt 0 3pt 5pt;
     padding: 0 3pt;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -333,6 +286,26 @@
     font-weight: 700;
   }
 
+  /* The capo is the one thing that cannot be forgotten between songs, so it
+     gets the OUT pink as a fill, the deeper pen ink as a thick outline, and
+     type larger than the title. */
+  .print-capo {
+    padding: 1pt 8pt;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 17pt;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: #5c0a33;
+    background: #f9b4d6;
+    border: 2.5pt solid var(--out-ink);
+    border-radius: 5pt;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   .print-pair {
     break-inside: avoid;
     page-break-inside: avoid;
@@ -357,7 +330,37 @@
     page-break-inside: avoid;
   }
 
-  .print-gap {
-    height: 0.45em;
+  /* Set print: songs flow one after another, each under a rule, and every
+     song balances its two columns so the next one starts right below. */
+  .print-sheet.in-set {
+    margin-top: 16pt;
+    padding-top: 8pt;
+    border-top: 1.5pt solid #9ca3af;
+  }
+
+  .print-sheet.in-set:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .print-sheet.in-set .print-body.two-col {
+    column-fill: balance;
+  }
+
+  /* Set print's chord page: one block per song, then a page break. */
+  .print-chart-page {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .print-chart-song {
+    margin-bottom: 10pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-chart-song .print-header {
+    margin-bottom: 4pt;
   }
 }

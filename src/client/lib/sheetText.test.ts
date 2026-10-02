@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Song } from "../../shared/types";
-import { headerKeyLine, printFooterCss, printTagline, sheetText } from "./sheetText";
+import { capoBadge, headerKeyLine, printFooterCss, printTagline, sheetText } from "./sheetText";
 import { transposeSong } from "./songOps";
 
 const song: Song = {
@@ -47,10 +47,17 @@ describe("headerKeyLine", () => {
 
 describe("printTagline", () => {
   it("adds the tempo only when the song sets one", () => {
-    expect(printTagline("Eb", 3, 72)).toBe("Key: Eb, Capo 3, 72 BPM");
-    expect(printTagline("G", 0)).toBe("Key: G");
-    expect(printTagline(null, 0, 96)).toBe("96 BPM");
-    expect(printTagline(null, 0)).toBe("");
+    expect(printTagline("Eb", 72)).toBe("Key: Eb, 72 BPM");
+    expect(printTagline("G")).toBe("Key: G");
+    expect(printTagline(null, 96)).toBe("96 BPM");
+    expect(printTagline(null)).toBe("");
+  });
+});
+
+describe("capoBadge", () => {
+  it("names the fret, and is null for an open song", () => {
+    expect(capoBadge(3)).toBe("Capo 3");
+    expect(capoBadge(0)).toBeNull();
   });
 });
 

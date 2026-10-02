@@ -36,15 +36,9 @@ describe("PrintSheet keeps section titles with their first row", () => {
     expect(html).toMatch(/<div class="print-keep"><div class="print-pair[^"]*"><pre class="print-chords">G<\/pre><\/div><div class="print-pair[^"]* print-label-compact[^"]*">.*?Verse 1.*?Amazing grace/);
   });
 
-  it("keeps a sidebar label row with chords together with the first line", () => {
+  it("keeps a label row with chords together with the first line", () => {
     const html = render(song(["[Verse 1]", LONG], [{ id: "a", line: 0, col: 0, chord: "G" }]));
-    expect(html).toMatch(/<div class="print-keep"><div class="print-pair[^"]*"><span class="print-side-label">Verse 1<\/span>.*?<\/div><div class="print-pair[^"]*">.*?Amazing grace/);
-  });
-
-  it("does not wrap a sidebar title that already rides its first line", () => {
-    const html = render(song(["[Verse 1]", LONG]));
-    expect(html).not.toContain("print-keep");
-    expect(html).toMatch(/print-side-label">Verse 1<\/span>/);
+    expect(html).toMatch(/<div class="print-keep"><div class="print-pair[^"]*"><pre class="print-chords">G<\/pre><\/div><div class="print-pair[^"]* print-label-compact[^"]*">.*?Verse 1.*?Amazing grace/);
   });
 
   it("keeps an empty section's label with the next section's first line", () => {
@@ -84,12 +78,12 @@ describe("PrintSheet section type bars", () => {
 });
 
 describe("PrintSheet header", () => {
-  it("prints only the title and a key, capo, and tempo tagline", () => {
+  it("prints only the title, a capo badge, and a key and tempo tagline", () => {
     const s = { ...song(["[Verse 1]", "Amazing grace"]), artist: "John Newton", notes: "Chorus after every verse.", capo: 2, bpm: 72 };
     const html = renderToStaticMarkup(
       createElement(PrintSheet, { song: s, soundingKey: "G", shapedKeyName: "F", versionName: "Short" }),
     );
-    expect(html).toContain('<div class="print-header"><h1>Amazing Grace</h1><span class="print-key">Key: G, Capo 2, 72 BPM</span></div>');
+    expect(html).toContain('<div class="print-header"><h1>Amazing Grace</h1><span class="print-capo">Capo 2</span><span class="print-key">Key: G, 72 BPM</span></div>');
     expect(html).not.toContain("John Newton");
     expect(html).not.toContain("Chorus after every verse.");
     expect(html).not.toMatch(/<div class="print-version">/);
@@ -105,11 +99,6 @@ describe("PrintSheet repeat badge", () => {
   it("badges sections merged from back-to-back repeats", () => {
     const html = render(song(["[Chorus]", "Amazing grace", "[Chorus]", "Amazing grace", "[Chorus]", "Amazing grace"]));
     expect(html).toContain('<span class="print-repeat">↻ x3</span>');
-  });
-
-  it("badges sidebar titles too", () => {
-    const html = render(song(["[Verse 1 x2]", LONG]));
-    expect(html).toContain('<span class="print-side-label">Verse 1 <span class="print-repeat">↻ x2</span></span>');
   });
 
   it("leaves single sections and x-words alone", () => {
@@ -158,8 +147,66 @@ describe("PrintSheet out sections", () => {
     const html = render(s);
     expect(html.match(/print-out-stamp/g)).toHaveLength(1);
     expect(html).toMatch(/class="print-pair sec-intro tacet-small out print-label-compact section-start out-start"><pre class="print-lyric">Intro<span class="print-out-stamp">OUT<\/span>/);
-    expect(html).toContain('class="print-gap out"');
+    expect(html).not.toContain("print-gap");
     expect(html).toMatch(/class="print-pair sec-verse tacet-small out out-end"><pre class="print-lyric">How sweet the sound/);
     expect(html).toMatch(/class="print-pair sec-chorus"><pre class="print-lyric">That saved a wretch/);
+  });
+});
+
+describe("PrintSheet blank lines", () => {
+  it("leaves blank lines out, keeping section gaps", () => {
+    const html = render(song(["[Verse 1]", "Amazing grace", "", "", "[Chorus]", "How sweet the sound", ""]));
+    expect(html).not.toContain("print-gap");
+    expect(html).not.toMatch(/<pre class="print-lyric"> <\/pre>/);
+    expect(html.match(/section-start/g)).toHaveLength(2);
+  });
+
+  it("keeps a chord-only line whose lyric is blank", () => {
+    const html = render(song(["[Intro]", ""], [{ id: "a", line: 1, col: 0, chord: "G" }]));
+    expect(html).toContain('<pre class="print-chords">G</pre>');
+  });
+});
+
+describe("PrintSheet long lines", () => {
+  it("wraps a long line into an indented row inside the two-column layout", () => {
+    const html = render(song(["[Verse 1]", LONG]));
+    expect(html).toContain('class="print-body two-col"');
+    expect(html).not.toContain("with-sidebar");
+    expect(html).toContain('<pre class="print-lyric">Amazing grace, how sweet the sound</pre><pre class="print-lyric">  that saved a wretch</pre>');
+  });
+
+  it("keeps each chord over the same words after a wrap", () => {
+    const html = render(
+      song(["[Verse 1]", LONG], [
+        { id: "a", line: 1, col: 0, chord: "G" },
+        { id: "b", line: 1, col: 35, chord: "C" },
+      ]),
+    );
+    // "that" starts at column 35 of the line and column 2 of the wrapped row.
+    expect(html).toContain('<pre class="print-chords">  C</pre><pre class="print-lyric">  that saved a wretch</pre>');
+  });
+});
+
+describe("PrintSheet chord diagrams", () => {
+  const withChord = song(["[Verse 1]", "Amazing grace"], [{ id: "a", line: 1, col: 0, chord: "G" }]);
+
+  it("prints the diagram row by default and drops it on request", () => {
+    expect(render(withChord)).toContain("print-diagrams");
+    const html = renderToStaticMarkup(
+      createElement(PrintSheet, { song: withChord, soundingKey: "G", shapedKeyName: "G", showDiagrams: false }),
+    );
+    expect(html).not.toContain("print-diagrams");
+    expect(html).toContain("Amazing grace");
+  });
+});
+
+describe("PrintSheet in a set", () => {
+  it("drops its own footer and names the version beside the title", () => {
+    const html = renderToStaticMarkup(
+      createElement(PrintSheet, { song: song(["Amazing grace"]), soundingKey: "G", shapedKeyName: "G", versionName: "Short", inSet: true }),
+    );
+    expect(html).toContain('class="print-sheet in-set"');
+    expect(html).not.toContain("@page");
+    expect(html).toContain("<h1>Amazing Grace (Short)</h1>");
   });
 });

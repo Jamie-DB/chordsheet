@@ -17,7 +17,8 @@ import {
   withMark,
   withoutMark,
 } from "../lib/sectionMarks";
-import { sheetText } from "../lib/sheetText";
+import { usePrintDiagrams } from "../lib/printPrefs";
+import { capoBadge, sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
 import { findArrangement } from "../lib/versions";
@@ -62,6 +63,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
   /** What the sheet, print, and copy show: the version when one is active. */
   const shown = arranged?.song ?? song;
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showDiagrams, setShowDiagrams] = usePrintDiagrams();
 
   const [editing, setEditing] = useState<EditingModel | null>(null);
   const [lyricsDraft, setLyricsDraft] = useState<string | null>(null);
@@ -307,6 +309,7 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
         <div className="editor-heading">
           <strong>{song.title}</strong>
           {song.artist && <span className="muted"> {song.artist}</span>}
+          {capoBadge(song.capo) && <span className="capo-badge">{capoBadge(song.capo)}</span>}
           {setNav && <span className="badge">{setNav.setName}</span>}
         </div>
         {setNav && (
@@ -353,6 +356,8 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
         onChange={onChange}
         onToggleSuggestions={() => setShowSuggestions((v) => !v)}
         showingSuggestions={showSuggestions}
+        showDiagrams={showDiagrams}
+        onToggleDiagrams={setShowDiagrams}
         onPrint={() => window.print()}
         copiedText={copiedText}
         onCopyText={() => {
@@ -366,7 +371,13 @@ export function Editor({ song, initialArrangementId, onBack, onChange, setNav }:
         }}
       />
 
-      <PrintSheet song={shown} soundingKey={soundingKey} shapedKeyName={shaped} versionName={active?.name} />
+      <PrintSheet
+        song={shown}
+        soundingKey={soundingKey}
+        shapedKeyName={shaped}
+        versionName={active?.name}
+        showDiagrams={showDiagrams}
+      />
 
       {showSuggestions && soundingKey && (
         <CapoSuggestions
