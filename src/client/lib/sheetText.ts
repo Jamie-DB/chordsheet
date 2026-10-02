@@ -13,11 +13,17 @@ export function headerKeyLine(soundingKey: string | null, capo: number): string 
 }
 
 /**
- * The printed sheet's one-line tagline beside the title, e.g.
- * "Key: Eb, Capo 3, 72 BPM". Tempo shows only when the song sets one.
+ * The printed sheet's tagline beside the title, e.g. "Key: Eb, 72 BPM". The
+ * capo is left out because the sheet shows it as its own highlighted badge.
+ * Tempo shows only when the song sets one.
  */
-export function printTagline(soundingKey: string | null, capo: number, bpm?: number): string {
-  return [headerKeyLine(soundingKey, capo), bpm ? `${bpm} BPM` : ""].filter(Boolean).join(", ");
+export function printTagline(soundingKey: string | null, bpm?: number): string {
+  return [soundingKey ? `Key: ${soundingKey}` : "", bpm ? `${bpm} BPM` : ""].filter(Boolean).join(", ");
+}
+
+/** The capo badge text, or null when the song plays open. */
+export function capoBadge(capo: number): string | null {
+  return capo > 0 ? `Capo ${capo}` : null;
 }
 
 /**

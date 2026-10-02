@@ -145,6 +145,7 @@ A finished song often gets played differently from the chart: a double chorus, a
 
 ## Later ideas (not scheduled)
 
+- Self-contained versions (Jamie, Oct 2, 2026): As written becomes just another version, and every version owns its own lines, chords, marks, and outs, so a version can be edited directly without touching any other. Today a version only orders the song's sections and its sheet is read-only. Key, capo, tempo, notes, and Transpose would stay song-level. Existing versions convert once on load through `renderArrangement`, so printed output does not change.
 - Per-version key and capo, for a service led in a different key.
 
 - Short tablature snippets for riffs.

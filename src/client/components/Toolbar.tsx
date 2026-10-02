@@ -12,6 +12,9 @@ interface Props {
   onToggleSuggestions(): void;
   showingSuggestions: boolean;
   onPrint?(): void;
+  /** Whether printing includes the chord diagram row; set with its toggle. */
+  showDiagrams?: boolean;
+  onToggleDiagrams?(show: boolean): void;
   onCopyText?(): void;
   copiedText?: boolean;
   /** The song has versions; say that key, capo, and transpose reach all of them. */
@@ -82,6 +85,16 @@ export function Toolbar(props: Props) {
 
       {props.onCopyText && (
         <button onClick={props.onCopyText}>{props.copiedText ? "Copied" : "Copy text"}</button>
+      )}
+      {props.onToggleDiagrams && (
+        <label className="print-option" title="Leave the chord diagrams off the printed sheet to save room.">
+          <input
+            type="checkbox"
+            checked={props.showDiagrams ?? true}
+            onChange={(e) => props.onToggleDiagrams?.(e.target.checked)}
+          />
+          Print chord diagrams
+        </label>
       )}
       {props.onPrint && (
         <button className="primary" onClick={props.onPrint}>

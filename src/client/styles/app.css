@@ -289,6 +289,20 @@ textarea {
   white-space: nowrap;
 }
 
+/* Same pink as the printed capo badge: the capo change is easy to forget. */
+.capo-badge {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #5c0a33;
+  background: #f9b4d6;
+  border: 2px solid var(--out-ink);
+  border-radius: 6px;
+  padding: 0 0.5rem;
+  white-space: nowrap;
+}
+
 .song-tools {
   display: flex;
   gap: 0.4rem;
@@ -686,6 +700,14 @@ button.mini {
   border: 1px solid var(--border);
   border-radius: 6px;
   background: white;
+}
+
+.print-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  cursor: pointer;
 }
 
 .toolbar-header-preview {
