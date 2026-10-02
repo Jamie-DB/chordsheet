@@ -1,20 +1,15 @@
-import type {
-  Arrangement,
-  ArrangementStep,
-  ChordPlacement,
-  SectionMark,
-  SectionRef,
-  Song,
-} from "../../shared/types";
+import type { ChordPlacement, MarkStyle, SectionMark, SectionRef, Song } from "../../shared/types";
+import { freshId } from "./ids";
+import { parseLabel } from "./printRepeats";
 import { markFor, sectionRanges, stripBrackets } from "./sectionMarks";
-import { slugify } from "./storage";
 
 /**
- * Arrangements are orderings over the song's own sections: a step names a
- * section by its label line and occurrence (the same anchor section marks
- * use), so edits to the words and chords in the original flow into every
- * arrangement. Rendering materializes an ordinary Song, so print, plain
- * text, diagrams, and the screen sheet all work on it unchanged.
+ * Section operations on one chart (the song as written or a version). A
+ * chart is cut into blocks, one per section, each carrying its own lines,
+ * chords, mark, and OUT flag; an operation reorders or changes blocks and
+ * the chart is laid back out with exactly one blank line between sections.
+ * Marks and OUT sections are anchored by label text and occurrence, so they
+ * are re-anchored from the blocks on every layout rather than patched.
  */
 
 /** Step key for lines above the first label; there is no label to name them by. */
@@ -80,202 +75,190 @@ export function arrangeableSections(song: Song): ArrangeableSection[] {
   return out;
 }
 
-/** The song as written: every section once, in order. */
-export function defaultSteps(song: Song): ArrangementStep[] {
-  return arrangeableSections(song).map((s) => ({ section: s.section, occurrence: s.occurrence }));
+export const MAX_REPEAT = 16;
+
+/** One section's lines and everything attached to it. */
+export interface Block {
+  /** The trimmed label line ("[Chorus x2]"), or null for the unlabeled opening. */
+  label: string | null;
+  /** Label line included when there is one. */
+  lines: string[];
+  /** Chords with lines relative to the block's first line. */
+  chords: ChordPlacement[];
+  mark: MarkStyle | null;
+  out: boolean;
 }
 
-/**
- * The section a step plays. A bare label with no lines under it borrows the
- * first same-named section that has content, so "[Chorus]" written as a
- * repeat marker plays the chorus. Null when the section no longer exists.
- */
-export function resolveStep(
-  sections: ArrangeableSection[],
-  step: ArrangementStep,
-): ArrangeableSection | null {
-  const exact = sections.find((s) => s.section === step.section && s.occurrence === step.occurrence);
-  if (!exact) return null;
-  if (exact.hasContent) return exact;
-  return sections.find((s) => s.section === step.section && s.hasContent) ?? exact;
+/** Cut a chart into its sections, in the order the order strip lists them. */
+export function toBlocks(song: Song): Block[] {
+  const marks = song.sectionMarks ?? [];
+  const outs = song.outSections ?? [];
+  return arrangeableSections(song).map((s) => {
+    const labeled = s.section !== OPENING;
+    const first = labeled ? s.start - 1 : s.start;
+    const mark = labeled ? markFor(marks, s.section, s.occurrence) : null;
+    return {
+      label: labeled ? s.section : null,
+      lines: song.lyrics.slice(first, s.end + 1),
+      chords: song.placements
+        .filter((p) => p.line >= first && p.line <= s.end)
+        .map((p) => ({ ...p, line: p.line - first })),
+      mark: mark ? { kind: mark.kind, ...(mark.text ? { text: mark.text } : {}), ...(mark.color ? { color: mark.color } : {}) } : null,
+      out: labeled && outs.some((o) => o.section === s.section && o.occurrence === s.occurrence),
+    };
+  });
 }
 
-/** Where one step landed in the rendered song. */
-export interface StepLines {
-  /** The step's label line, or null for an unlabeled opening. */
-  label: number | null;
-  /** First and last rendered line of the step, label and cue included. */
-  start: number;
-  end: number;
-}
-
-export interface ArrangedSong {
-  /** An ordinary Song holding the arranged lines; render it like any other. */
-  song: Song;
-  /** Indices of steps whose section no longer exists in the song. */
-  missing: number[];
-  /** Per step, by index: its rendered lines, or null when the step is missing. */
-  stepLines: Array<StepLines | null>;
-}
-
-export function renderArrangement(song: Song, arrangement: Arrangement): ArrangedSong {
-  const sections = arrangeableSections(song);
-  const sourceMarks = song.sectionMarks ?? [];
+/** Lay blocks back out as a chart, keeping the rest of the song's fields. */
+export function fromBlocks(song: Song, blocks: Block[]): Song {
   const lyrics: string[] = [];
   const placements: ChordPlacement[] = [];
   const sectionMarks: SectionMark[] = [];
   const outSections: SectionRef[] = [];
-  const labelCounts = new Map<string, number>();
-  const missing: number[] = [];
-  const stepLines: Array<StepLines | null> = [];
-
-  arrangement.steps.forEach((step, k) => {
-    const source = resolveStep(sections, step);
-    if (!source) {
-      missing.push(k);
-      stepLines.push(null);
-      return;
-    }
-    const first = lyrics.length === 0;
-    if (!first) lyrics.push("");
-    const start = lyrics.length;
-    let labelLine: number | null = null;
-
-    const repeat = step.repeat ?? 1;
-    const suffix = repeat > 1 ? ` x${repeat}` : "";
-    const note = step.note?.trim();
-    const labeled = step.section !== OPENING;
-    // Unlabeled opening lines get a label once they need one: a repeat, a
-    // cue, a mark, an out, or a place after another section they would
-    // otherwise join.
-    if (labeled || suffix || note || step.mark || step.out || !first) {
-      const base = labeled ? stripBrackets(step.section) : stepTitle(OPENING, 1);
-      const label = `[${base}${suffix}]`;
-      const occurrence = (labelCounts.get(label) ?? 0) + 1;
-      labelCounts.set(label, occurrence);
-      labelLine = lyrics.length;
-      lyrics.push(label);
-      if (step.out) outSections.push({ section: label, occurrence });
-
-      // The step's own mark wins; null clears; absent inherits the section's.
-      const inherited =
-        markFor(sourceMarks, step.section, step.occurrence) ??
-        markFor(sourceMarks, source.section, source.occurrence);
-      const style = step.mark === undefined ? inherited : step.mark;
-      if (style) {
-        sectionMarks.push({
-          section: label,
-          occurrence,
-          kind: style.kind,
-          ...(style.text ? { text: style.text } : {}),
-          ...(style.color ? { color: style.color } : {}),
-        });
-      }
-    }
-    if (note) lyrics.push(`(${note})`);
-
-    const offset = lyrics.length - source.start;
-    for (let i = source.start; i <= source.end; i++) lyrics.push(song.lyrics[i]);
-    for (const p of song.placements) {
-      if (p.line < source.start || p.line > source.end) continue;
-      placements.push({
-        ...p,
-        id: `${p.id}~${k}`,
-        line: p.line + offset,
-        ...(step.hold ? { hold: true } : {}),
-      });
-    }
-    stepLines.push({ label: labelLine, start, end: lyrics.length - 1 });
+  const counts = new Map<string, number>();
+  blocks.forEach((block, k) => {
+    if (k > 0) lyrics.push("");
+    const offset = lyrics.length;
+    lyrics.push(...block.lines);
+    for (const c of block.chords) placements.push({ ...c, line: c.line + offset });
+    if (block.label === null) return;
+    const occurrence = (counts.get(block.label) ?? 0) + 1;
+    counts.set(block.label, occurrence);
+    if (block.mark) sectionMarks.push({ section: block.label, occurrence, ...block.mark });
+    if (block.out) outSections.push({ section: block.label, occurrence });
   });
-
-  return {
-    song: {
-      ...song,
-      lyrics,
-      placements,
-      sectionMarks: sectionMarks.length > 0 ? sectionMarks : undefined,
-      outSections: outSections.length > 0 ? outSections : undefined,
-      arrangements: undefined,
-    },
-    missing,
-    stepLines,
-  };
-}
-
-export function createArrangement(song: Song, name: string, steps?: ArrangementStep[]): Arrangement {
-  const now = new Date().toISOString();
-  const taken = new Set((song.arrangements ?? []).map((a) => a.id));
-  const trimmed = name.trim() || "Arrangement";
-  return {
-    id: slugify(trimmed, taken),
-    name: trimmed,
-    steps: steps ?? defaultSteps(song),
-    createdAt: now,
-    updatedAt: now,
-  };
-}
-
-/** Insert or replace by id; stamps updatedAt. */
-export function withArrangement(song: Song, arrangement: Arrangement): Song {
-  const stamped = { ...arrangement, updatedAt: new Date().toISOString() };
-  const list = song.arrangements ?? [];
-  const exists = list.some((a) => a.id === arrangement.id);
   return {
     ...song,
-    arrangements: exists
-      ? list.map((a) => (a.id === arrangement.id ? stamped : a))
-      : [...list, stamped],
+    lyrics,
+    placements,
+    sectionMarks: sectionMarks.length > 0 ? sectionMarks : undefined,
+    outSections: outSections.length > 0 ? outSections : undefined,
   };
 }
 
-export function withoutArrangement(song: Song, id: string): Song {
-  const rest = (song.arrangements ?? []).filter((a) => a.id !== id);
-  return { ...song, arrangements: rest.length > 0 ? rest : undefined };
+/** Run an edit over one section's block; an unknown index changes nothing. */
+function editBlocks(song: Song, k: number, edit: (blocks: Block[]) => Block[]): Song {
+  const blocks = toBlocks(song);
+  if (k < 0 || k >= blocks.length) return song;
+  return fromBlocks(song, edit(blocks));
 }
 
-export function moveStep(steps: ArrangementStep[], index: number, delta: number): ArrangementStep[] {
-  const target = index + delta;
-  if (index < 0 || index >= steps.length || target < 0 || target >= steps.length) return steps;
-  const out = [...steps];
-  const [moved] = out.splice(index, 1);
-  out.splice(target, 0, moved);
-  return out;
+/** Move a section one place earlier or later. */
+export function moveSection(song: Song, k: number, delta: number): Song {
+  const target = k + delta;
+  return editBlocks(song, k, (blocks) => {
+    if (target < 0 || target >= blocks.length) return blocks;
+    const out = [...blocks];
+    [out[k], out[target]] = [out[target], out[k]];
+    return out;
+  });
 }
 
-/** Copy a step in place, right after itself: a double chorus. */
-export function duplicateStep(steps: ArrangementStep[], index: number): ArrangementStep[] {
-  if (index < 0 || index >= steps.length) return steps;
-  return [...steps.slice(0, index + 1), { ...steps[index] }, ...steps.slice(index + 1)];
+/** Copies get fresh chord ids, so a chord is only ever found by one id. */
+function freshened(block: Block): Block {
+  return { ...block, chords: block.chords.map((c) => ({ ...c, id: freshId() })) };
 }
 
-/** Put a step at this index, clamped to the ends: add a section after another. */
-export function insertStep(steps: ArrangementStep[], index: number, step: ArrangementStep): ArrangementStep[] {
-  const at = Math.min(steps.length, Math.max(0, index));
-  return [...steps.slice(0, at), step, ...steps.slice(at)];
+/** Play a section again right after itself: a double chorus. */
+export function duplicateSection(song: Song, k: number): Song {
+  return editBlocks(song, k, (blocks) => [...blocks.slice(0, k + 1), freshened(blocks[k]), ...blocks.slice(k + 1)]);
 }
 
-export function removeStep(steps: ArrangementStep[], index: number): ArrangementStep[] {
-  if (index < 0 || index >= steps.length) return steps;
-  return steps.filter((_, i) => i !== index);
+export function removeSection(song: Song, k: number): Song {
+  return editBlocks(song, k, (blocks) => blocks.filter((_, i) => i !== k));
 }
 
-export const MAX_REPEAT = 16;
+/**
+ * Put a section copied from another chart (or this one) at this index,
+ * clamped to the ends. Its mark and OUT flag come along.
+ */
+export function insertSection(song: Song, at: number, block: Block): Song {
+  const blocks = toBlocks(song);
+  const index = Math.min(blocks.length, Math.max(0, at));
+  return fromBlocks(song, [...blocks.slice(0, index), freshened(block), ...blocks.slice(index)]);
+}
 
-export function updateStep(
-  steps: ArrangementStep[],
-  index: number,
-  patch: Partial<ArrangementStep>,
-): ArrangementStep[] {
-  if (index < 0 || index >= steps.length) return steps;
-  return steps.map((s, i) => {
-    if (i !== index) return s;
-    const next: ArrangementStep = { ...s, ...patch };
-    const repeat = Math.min(MAX_REPEAT, Math.max(1, Math.round(next.repeat ?? 1)));
-    if (repeat > 1) next.repeat = repeat;
-    else delete next.repeat;
-    if (!next.note?.trim()) delete next.note;
-    if (!next.out) delete next.out;
-    if (!next.hold) delete next.hold;
-    return next;
+/**
+ * A section with no label (the opening lines) gets one once it needs one
+ * to carry a repeat count or an OUT stamp.
+ */
+function labeled(block: Block): Block {
+  if (block.label !== null) return block;
+  return {
+    ...block,
+    label: "[Opening]",
+    lines: ["[Opening]", ...block.lines],
+    chords: block.chords.map((c) => ({ ...c, line: c.line + 1 })),
+  };
+}
+
+/** Play the section this many times, printed once as "x3" on its label. */
+export function setRepeat(song: Song, k: number, count: number): Song {
+  const n = Math.min(MAX_REPEAT, Math.max(1, Math.round(count)));
+  return editBlocks(song, k, (blocks) =>
+    blocks.map((b, i) => {
+      if (i !== k) return b;
+      const withLabel = labeled(b);
+      const label = `[${parseLabel(withLabel.label ?? "").base}${n > 1 ? ` x${n}` : ""}]`;
+      return { ...withLabel, label, lines: [label, ...withLabel.lines.slice(1)] };
+    }),
+  );
+}
+
+/** The player sits the section out: it prints small under an OUT stamp. */
+export function toggleOut(song: Song, k: number): Song {
+  return editBlocks(song, k, (blocks) =>
+    blocks.map((b, i) => (i === k ? { ...labeled(b), out: !b.out } : b)),
+  );
+}
+
+/** Whether every chord in the block is a hold, and there is at least one. */
+function allHolds(block: Block): boolean {
+  return block.chords.length > 0 && block.chords.every((c) => c.hold === true);
+}
+
+/** Every chord in the section prints as a full-measure hold (diamond), or back to plain. */
+export function toggleDiamonds(song: Song, k: number): Song {
+  return editBlocks(song, k, (blocks) =>
+    blocks.map((b, i) => {
+      if (i !== k) return b;
+      const on = !allHolds(b);
+      return {
+        ...b,
+        chords: b.chords.map(({ hold: _hold, ...c }) => (on ? { ...c, hold: true } : c)),
+      };
+    }),
+  );
+}
+
+/** What the order strip and section controls show for one section. */
+export interface SectionSummary {
+  title: string;
+  repeat: number;
+  out: boolean;
+  diamonds: boolean;
+  /** The section's label line, where its tag sits on the sheet; null for the opening. */
+  labelLine: number | null;
+  /** First and last line of the section, label included. */
+  start: number;
+  end: number;
+  hasContent: boolean;
+}
+
+export function sectionSummaries(song: Song): SectionSummary[] {
+  const blocks = toBlocks(song);
+  return arrangeableSections(song).map((s, k) => {
+    const labeledSection = s.section !== OPENING;
+    const { base, count } = labeledSection ? parseLabel(s.section) : { base: stepTitle(OPENING, 1), count: 1 };
+    return {
+      title: base,
+      repeat: count,
+      out: blocks[k].out,
+      diamonds: allHolds(blocks[k]),
+      labelLine: labeledSection ? s.start - 1 : null,
+      start: labeledSection ? s.start - 1 : s.start,
+      end: s.end,
+      hasContent: s.hasContent,
+    };
   });
 }

@@ -1,10 +1,11 @@
 import type { Song } from "../../shared/types";
-import { createArrangement, withArrangement, withoutArrangement } from "../lib/arrangement";
+import { WRITTEN_NAME, createArrangement, withArrangement, withoutArrangement } from "../lib/charts";
 import { defaultVersionName, findArrangement } from "../lib/versions";
 
 interface Props {
+  /** The stored song, with every version. */
   song: Song;
-  /** null plays the song as written. */
+  /** null is the song as written. */
   activeId: string | null;
   /** Locked while the lyrics are open for editing. */
   disabled: boolean;
@@ -12,16 +13,16 @@ interface Props {
   onChange(song: Song): void;
 }
 
-/** Pick, create, rename, duplicate, and delete the song's named versions. */
+/** Pick, create, rename, and delete the song's versions. Each is its own chart. */
 export function VersionBar({ song, activeId, disabled, onSelect, onChange }: Props) {
   const versions = song.arrangements ?? [];
   const active = findArrangement(song, activeId);
 
   function create() {
     const suggested = defaultVersionName(new Date());
-    const name = window.prompt("Name the new version", suggested);
+    const name = window.prompt(`Name the new version (a copy of ${active?.name ?? WRITTEN_NAME})`, suggested);
     if (name === null) return;
-    const version = createArrangement(song, name.trim() || suggested);
+    const version = createArrangement(song, name.trim() || suggested, active?.id ?? null);
     onChange(withArrangement(song, version));
     onSelect(version.id);
   }
@@ -33,16 +34,9 @@ export function VersionBar({ song, activeId, disabled, onSelect, onChange }: Pro
     onChange(withArrangement(song, { ...active, name: name.trim() }));
   }
 
-  function duplicate() {
-    if (!active) return;
-    const copy = createArrangement(song, `${active.name} copy`, active.steps.map((s) => ({ ...s })));
-    onChange(withArrangement(song, copy));
-    onSelect(copy.id);
-  }
-
   function remove() {
     if (!active) return;
-    if (!window.confirm(`Delete the version "${active.name}"? The song as written stays as it is.`)) return;
+    if (!window.confirm(`Delete the version "${active.name}"? Every other version stays as it is.`)) return;
     onChange(withoutArrangement(song, active.id));
     onSelect(null);
   }
@@ -57,7 +51,7 @@ export function VersionBar({ song, activeId, disabled, onSelect, onChange }: Pro
           onChange={(e) => onSelect(e.target.value || null)}
           aria-label="Version"
         >
-          <option value="">As written</option>
+          <option value="">{WRITTEN_NAME}</option>
           {versions.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name}
@@ -65,16 +59,18 @@ export function VersionBar({ song, activeId, disabled, onSelect, onChange }: Pro
           ))}
         </select>
       </label>
-      <button className="mini" disabled={disabled} onClick={create}>
+      <button
+        className="mini"
+        disabled={disabled}
+        title="Make a new version as a full copy of this one"
+        onClick={create}
+      >
         New version
       </button>
       {active && (
         <>
           <button className="mini" onClick={rename}>
             Rename
-          </button>
-          <button className="mini" onClick={duplicate}>
-            Duplicate
           </button>
           <button className="mini danger" onClick={remove}>
             Delete

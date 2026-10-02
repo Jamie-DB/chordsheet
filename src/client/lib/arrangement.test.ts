@@ -1,24 +1,21 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Arrangement, ArrangementStep, ChordPlacement, SectionMark, Song } from "../../shared/types";
+import { describe, expect, it } from "vitest";
+import type { ChordPlacement, Song } from "../../shared/types";
 import {
   MAX_REPEAT,
   OPENING,
   arrangeableSections,
-  createArrangement,
-  defaultSteps,
-  duplicateStep,
-  insertStep,
-  moveStep,
-  removeStep,
-  renderArrangement,
-  resolveStep,
+  duplicateSection,
+  fromBlocks,
+  insertSection,
+  moveSection,
+  removeSection,
+  sectionSummaries,
+  setRepeat,
   stepTitle,
-  updateStep,
-  withArrangement,
-  withoutArrangement,
+  toBlocks,
+  toggleDiamonds,
+  toggleOut,
 } from "./arrangement";
-import { isSectionLabel } from "./lineOps";
-import { sectionRanges } from "./sectionMarks";
 
 // Every lyric here is public domain (It Is Well with My Soul, Amazing Grace, Holy Holy Holy).
 const V1A = "When peace like a river attendeth my way,";
@@ -46,16 +43,6 @@ function mk(lyrics: string[], placements: ChordPlacement[] = [], extra: Partial<
     ...extra,
   };
 }
-
-function arr(steps: ArrangementStep[], id = "a"): Arrangement {
-  return { id, name: id, steps, createdAt: "2026-01-01", updatedAt: "2026-01-01" };
-}
-
-const step = (section: string, occurrence = 1, rest: Partial<ArrangementStep> = {}): ArrangementStep => ({
-  section,
-  occurrence,
-  ...rest,
-});
 
 /**
  * 0 [Verse 1] / 1-2 verse / 3 blank / 4 [Chorus] / 5-6 chorus / 7 blank /
@@ -145,530 +132,173 @@ describe("arrangeableSections", () => {
   });
 });
 
-describe("defaultSteps", () => {
-  it("is every section once in song order, bare labels included", () => {
-    expect(defaultSteps(WELL)).toEqual([
-      step("[Verse 1]"),
-      step("[Chorus]"),
-      step("[Verse 2]"),
-      step("[Chorus]", 2),
-      step("[Verse 4]"),
-    ]);
-  });
-  it("includes the opening when present", () => {
-    expect(defaultSteps(mk([AG, "[Verse 1]", V1A]))).toEqual([step(OPENING), step("[Verse 1]")]);
-  });
-  it("is empty for an empty song", () => {
-    expect(defaultSteps(mk([]))).toEqual([]);
-  });
-});
 
-describe("resolveStep", () => {
-  const sections = arrangeableSections(WELL);
-  const lonely = arrangeableSections(mk(["[Verse 1]", V1A, "", "[Tag]"]));
-  it.each<[string, ReturnType<typeof arrangeableSections>, ArrangementStep, [string, number] | null]>([
-    ["a section with content resolves to itself", sections, step("[Chorus]"), ["[Chorus]", 1]],
-    ["a bare label borrows the first same-label section with content", sections, step("[Chorus]", 2), ["[Chorus]", 1]],
-    ["a bare label with no content anywhere resolves to itself", lonely, step("[Tag]"), ["[Tag]", 1]],
-    ["a missing occurrence is null", sections, step("[Chorus]", 3), null],
-    ["a missing label is null", sections, step("[Bridge]"), null],
-    ["an opening step with no opening is null", sections, step(OPENING), null],
-  ])("%s", (_name, list, s, expected) => {
-    const got = resolveStep(list, s);
-    expect(got ? [got.section, got.occurrence] : null).toEqual(expected);
-  });
-});
-
-describe("renderArrangement", () => {
-  it("renders the default arrangement with one blank between steps and none at the ends", () => {
-    const { song, missing } = renderArrangement(WELL, arr(defaultSteps(WELL)));
-    expect(missing).toEqual([]);
-    expect(song.lyrics).toEqual([
-      "[Verse 1]", V1A, V1B,
-      "",
-      "[Chorus]", CHA, CHB,
-      "",
-      "[Verse 2]", V2A,
-      "",
-      "[Chorus]", CHA, CHB, // the bare repeat marker plays the chorus
-      "",
-      "[Verse 4]", V4A,
-    ]);
+describe("section operations", () => {
+  const lyricsOf = (song: Song) => song.lyrics;
+  const marked = (): Song => ({
+    ...WELL,
+    sectionMarks: [{ section: "[Chorus]", occurrence: 1, kind: "soft" }],
+    outSections: [{ section: "[Verse 2]", occurrence: 1 }],
   });
 
-  it("reports missing steps by index and skips them without extra blanks", () => {
-    const { song, missing } = renderArrangement(
-      WELL,
-      arr([step("[Bridge]"), step("[Verse 1]"), step("[Chorus]", 9), step("[Verse 4]"), step(OPENING)]),
-    );
-    expect(missing).toEqual([0, 2, 4]);
-    expect(song.lyrics).toEqual(["[Verse 1]", V1A, V1B, "", "[Verse 4]", V4A]);
+  it("cuts a chart into blocks and lays it back out unchanged", () => {
+    const blocks = toBlocks(WELL);
+    expect(blocks.map((b) => b.label)).toEqual(["[Verse 1]", "[Chorus]", "[Verse 2]", "[Chorus]", "[Verse 4]"]);
+    const again = fromBlocks(WELL, blocks);
+    expect(again.lyrics).toEqual(WELL.lyrics);
+    expect(again.placements).toEqual(WELL.placements);
   });
 
-  it("renders an empty song for an empty or all-missing arrangement", () => {
-    expect(renderArrangement(WELL, arr([])).song.lyrics).toEqual([]);
-    const all = renderArrangement(WELL, arr([step("[Bridge]")]));
-    expect(all.song.lyrics).toEqual([]);
-    expect(all.song.placements).toEqual([]);
-    expect(all.missing).toEqual([0]);
+  it("carries marks and OUT flags with their blocks", () => {
+    const blocks = toBlocks(marked());
+    expect(blocks[1].mark).toEqual({ kind: "soft" });
+    expect(blocks[2].out).toBe(true);
+    expect(blocks[0].mark).toBeNull();
+    expect(fromBlocks(marked(), blocks).sectionMarks).toEqual(marked().sectionMarks);
   });
 
-  it.each<[string, Partial<ArrangementStep>, string[]]>([
-    ["repeat 1 renders plain", { repeat: 1 }, ["[Chorus]", CHA, CHB]],
-    ["repeat 2 renders x2", { repeat: 2 }, ["[Chorus x2]", CHA, CHB]],
-    ["a note renders right after the label", { note: "vamp while the pastor speaks" }, ["[Chorus]", "(vamp while the pastor speaks)", CHA, CHB]],
-    ["a note is trimmed", { note: "  softly  " }, ["[Chorus]", "(softly)", CHA, CHB]],
-    ["a blank note renders nothing", { note: "   " }, ["[Chorus]", CHA, CHB]],
-    ["repeat and note together", { repeat: 3, note: "build" }, ["[Chorus x3]", "(build)", CHA, CHB]],
-  ])("%s", (_name, rest, expected) => {
-    expect(renderArrangement(WELL, arr([step("[Chorus]", 1, rest)])).song.lyrics).toEqual(expected);
-  });
-
-  describe("the opening block", () => {
-    const opened = mk([AG, "", "[Verse 1]", V1A], [pc("o", 0, "G"), pc("v", 3, "D")]);
-    it.each<[string, Partial<ArrangementStep>, string[]]>([
-      ["is unlabeled when plain", {}, [AG, "", "[Verse 1]", V1A]],
-      ["is labeled when repeated", { repeat: 2 }, ["[Opening x2]", AG, "", "[Verse 1]", V1A]],
-      ["is labeled when it has a note", { note: "guitar alone" }, ["[Opening]", "(guitar alone)", AG, "", "[Verse 1]", V1A]],
-      ["is labeled when it carries a mark", { mark: { kind: "soft" } }, ["[Opening]", AG, "", "[Verse 1]", V1A]],
-      ["stays unlabeled when its mark is cleared", { mark: null }, [AG, "", "[Verse 1]", V1A]],
-    ])("%s", (_name, rest, expected) => {
-      const { song } = renderArrangement(opened, arr([step(OPENING, 1, rest), step("[Verse 1]")]));
-      expect(song.lyrics).toEqual(expected);
+  describe("moveSection", () => {
+    it("swaps a section with its neighbour, chords and all, with one blank between", () => {
+      const moved = moveSection(WELL, 0, 1);
+      expect(lyricsOf(moved).slice(0, 7)).toEqual(["[Chorus]", CHA, CHB, "", "[Verse 1]", V1A, V1B]);
+      // The chorus chords moved up to its new lines; the verse chords followed their lines down.
+      expect(moved.placements.find((p) => p.id === "c1")).toMatchObject({ line: 1 });
+      expect(moved.placements.find((p) => p.id === "v1")).toMatchObject({ line: 5 });
     });
 
-    it("is labeled when it plays after another section it would otherwise join", () => {
-      const { song } = renderArrangement(opened, arr([step("[Verse 1]"), step(OPENING)]));
-      expect(song.lyrics).toEqual(["[Verse 1]", V1A, "", "[Opening]", AG]);
-      expect(sectionRanges(song.lyrics).map((r) => r.label)).toEqual(["[Verse 1]", "[Opening]"]);
-      expect(song.placements).toEqual([
-        { id: "v~0", line: 1, col: 0, chord: "D" },
-        { id: "o~1", line: 4, col: 0, chord: "G" },
-      ]);
-    });
-
-    it("skips blank lines above the opening's first content", () => {
-      const padded = mk(["", AG, "", "[Verse 1]", V1A], [pc("o", 1, "G")]);
-      expect(arrangeableSections(padded)[0]).toMatchObject({ section: OPENING, start: 1, end: 1 });
-      const { song } = renderArrangement(padded, arr([step(OPENING), step("[Verse 1]")]));
-      expect(song.lyrics).toEqual([AG, "", "[Verse 1]", V1A]);
-      expect(song.placements).toEqual([{ id: "o~0", line: 0, col: 0, chord: "G" }]);
-    });
-
-    it("stays unlabeled when only missing steps come before it", () => {
-      const { song, missing } = renderArrangement(opened, arr([step("[Bridge]"), step(OPENING), step("[Verse 1]")]));
-      expect(missing).toEqual([0]);
-      expect(song.lyrics).toEqual([AG, "", "[Verse 1]", V1A]);
-    });
-
-    it("numbers repeated opening labels", () => {
-      const { song } = renderArrangement(
-        opened,
-        arr([step(OPENING), step("[Verse 1]"), step(OPENING, 1, { mark: { kind: "soft" } }), step(OPENING, 1, { mark: { kind: "full" } })]),
+    it("re-anchors a mark to the section it belongs to when same-named labels swap places", () => {
+      const song = mk(
+        ["[Chorus]", CHA, "", "[Verse 1]", V1A, "", "[Chorus]", CHB],
+        [],
+        { sectionMarks: [{ section: "[Chorus]", occurrence: 2, kind: "build" }] },
       );
-      expect(song.lyrics).toEqual([AG, "", "[Verse 1]", V1A, "", "[Opening]", AG, "", "[Opening]", AG]);
-      expect(song.sectionMarks).toEqual([
-        { section: "[Opening]", occurrence: 1, kind: "soft" },
-        { section: "[Opening]", occurrence: 2, kind: "full" },
-      ]);
+      const moved = moveSection(song, 2, -2);
+      expect(moved.lyrics[0]).toBe("[Chorus]");
+      expect(moved.lyrics[1]).toBe(CHB);
+      expect(moved.sectionMarks).toEqual([{ section: "[Chorus]", occurrence: 1, kind: "build" }]);
+    });
+
+    it("changes nothing past either end", () => {
+      expect(moveSection(WELL, 0, -1)).toEqual(WELL);
+      expect(moveSection(WELL, 4, 1)).toEqual(WELL);
+      expect(moveSection(WELL, 9, 1)).toBe(WELL);
     });
   });
 
-  it("keeps a trailing blank line that carries a chord, and its chord", () => {
-    const s = mk(["[Verse 1]", V1A, "", "", "[Chorus]", CHA], [pc("v", 1, "D"), pc("tag", 2, "A", 3)]);
-    const { song } = renderArrangement(s, arr([step("[Verse 1]"), step("[Chorus]")]));
-    expect(song.lyrics).toEqual(["[Verse 1]", V1A, "", "", "[Chorus]", CHA]);
-    expect(song.placements).toEqual([
-      { id: "v~0", line: 1, col: 0, chord: "D" },
-      { id: "tag~0", line: 2, col: 3, chord: "A" },
-    ]);
-  });
-
-  it("copies placements with remapped lines and ids unique across duplicated steps", () => {
-    const { song } = renderArrangement(
-      WELL,
-      arr([step("[Chorus]", 1, { note: "soft" }), step("[Chorus]"), step("[Chorus]", 2), step("[Verse 4]")]),
-    );
-    expect(song.lyrics).toEqual([
-      "[Chorus]", "(soft)", CHA, CHB,
-      "",
-      "[Chorus]", CHA, CHB,
-      "",
-      "[Chorus]", CHA, CHB,
-      "",
-      "[Verse 4]", V4A,
-    ]);
-    expect(song.placements).toEqual([
-      { id: "c1~0", line: 2, col: 0, chord: "D" },
-      { id: "c2~0", line: 3, col: 4, chord: "A" },
-      { id: "c1~1", line: 6, col: 0, chord: "D" },
-      { id: "c2~1", line: 7, col: 4, chord: "A" },
-      { id: "c1~2", line: 10, col: 0, chord: "D" },
-      { id: "c2~2", line: 11, col: 4, chord: "A" },
-      { id: "v4~3", line: 14, col: 0, chord: "G" },
-    ]);
-    const ids = song.placements.map((p) => p.id);
-    expect(new Set(ids).size).toBe(ids.length);
-    for (const p of song.placements) {
-      const src = WELL.placements.find((q) => q.id === p.id.split("~")[0])!;
-      expect(song.lyrics[p.line]).toBe(WELL.lyrics[src.line]);
-    }
-  });
-
-  it("carries hold flags on copied placements", () => {
-    const s = mk(["[Verse 1]", V1A], [{ ...pc("h", 1, "D"), hold: true }]);
-    expect(renderArrangement(s, arr([step("[Verse 1]")])).song.placements).toEqual([
-      { id: "h~0", line: 1, col: 0, chord: "D", hold: true },
-    ]);
-  });
-
-  it("clears arrangements on the rendered song and keeps the other fields", () => {
-    const source = withArrangement({ ...WELL, capo: 3, keyOverride: "Eb" }, arr(defaultSteps(WELL), "x"));
-    const { song } = renderArrangement(source, source.arrangements![0]);
-    expect(song.arrangements).toBeUndefined();
-    expect(song.capo).toBe(3);
-    expect(song.keyOverride).toBe("Eb");
-    expect(song.id).toBe(WELL.id);
-  });
-
-  describe("section marks", () => {
-    const soft: SectionMark = { section: "[Chorus]", occurrence: 1, kind: "soft" };
-    const bareFull: SectionMark = { section: "[Chorus]", occurrence: 2, kind: "full" };
-    const verseCustom: SectionMark = { section: "[Verse 1]", occurrence: 1, kind: "custom", text: "swell", color: "blue" };
-    const marked = { ...WELL, sectionMarks: [soft, verseCustom] };
-
-    const render = (s: Song, steps: ArrangementStep[]) => renderArrangement(s, arr(steps)).song.sectionMarks;
-
-    it("is undefined when nothing is marked", () => {
-      expect(render(WELL, defaultSteps(WELL))).toBeUndefined();
+  describe("duplicateSection", () => {
+    it("plays the section again right after itself with chords under fresh ids", () => {
+      const doubled = duplicateSection(WELL, 1);
+      expect(doubled.lyrics.slice(4, 12)).toEqual(["[Chorus]", CHA, CHB, "", "[Chorus]", CHA, CHB, ""]);
+      const chorus = doubled.placements.filter((p) => p.line === 5 || p.line === 9);
+      expect(chorus).toHaveLength(2);
+      expect(new Set(doubled.placements.map((p) => p.id)).size).toBe(doubled.placements.length);
     });
 
-    it("inherits the source section's mark, text and color included", () => {
-      expect(render(marked, [step("[Verse 1]"), step("[Chorus]")])).toEqual([
-        { section: "[Verse 1]", occurrence: 1, kind: "custom", text: "swell", color: "blue" },
+    it("carries the mark and OUT flag to the copy", () => {
+      const doubled = duplicateSection(marked(), 1);
+      expect(doubled.sectionMarks).toEqual([
         { section: "[Chorus]", occurrence: 1, kind: "soft" },
-      ]);
-    });
-
-    it("a bare repeat marker inherits the borrowed section's mark", () => {
-      expect(render(marked, [step("[Chorus]", 2)])).toEqual([{ section: "[Chorus]", occurrence: 1, kind: "soft" }]);
-    });
-
-    it("a bare repeat marker's own mark wins over the borrowed section's", () => {
-      expect(render({ ...WELL, sectionMarks: [soft, bareFull] }, [step("[Chorus]", 2)])).toEqual([
-        { section: "[Chorus]", occurrence: 1, kind: "full" },
-      ]);
-    });
-
-    it("a step mark overrides the inherited one", () => {
-      expect(render(marked, [step("[Chorus]", 1, { mark: { kind: "tacet" } })])).toEqual([
-        { section: "[Chorus]", occurrence: 1, kind: "tacet" },
-      ]);
-    });
-
-    it("a step mark applies where the section has none", () => {
-      expect(render(WELL, [step("[Verse 2]", 1, { mark: { kind: "custom", text: "drop", color: "red" } })])).toEqual([
-        { section: "[Verse 2]", occurrence: 1, kind: "custom", text: "drop", color: "red" },
-      ]);
-    });
-
-    it("a null step mark clears the inherited one", () => {
-      expect(render(marked, [step("[Chorus]", 1, { mark: null })])).toBeUndefined();
-    });
-
-    it("counts occurrences among identical rendered labels", () => {
-      expect(
-        render(marked, [
-          step("[Chorus]"),
-          step("[Chorus]", 1, { repeat: 2 }),
-          step("[Chorus]", 2),
-          step("[Chorus]", 1, { repeat: 2, mark: { kind: "build" } }),
-        ]),
-      ).toEqual([
-        { section: "[Chorus]", occurrence: 1, kind: "soft" },
-        { section: "[Chorus x2]", occurrence: 1, kind: "soft" },
         { section: "[Chorus]", occurrence: 2, kind: "soft" },
-        { section: "[Chorus x2]", occurrence: 2, kind: "build" },
-      ]);
-    });
-
-    it("anchors a mark on a labeled opening to its rendered label", () => {
-      const s = mk([AG, "[Verse 1]", V1A]);
-      expect(render(s, [step(OPENING, 1, { repeat: 2, mark: { kind: "soft" } })])).toEqual([
-        { section: "[Opening x2]", occurrence: 1, kind: "soft" },
       ]);
     });
   });
 
-  it("every rendered label is a section that sectionRanges recognizes, and marks anchor to one", () => {
-    const s = mk(
-      [AG, "", ...WELL.lyrics],
-      WELL.placements.map((p) => ({ ...p, line: p.line + 2 })),
-      { sectionMarks: [{ section: "[Chorus]", occurrence: 1, kind: "soft" }] },
-    );
-    const steps: ArrangementStep[] = [
-      step(OPENING, 1, { repeat: 2, note: "guitar alone" }),
-      step("[Verse 1]"),
-      step("[Chorus]", 1, { repeat: 2 }),
-      step("[Verse 2]", 1, { note: "half time" }),
-      step("[Chorus]", 2),
-      step("[Chorus]"),
-      step("[Bridge]"),
-      step("[Verse 4]", 1, { repeat: 3, mark: { kind: "full" } }),
-    ];
-    const { song, missing } = renderArrangement(s, arr(steps));
-    expect(missing).toEqual([6]);
-
-    const labels = song.lyrics.filter(isSectionLabel);
-    expect(labels).toEqual(["[Opening x2]", "[Verse 1]", "[Chorus x2]", "[Verse 2]", "[Chorus]", "[Chorus]", "[Verse 4 x3]"]);
-
-    const ranges = sectionRanges(song.lyrics);
-    expect(ranges.map((r) => r.label)).toEqual(labels);
-    expect(ranges[0].start).toBe(0);
-    expect(ranges.map((r) => `${r.label}#${r.occurrence}`)).toContain("[Chorus]#2");
-
-    for (const m of song.sectionMarks ?? []) {
-      expect(ranges.some((r) => r.label === m.section && r.occurrence === m.occurrence)).toBe(true);
-    }
-    expect(song.sectionMarks).toEqual([
-      { section: "[Chorus x2]", occurrence: 1, kind: "soft" },
-      { section: "[Chorus]", occurrence: 1, kind: "soft" },
-      { section: "[Chorus]", occurrence: 2, kind: "soft" },
-      { section: "[Verse 4 x3]", occurrence: 1, kind: "full" },
-    ]);
-
-    // Re-deriving sections from the rendered song finds the same blocks.
-    expect(arrangeableSections(song).every((sec) => sec.hasContent)).toBe(true);
-    expect(song.lyrics[0]).not.toBe("");
-    expect(song.lyrics[song.lyrics.length - 1]).not.toBe("");
-    expect(song.lyrics.some((l, i) => l === "" && song.lyrics[i + 1] === "")).toBe(false);
-  });
-});
-
-describe("arrangement list ops", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-09-24T10:00:00.000Z"));
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it("createArrangement slugs the name, dedupes ids, and defaults steps to song order", () => {
-    const a = createArrangement(WELL, "  Double Chorus!  ");
-    expect(a).toEqual({
-      id: "double-chorus",
-      name: "Double Chorus!",
-      steps: defaultSteps(WELL),
-      createdAt: "2026-09-24T10:00:00.000Z",
-      updatedAt: "2026-09-24T10:00:00.000Z",
+  describe("removeSection", () => {
+    it("drops the section, its chords, and its mark", () => {
+      const removed = removeSection(marked(), 1);
+      expect(removed.lyrics).not.toContain(CHA);
+      expect(removed.placements.some((p) => p.id === "c1")).toBe(false);
+      expect(removed.sectionMarks).toBeUndefined();
+      expect(removed.outSections).toEqual([{ section: "[Verse 2]", occurrence: 1 }]);
     });
-    const withOne = withArrangement(WELL, a);
-    expect(createArrangement(withOne, "Double chorus").id).toBe("double-chorus-2");
+
+    it("leaves an empty chart when the last section goes", () => {
+      expect(removeSection(mk(["[Verse 1]", V1A]), 0).lyrics).toEqual([]);
+    });
   });
 
-  it("createArrangement names a blank name and takes given steps", () => {
-    const a = createArrangement(WELL, "   ", [step("[Chorus]")]);
-    expect(a.name).toBe("Arrangement");
-    expect(a.id).toBe("arrangement");
-    expect(a.steps).toEqual([step("[Chorus]")]);
+  describe("insertSection", () => {
+    const source = toBlocks(mk(["[Bridge]", AG], [pc("x", 1, "G")], { outSections: [{ section: "[Bridge]", occurrence: 1 }] }))[0];
+
+    it("puts a copied section at the index, clamped to the ends, with its OUT flag", () => {
+      expect(insertSection(WELL, 1, source).lyrics.slice(3, 8)).toEqual(["", "[Bridge]", AG, "", "[Chorus]"]);
+      expect(insertSection(WELL, 99, source).lyrics.at(-1)).toBe(AG);
+      expect(insertSection(WELL, -4, source).lyrics[0]).toBe("[Bridge]");
+      expect(insertSection(WELL, 0, source).outSections).toEqual([{ section: "[Bridge]", occurrence: 1 }]);
+    });
+
+    it("gives the copied chord a fresh id", () => {
+      const inserted = insertSection(WELL, 0, source);
+      expect(inserted.placements.find((p) => p.chord === "G" && p.line === 1)?.id).not.toBe("x");
+    });
   });
 
-  it("withArrangement inserts a new id and replaces an existing one, stamping updatedAt", () => {
-    const first = arr([step("[Verse 1]")], "first");
-    const second = arr([step("[Chorus]")], "second");
-    let s = withArrangement(withArrangement(WELL, first), second);
-    expect(s.arrangements!.map((a) => a.id)).toEqual(["first", "second"]);
-    expect(s.arrangements![0].updatedAt).toBe("2026-09-24T10:00:00.000Z");
+  describe("setRepeat", () => {
+    it("writes and clears an xN suffix on the label, clamped to MAX_REPEAT", () => {
+      expect(setRepeat(WELL, 1, 3).lyrics[4]).toBe("[Chorus x3]");
+      expect(setRepeat(setRepeat(WELL, 1, 3), 1, 1).lyrics[4]).toBe("[Chorus]");
+      expect(setRepeat(WELL, 1, 99).lyrics[4]).toBe(`[Chorus x${MAX_REPEAT}]`);
+      expect(setRepeat(WELL, 1, 0).lyrics[4]).toBe("[Chorus]");
+    });
 
-    s = withArrangement(s, { ...first, name: "Renamed", steps: [] });
-    expect(s.arrangements!.map((a) => [a.id, a.name])).toEqual([
-      ["first", "Renamed"],
-      ["second", "second"],
-    ]);
-    expect(s.arrangements![0].createdAt).toBe("2026-01-01");
-    expect(WELL.arrangements).toBeUndefined();
+    it("keeps the section's mark under the renamed label", () => {
+      expect(setRepeat(marked(), 1, 2).sectionMarks).toEqual([{ section: "[Chorus x2]", occurrence: 1, kind: "soft" }]);
+    });
+
+    it("labels an unlabeled opening so it can carry a count", () => {
+      const song = mk([AG, "", "[Verse 1]", V1A], [pc("o", 0, "G")]);
+      const repeated = setRepeat(song, 0, 2);
+      expect(repeated.lyrics.slice(0, 2)).toEqual(["[Opening x2]", AG]);
+      expect(repeated.placements.find((p) => p.id === "o")?.line).toBe(1);
+    });
   });
 
-  it("withoutArrangement removes by id and leaves arrangements undefined when empty", () => {
-    const s = withArrangement(withArrangement(WELL, arr([], "a")), arr([], "b"));
-    const one = withoutArrangement(s, "a");
-    expect(one.arrangements!.map((a) => a.id)).toEqual(["b"]);
-    expect(withoutArrangement(one, "b").arrangements).toBeUndefined();
-    expect(withoutArrangement(WELL, "nope").arrangements).toBeUndefined();
-    expect(withoutArrangement(one, "nope").arrangements!.map((a) => a.id)).toEqual(["b"]);
-  });
-});
+  describe("toggleOut", () => {
+    it("sets and clears an OUT section", () => {
+      const on = toggleOut(WELL, 0);
+      expect(on.outSections).toEqual([{ section: "[Verse 1]", occurrence: 1 }]);
+      expect(toggleOut(on, 0).outSections).toBeUndefined();
+    });
 
-describe("step list ops", () => {
-  const a = step("[Verse 1]");
-  const b = step("[Chorus]");
-  const c = step("[Verse 2]");
-  const steps = [a, b, c];
-
-  it.each<[number, number, ArrangementStep[]]>([
-    [0, 1, [b, a, c]],
-    [2, -1, [a, c, b]],
-    [0, 2, [b, c, a]],
-    [0, -1, steps],
-    [2, 1, steps],
-    [-1, 1, steps],
-    [3, -1, steps],
-  ])("moveStep(%i, %i)", (index, delta, expected) => {
-    expect(moveStep(steps, index, delta)).toEqual(expected);
+    it("labels an unlabeled opening so an OUT can anchor to it", () => {
+      const out = toggleOut(mk([AG, "", "[Verse 1]", V1A]), 0);
+      expect(out.lyrics[0]).toBe("[Opening]");
+      expect(out.outSections).toEqual([{ section: "[Opening]", occurrence: 1 }]);
+    });
   });
 
-  it("moveStep returns the same array when out of bounds", () => {
-    expect(moveStep(steps, 0, -1)).toBe(steps);
+  describe("toggleDiamonds", () => {
+    it("holds every chord in the section, then releases them all", () => {
+      const held = toggleDiamonds(WELL, 1);
+      expect(held.placements.filter((p) => p.line >= 4 && p.line <= 6).every((p) => p.hold === true)).toBe(true);
+      expect(held.placements.filter((p) => p.line < 4).every((p) => p.hold === undefined)).toBe(true);
+      expect(toggleDiamonds(held, 1).placements.every((p) => p.hold === undefined)).toBe(true);
+    });
+
+    it("holds the rest when only some chords are held", () => {
+      const half = mk(["[Chorus]", CHA], [{ ...pc("a", 1, "D"), hold: true }, pc("b", 1, "A", 5)]);
+      expect(toggleDiamonds(half, 0).placements.every((p) => p.hold === true)).toBe(true);
+    });
   });
 
-  it.each<[number, ArrangementStep[]]>([
-    [0, [a, a, b, c]],
-    [1, [a, b, b, c]],
-    [2, [a, b, c, c]],
-    [-1, steps],
-    [3, steps],
-  ])("duplicateStep(%i)", (index, expected) => {
-    expect(duplicateStep(steps, index)).toEqual(expected);
+  describe("sectionSummaries", () => {
+    it("reports title, repeat, OUT, diamonds, and lines for each section", () => {
+      const song = toggleDiamonds(toggleOut(setRepeat(WELL, 1, 2), 0), 1);
+      const [verse, chorus] = sectionSummaries(song);
+      expect(verse).toMatchObject({ title: "Verse 1", repeat: 1, out: true, diamonds: false, labelLine: 0, start: 0, end: 2 });
+      expect(chorus).toMatchObject({ title: "Chorus", repeat: 2, out: false, diamonds: true, labelLine: 4 });
+    });
+
+    it("lists an unlabeled opening first, with no label line", () => {
+      const [opening, verse] = sectionSummaries(mk([AG, "", "[Verse 1]", V1A]));
+      expect(opening).toMatchObject({ title: "Opening", labelLine: null, start: 0, end: 0 });
+      expect(verse.labelLine).toBe(2);
+    });
   });
 
-  it("duplicateStep copies the step object rather than sharing it", () => {
-    const out = duplicateStep(steps, 1);
-    expect(out[2]).not.toBe(out[1]);
-  });
-
-  it.each<[number, ArrangementStep[]]>([
-    [0, [b, c]],
-    [2, [a, b]],
-    [-1, steps],
-    [3, steps],
-  ])("removeStep(%i)", (index, expected) => {
-    expect(removeStep(steps, index)).toEqual(expected);
-  });
-
-  it.each<[string, ArrangementStep, Partial<ArrangementStep>, ArrangementStep]>([
-    ["sets a repeat", b, { repeat: 3 }, { ...b, repeat: 3 }],
-    ["deletes repeat 1", { ...b, repeat: 3 }, { repeat: 1 }, b],
-    ["clamps repeat 0 up to 1, deleting it", { ...b, repeat: 3 }, { repeat: 0 }, b],
-    ["clamps a negative repeat up to 1", b, { repeat: -4 }, b],
-    ["clamps repeat down to the max", b, { repeat: 99 }, { ...b, repeat: MAX_REPEAT }],
-    ["keeps the max", b, { repeat: 16 }, { ...b, repeat: 16 }],
-    ["rounds a fractional repeat", b, { repeat: 2.6 }, { ...b, repeat: 3 }],
-    ["drops a NaN repeat", { ...b, repeat: 2 }, { repeat: NaN }, b],
-    ["clears repeat when patched undefined", { ...b, repeat: 2 }, { repeat: undefined }, b],
-    ["keeps an existing repeat untouched by other patches", { ...b, repeat: 4 }, { note: "x" }, { ...b, repeat: 4, note: "x" }],
-    ["sets a note", b, { note: "vamp" }, { ...b, note: "vamp" }],
-    ["deletes a blank note", { ...b, note: "vamp" }, { note: "  " }, b],
-    ["deletes an empty note", { ...b, note: "vamp" }, { note: "" }, b],
-    ["sets a mark", b, { mark: { kind: "full" } }, { ...b, mark: { kind: "full" } }],
-    ["sets a null mark", b, { mark: null }, { ...b, mark: null }],
-  ])("updateStep %s", (_name, start, patch, expected) => {
-    expect(updateStep([a, start, c], 1, patch)).toEqual([a, expected, c]);
-  });
-
-  it("updateStep ignores out of range indices", () => {
-    expect(updateStep(steps, -1, { repeat: 2 })).toBe(steps);
-    expect(updateStep(steps, 3, { repeat: 2 })).toBe(steps);
-  });
-
-  it("updateStep leaves the other steps as the same objects", () => {
-    const out = updateStep(steps, 1, { repeat: 2 });
-    expect(out[0]).toBe(a);
-    expect(out[2]).toBe(c);
-    expect(steps[1]).toEqual(step("[Chorus]"));
-  });
-});
-
-describe("out steps", () => {
-  it("anchors each out step to its rendered label and occurrence", () => {
-    const { song } = renderArrangement(
-      WELL,
-      arr([step("[Verse 1]", 1, { out: true }), step("[Chorus]"), step("[Chorus]", 1, { out: true })]),
-    );
-    expect(song.outSections).toEqual([
-      { section: "[Verse 1]", occurrence: 1 },
-      { section: "[Chorus]", occurrence: 2 },
-    ]);
-    const labels = sectionRanges(song.lyrics).map((r) => [r.label, r.occurrence]);
-    expect(labels).toContainEqual(["[Chorus]", 2]);
-  });
-
-  it("leaves outSections undefined when no step is out", () => {
-    expect(renderArrangement(WELL, arr(defaultSteps(WELL))).song.outSections).toBeUndefined();
-  });
-
-  it("labels an unlabeled opening so an out can anchor to it", () => {
-    const song = mk([AG, "", "[Verse 1]", V1A]);
-    const { song: out } = renderArrangement(song, arr([step(OPENING, 1, { out: true }), step("[Verse 1]")]));
-    expect(out.lyrics[0]).toBe("[Opening]");
-    expect(out.outSections).toEqual([{ section: "[Opening]", occurrence: 1 }]);
-  });
-
-  it("updateStep sets out and drops it again when cleared", () => {
-    const steps = [step("[Chorus]")];
-    const on = updateStep(steps, 0, { out: true });
-    expect(on[0]).toEqual({ section: "[Chorus]", occurrence: 1, out: true });
-    expect(updateStep(on, 0, { out: false })[0]).toEqual({ section: "[Chorus]", occurrence: 1 });
-  });
-});
-
-describe("insertStep", () => {
-  const a = step("[Verse 1]");
-  const b = step("[Chorus]");
-  const n = step("[Verse 4]");
-
-  it.each<[string, number, ArrangementStep[]]>([
-    ["at the front", 0, [n, a, b]],
-    ["between two steps", 1, [a, n, b]],
-    ["at the end", 2, [a, b, n]],
-    ["past the end clamps to the end", 9, [a, b, n]],
-    ["before the front clamps to the front", -3, [n, a, b]],
-  ])("%s", (_name, index, expected) => {
-    expect(insertStep([a, b], index, n)).toEqual(expected);
-  });
-});
-
-describe("hold steps", () => {
-  it("marks every chord in a hold step as a hold and leaves other steps alone", () => {
-    const { song } = renderArrangement(WELL, arr([step("[Verse 1]"), step("[Chorus]", 1, { hold: true })]));
-    const byLine = song.placements.map((p) => [p.chord, p.hold === true]);
-    expect(byLine).toEqual([["D", false], ["A", false], ["D", true], ["A", true]]);
-  });
-
-  it("keeps the song as written untouched", () => {
-    renderArrangement(WELL, arr([step("[Chorus]", 1, { hold: true })]));
-    expect(WELL.placements.every((p) => p.hold === undefined)).toBe(true);
-  });
-
-  it("keeps a chord already held in the song held in a plain step", () => {
-    const held = mk(["[Chorus]", CHA], [{ ...pc("c", 1, "D"), hold: true }]);
-    expect(renderArrangement(held, arr([step("[Chorus]")])).song.placements[0].hold).toBe(true);
-  });
-
-  it("updateStep sets hold and drops it again when cleared", () => {
-    const on = updateStep([step("[Chorus]")], 0, { hold: true });
-    expect(on[0]).toEqual({ section: "[Chorus]", occurrence: 1, hold: true });
-    expect(updateStep(on, 0, { hold: false })[0]).toEqual({ section: "[Chorus]", occurrence: 1 });
-  });
-});
-
-describe("stepLines", () => {
-  it("maps each step to its label and rendered lines, cue included", () => {
-    const { song, stepLines } = renderArrangement(
-      WELL,
-      arr([step("[Verse 1]"), step("[Chorus]", 1, { note: "softly" }), step("[Verse 4]")]),
-    );
-    expect(song.lyrics).toEqual(["[Verse 1]", V1A, V1B, "", "[Chorus]", "(softly)", CHA, CHB, "", "[Verse 4]", V4A]);
-    expect(stepLines).toEqual([
-      { label: 0, start: 0, end: 2 },
-      { label: 4, start: 4, end: 7 },
-      { label: 9, start: 9, end: 10 },
-    ]);
-  });
-
-  it("is null for a missing step and has no label for a plain opening", () => {
-    const opened = mk([AG, "", "[Verse 1]", V1A], [pc("o", 0, "G")]);
-    const { stepLines } = renderArrangement(opened, arr([step(OPENING), step("[Bridge]"), step("[Verse 1]")]));
-    expect(stepLines).toEqual([{ label: null, start: 0, end: 0 }, null, { label: 2, start: 2, end: 3 }]);
+  it("every layout leaves exactly one blank line between sections and none at the ends", () => {
+    const messy = mk(["", "[Verse 1]", V1A, "", "", "", "[Chorus]", CHA, ""]);
+    const out = fromBlocks(messy, toBlocks(messy));
+    expect(out.lyrics).toEqual(["[Verse 1]", V1A, "", "[Chorus]", CHA]);
   });
 });

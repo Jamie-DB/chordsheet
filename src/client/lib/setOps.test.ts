@@ -22,7 +22,10 @@ const song = (id: string, arrangementIds: string[] = []): Song => ({
         arrangements: arrangementIds.map((a) => ({
           id: a,
           name: a,
-          steps: [],
+          lyrics: [],
+          placements: [],
+          keyOverride: null,
+          capo: 0,
           createdAt: "2026-01-01",
           updatedAt: "2026-01-01",
         })),

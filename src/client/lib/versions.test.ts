@@ -1,20 +1,19 @@
 import { describe, expect, it } from "vitest";
-import type { Arrangement, ArrangementStep, Song } from "../../shared/types";
+import type { Arrangement, Song } from "../../shared/types";
 import {
   defaultVersionName,
   entryTitle,
   findArrangement,
-  inheritedMark,
-  markChoice,
-  markFromChoice,
   versionCount,
-  type MarkChoice,
 } from "./versions";
 
 const version = (id: string, name: string): Arrangement => ({
   id,
   name,
-  steps: [],
+  lyrics: [],
+  placements: [],
+  keyOverride: null,
+  capo: 0,
   createdAt: "2026-01-01",
   updatedAt: "2026-01-01",
 });
@@ -78,57 +77,5 @@ describe("versionCount", () => {
     [0, "0 versions"],
   ])("%i", (n, expected) => {
     expect(versionCount(n)).toBe(expected);
-  });
-});
-
-describe("markChoice and markFromChoice", () => {
-  type Mark = ArrangementStep["mark"];
-  const custom: Mark = { kind: "custom", text: "drop", color: "red" };
-  it.each<[Mark, MarkChoice]>([
-    [undefined, "inherit"],
-    [null, "none"],
-    [{ kind: "soft" }, "soft"],
-    [{ kind: "tacet" }, "tacet"],
-    [custom, "custom"],
-  ])("%j reads as %j", (mark, choice) => {
-    expect(markChoice(mark)).toBe(choice);
-  });
-
-  it.each<[MarkChoice, Mark, Mark]>([
-    ["inherit", { kind: "soft" }, undefined],
-    ["none", { kind: "soft" }, null],
-    ["build", undefined, { kind: "build" }],
-    ["full", custom, { kind: "full" }],
-    ["custom", custom, custom],
-    ["custom", { kind: "soft" }, { kind: "custom", color: "amber" }],
-  ])("%j from %j is %j", (choice, current, expected) => {
-    expect(markFromChoice(choice, current)).toEqual(expected);
-  });
-});
-
-describe("inheritedMark", () => {
-  // Public domain: It Is Well with My Soul.
-  const lyrics = [
-    "[Verse 1]",
-    "When peace like a river attendeth my way,",
-    "",
-    "[Chorus]",
-    "It is well (it is well),",
-    "",
-    "[Chorus]",
-  ];
-  const marked = (sectionMarks: Song["sectionMarks"]): Song => ({ ...song("w", "W"), lyrics, sectionMarks });
-  const soft = { section: "[Chorus]", occurrence: 1, kind: "soft" as const };
-  const full = { section: "[Chorus]", occurrence: 2, kind: "full" as const };
-
-  it.each<[string, Song, ArrangementStep, string | null]>([
-    ["the section's own mark", marked([soft]), { section: "[Chorus]", occurrence: 1 }, "soft"],
-    ["no mark", marked([soft]), { section: "[Verse 1]", occurrence: 1 }, null],
-    ["a bare repeat marker borrows the chorus mark", marked([soft]), { section: "[Chorus]", occurrence: 2 }, "soft"],
-    ["a bare repeat marker's own mark wins", marked([soft, full]), { section: "[Chorus]", occurrence: 2 }, "full"],
-    ["a missing section", marked([soft]), { section: "[Bridge]", occurrence: 1 }, null],
-    ["a song without marks", marked(undefined), { section: "[Chorus]", occurrence: 1 }, null],
-  ])("%s", (_name, s, step, expected) => {
-    expect(inheritedMark(s, step)?.kind ?? null).toBe(expected);
   });
 });

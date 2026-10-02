@@ -1,11 +1,9 @@
 import { useState } from "react";
 import type { Setlist, Song } from "../../shared/types";
 import { usePrintDiagrams } from "../lib/printPrefs";
-import { setSheets } from "../lib/printSet";
-import { capoBadge, printFooterCss } from "../lib/sheetText";
+import { capoBadge } from "../lib/sheetText";
 import { findArrangement } from "../lib/versions";
-import { PrintSheet } from "./PrintSheet";
-import { SetChartPage } from "./SetChartPage";
+import { SetPrint } from "./SetPrint";
 
 interface Props {
   set: Setlist;
@@ -26,7 +24,6 @@ export function SetView({ set, songs, ...props }: Props) {
   const [showDiagrams, setShowDiagrams] = usePrintDiagrams();
   const byId = new Map(songs.map((s) => [s.id, s]));
   const inSet = new Set(set.entries.map((e) => e.songId));
-  const sheets = setSheets(set, songs);
   const addable = [...songs].sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
 
   return (
@@ -144,13 +141,7 @@ export function SetView({ set, songs, ...props }: Props) {
           </div>
         </section>
       </div>
-      <div className="set-print">
-        <style>{printFooterCss(set.name)}</style>
-        {showDiagrams && <SetChartPage sheets={sheets} />}
-        {sheets.map((sheet, i) => (
-          <PrintSheet key={i} {...sheet} showDiagrams={false} inSet />
-        ))}
-      </div>
+      <SetPrint set={set} songs={songs} showDiagrams={showDiagrams} />
     </>
   );
 }

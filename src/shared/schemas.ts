@@ -16,20 +16,43 @@ export const sectionMarkSchema = z.object({
   color: z.enum(["red", "blue", "amber", "green"]).optional(),
 });
 
-export const arrangementStepSchema = z.object({
-  section: z.string(),
-  occurrence: z.number().int().min(1),
-  repeat: z.number().int().min(1).max(16).optional(),
-  note: z.string().optional(),
-  mark: sectionMarkSchema.pick({ kind: true, text: true, color: true }).nullable().optional(),
-  out: z.boolean().optional(),
-  hold: z.boolean().optional(),
-});
+const chartShape = {
+  lyrics: z.array(z.string()),
+  placements: z.array(chordPlacementSchema),
+  keyOverride: z.string().nullable(),
+  capo: z.number().int().min(0).max(9),
+  bpm: z.number().int().min(20).max(400).optional(),
+  notes: z.string().optional(),
+  sectionMarks: z.array(sectionMarkSchema).optional(),
+  outSections: z.array(sectionMarkSchema.pick({ section: true, occurrence: true })).optional(),
+};
 
 export const arrangementSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  steps: z.array(arrangementStepSchema),
+  ...chartShape,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+/**
+ * A version saved before versions owned their chart: just an ordering over
+ * the song's sections. Read as-is; upgradeVersions turns it into a chart.
+ */
+export const legacyArrangementSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  steps: z.array(
+    z.object({
+      section: z.string(),
+      occurrence: z.number().int().min(1),
+      repeat: z.number().int().min(1).max(16).optional(),
+      note: z.string().optional(),
+      mark: sectionMarkSchema.pick({ kind: true, text: true, color: true }).nullable().optional(),
+      out: z.boolean().optional(),
+      hold: z.boolean().optional(),
+    }),
+  ),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -39,15 +62,8 @@ export const songSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   artist: z.string().optional(),
-  lyrics: z.array(z.string()),
-  placements: z.array(chordPlacementSchema),
-  keyOverride: z.string().nullable(),
-  capo: z.number().int().min(0).max(9),
-  bpm: z.number().int().min(20).max(400).optional(),
-  notes: z.string().optional(),
-  sectionMarks: z.array(sectionMarkSchema).optional(),
-  outSections: z.array(sectionMarkSchema.pick({ section: true, occurrence: true })).optional(),
-  arrangements: z.array(arrangementSchema).optional(),
+  ...chartShape,
+  arrangements: z.array(z.union([arrangementSchema, legacyArrangementSchema])).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

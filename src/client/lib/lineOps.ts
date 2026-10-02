@@ -43,7 +43,7 @@ export interface ReplacedLyrics {
   song: Song;
   /** Chords whose line no longer exists. */
   droppedChords: number;
-  /** Marks and version steps whose section label was removed. */
+  /** Marks and OUT sections whose section label was removed. */
   droppedRefs: number;
 }
 
@@ -124,7 +124,7 @@ type Ref = { section: string; occurrence: number };
 const refKey = (r: Ref) => `${r.occurrence}:${r.section}`;
 
 /**
- * Section marks and version steps name a section by label text and
+ * Section marks and OUT sections name a section by label text and
  * occurrence, so any edit that renames, adds, or removes a label can leave
  * them pointing at a different section than the one they were made for.
  * This follows each label line through the edit instead:
@@ -134,10 +134,9 @@ const refKey = (r: Ref) => `${r.occurrence}:${r.section}`;
  *   its references take the new anchor (occurrences shift with it).
  * - Labels left unmatched on both sides pair up in order when the counts
  *   agree: that is a rename through a whole-text edit.
- * - Any other unmatched old label is gone. Its marks and version steps are
+ * - Any other unmatched old label is gone. Its marks and OUT flags are
  *   dropped rather than left to resolve to whichever section now holds the
- *   old anchor. Its lines joined the section above, so a version still
- *   plays them there.
+ *   old anchor. Its lines joined the section above.
  *
  * oldLyrics and newLyrics are before normalization; normalizing only
  * removes blank lines, so label order and anchors are the same after it.
@@ -175,7 +174,7 @@ export function retargetSections(
   if (!changed) return { song, dropped: 0 };
 
   let dropped = 0;
-  // Keys absent from the map (the unlabeled opening, steps already missing) stay as they are.
+  // Keys absent from the map stay as they are.
   const follow = <T extends Ref>(refs: T[]): T[] =>
     refs.flatMap((ref) => {
       const key = refKey(ref);
@@ -189,25 +188,15 @@ export function retargetSections(
     });
 
   const marks = song.sectionMarks ? follow(song.sectionMarks) : undefined;
-  const arrangements = song.arrangements?.map((a) => ({ ...a, steps: follow(a.steps) }));
+  const outs = song.outSections ? follow(song.outSections) : undefined;
   return {
     song: {
       ...song,
       ...(song.sectionMarks ? { sectionMarks: marks && marks.length > 0 ? marks : undefined } : {}),
-      ...(arrangements ? { arrangements } : {}),
+      ...(song.outSections ? { outSections: outs && outs.length > 0 ? outs : undefined } : {}),
     },
     dropped,
   };
-}
-
-/** Version steps that play the section this label line starts; 0 for any other line. */
-export function stepsUsingLabel(song: Song, index: number): number {
-  const label = labelsAt(song.lyrics).find((l) => l.line === index);
-  if (!label) return 0;
-  return (song.arrangements ?? []).reduce(
-    (n, a) => n + a.steps.filter((s) => s.section === label.section && s.occurrence === label.occurrence).length,
-    0,
-  );
 }
 
 export function chordsOnLine(song: Song, index: number): number {

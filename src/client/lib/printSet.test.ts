@@ -38,13 +38,16 @@ describe("setSheets", () => {
     expect(sheet.versionName).toBeUndefined();
   });
 
-  it("prints the version the set plays, in its section order", () => {
+  it("prints the version the set plays, with its own chart, key, and capo", () => {
     const withVersion = song("a", {
       arrangements: [
         {
           id: "v1",
           name: "Short",
-          steps: [{ section: "[Chorus]", occurrence: 1 }],
+          lyrics: ["[Chorus]", "How sweet"],
+          placements: [],
+          keyOverride: "D",
+          capo: 4,
           createdAt: "2026-01-01T00:00:00.000Z",
           updatedAt: "2026-01-01T00:00:00.000Z",
         },
@@ -52,7 +55,9 @@ describe("setSheets", () => {
     });
     const [sheet] = setSheets(set([{ songId: "a", arrangementId: "v1" }]), [withVersion]);
     expect(sheet.versionName).toBe("Short");
-    expect(sheet.song.lyrics).toContain("How sweet");
-    expect(sheet.song.lyrics).not.toContain("Amazing grace");
+    expect(sheet.song.lyrics).toEqual(["[Chorus]", "How sweet"]);
+    // The version's own key and capo, not the song's.
+    expect(sheet.soundingKey).toBe("D");
+    expect(sheet.shapedKeyName).toBe("Bb");
   });
 });
