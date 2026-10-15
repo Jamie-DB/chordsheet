@@ -10,20 +10,27 @@ export interface DiagramSpec extends ShapeResult {
 /**
  * Unique displayed shapes in order of first appearance in the song. Triads
  * are labeled and deduplicated by the triad played, so C#m7 and C#m share
- * one C#m grid.
+ * one C#m grid, and each sits nearest the triad before it.
  */
 export function diagramSpecs(song: Song, shapedKeyName: string, style: DiagramStyle = "full"): DiagramSpec[] {
   const seen = new Set<string>();
   const out: DiagramSpec[] = [];
-  const home = triadHome(shapedKeyName);
+  let near = triadHome(shapedKeyName);
   const ordered = [...song.placements].sort((a, b) => a.line - b.line || a.col - b.col);
   for (const p of ordered) {
     const shown = displayChord(p.chord, song.capo, shapedKeyName);
-    const result = style === "triads" ? triadVoicingFor(shown, home) : voicingFor(shown);
-    const label = style === "triads" && result ? result.playedAs : shown;
-    if (seen.has(label)) continue;
-    seen.add(label);
-    if (result) out.push({ label, ...result });
+    if (style === "triads") {
+      const triad = triadVoicingFor(shown, near);
+      if (!triad || seen.has(triad.playedAs)) continue;
+      seen.add(triad.playedAs);
+      near = triad.center;
+      out.push({ label: triad.playedAs, voicing: triad.voicing, playedAs: triad.playedAs, approximated: triad.approximated });
+      continue;
+    }
+    if (seen.has(shown)) continue;
+    seen.add(shown);
+    const result = voicingFor(shown);
+    if (result) out.push({ label: shown, ...result });
   }
   return out;
 }

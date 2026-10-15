@@ -11,7 +11,9 @@ interface Props {
 
 const FRETS_SHOWN = 4;
 const LEFT = 10;
-const RIGHT = 50;
+const RIGHT_SIX = 50;
+/** Four strings sit narrower, so the fret number clears a dot on the top string. */
+const RIGHT_FOUR = 44;
 const TOP = 24;
 const BOTTOM = 68;
 const FRET_GAP = (BOTTOM - TOP) / FRETS_SHOWN;
@@ -20,6 +22,7 @@ const FRET_GAP = (BOTTOM - TOP) / FRETS_SHOWN;
 export function ChordDiagram({ label, voicing, title, strings = 6 }: Props) {
   const { baseFret } = voicing;
   const frets = voicing.frets.slice(6 - strings);
+  const RIGHT = strings === 4 ? RIGHT_FOUR : RIGHT_SIX;
   const xFor = (string: number) => LEFT + string * ((RIGHT - LEFT) / (strings - 1));
 
   return (
@@ -32,7 +35,7 @@ export function ChordDiagram({ label, voicing, title, strings = 6 }: Props) {
       aria-label={`${label} chord diagram`}
     >
       {title && <title>{title}</title>}
-      <text x="30" y="9" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily="inherit" fill="currentColor">
+      <text x={(LEFT + RIGHT) / 2} y="9" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily="inherit" fill="currentColor">
         {label}
       </text>
 
@@ -55,7 +58,7 @@ export function ChordDiagram({ label, voicing, title, strings = 6 }: Props) {
       {baseFret === 1 ? (
         <rect x={LEFT - 0.5} y={TOP - 2.5} width={RIGHT - LEFT + 1} height="2.5" fill="currentColor" />
       ) : (
-        <text x={RIGHT + 2.5} y={TOP + FRET_GAP * 0.65} fontSize="6.5" fontFamily="inherit" fill="currentColor">
+        <text x={RIGHT + (strings === 4 ? 5 : 2.5)} y={TOP + FRET_GAP * 0.65} fontSize="6.5" fontFamily="inherit" fill="currentColor">
           {baseFret}fr
         </text>
       )}

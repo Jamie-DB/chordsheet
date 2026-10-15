@@ -29,6 +29,13 @@ describe("diagramSpecs", () => {
     ]);
   });
 
+  it("puts each triad nearest the one before it", () => {
+    const e = { ...song(["E", "C#m", "B"]), keyOverride: "E" };
+    const b = diagramSpecs(e, "E", "triads")[2];
+    expect(b.label).toBe("B");
+    expect(b.voicing.frets).toEqual([-1, -1, 4, 4, 4, -1]);
+  });
+
   it("voices triads for the shapes under a capo", () => {
     expect(diagramSpecs(song(["A"], 2), "G", "triads")[0].label).toBe("G");
   });
