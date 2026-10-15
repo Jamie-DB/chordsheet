@@ -330,22 +330,17 @@
     page-break-inside: avoid;
   }
 
-  /* Set print: songs flow one after another, each under a rule, and every
-     song balances its two columns so the next one starts right below. */
+  /* Set print: every song starts on a page of its own, even when the last
+     page has room, and lays out like a song printed alone. The first song
+     needs no break: the chord page breaks after itself. */
   .print-sheet.in-set {
-    margin-top: 16pt;
-    padding-top: 8pt;
-    border-top: 1.5pt solid #9ca3af;
+    break-before: page;
+    page-break-before: always;
   }
 
   .print-sheet.in-set:first-of-type {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
-  }
-
-  .print-sheet.in-set .print-body.two-col {
-    column-fill: balance;
+    break-before: auto;
+    page-break-before: auto;
   }
 
   /* Set print's chord page: one block per song, then a page break. */
