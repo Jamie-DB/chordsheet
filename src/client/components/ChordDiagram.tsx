@@ -5,21 +5,22 @@ interface Props {
   voicing: Voicing;
   /** Tooltip when the shape approximates the labeled chord. */
   title?: string;
+  /** 4 draws only the top four strings (D G B E), for triad shapes. */
+  strings?: 4 | 6;
 }
 
-const STRINGS = 6;
 const FRETS_SHOWN = 4;
 const LEFT = 10;
 const RIGHT = 50;
 const TOP = 24;
 const BOTTOM = 68;
-const STRING_GAP = (RIGHT - LEFT) / (STRINGS - 1);
 const FRET_GAP = (BOTTOM - TOP) / FRETS_SHOWN;
 
 /** One chord grid: name above, X/O markers, dots on a 4-fret window. */
-export function ChordDiagram({ label, voicing, title }: Props) {
-  const { frets, baseFret } = voicing;
-  const xFor = (string: number) => LEFT + string * STRING_GAP;
+export function ChordDiagram({ label, voicing, title, strings = 6 }: Props) {
+  const { baseFret } = voicing;
+  const frets = voicing.frets.slice(6 - strings);
+  const xFor = (string: number) => LEFT + string * ((RIGHT - LEFT) / (strings - 1));
 
   return (
     <svg
@@ -59,7 +60,7 @@ export function ChordDiagram({ label, voicing, title }: Props) {
         </text>
       )}
 
-      {Array.from({ length: STRINGS }, (_, i) => (
+      {Array.from({ length: strings }, (_, i) => (
         <line key={`s${i}`} x1={xFor(i)} y1={TOP} x2={xFor(i)} y2={BOTTOM} stroke="currentColor" strokeWidth="0.8" />
       ))}
       {Array.from({ length: FRETS_SHOWN + 1 }, (_, i) => (

@@ -3,6 +3,7 @@ import { buildChordRowSegments, displayChord } from "../../engine";
 import type { Song } from "../../shared/types";
 import { markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
 import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
+import type { DiagramStyle } from "../lib/printPrefs";
 import { capoBadge, printFooterCss, printTagline } from "../lib/sheetText";
 import { wrapLine } from "../lib/printWrap";
 import { ChordChartRow } from "./ChordChartRow";
@@ -16,6 +17,7 @@ interface Props {
   versionName?: string;
   /** The chord diagram row under the title. */
   showDiagrams?: boolean;
+  diagramStyle?: DiagramStyle;
   /**
    * One song among several in a set print: no footer of its own (the set
    * sets one), the version named beside the title, and a rule above it.
@@ -35,7 +37,7 @@ const WRAP_INDENT = 2;
  * once, with each pass's dynamics under the label. Blank lines are left
  * out (section gaps separate sections) and lines too wide for a column wrap.
  */
-export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName, showDiagrams = true, inSet = false }: Props) {
+export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName, showDiagrams = true, diagramStyle = "full", inSet = false }: Props) {
   const { song, passNotes } = collapseRepeats(written);
   const marks = song.sectionMarks ?? [];
   const ranges = sectionRanges(song.lyrics);
@@ -83,7 +85,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
       </div>
       {showDiagrams && (
         <div className="print-diagrams">
-          <ChordChartRow song={song} shapedKeyName={shapedKeyName} />
+          <ChordChartRow song={song} shapedKeyName={shapedKeyName} style={diagramStyle} />
         </div>
       )}
       <div className="print-body two-col">

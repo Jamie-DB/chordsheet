@@ -154,7 +154,7 @@ function simplificationLadder(quality: string): string[] {
   return out;
 }
 
-function toVoicing(frets: number[]): Voicing {
+export function toVoicing(frets: number[]): Voicing {
   const fretted = frets.filter((f) => f > 0);
   const maxFret = fretted.length > 0 ? Math.max(...fretted) : 0;
   const baseFret = maxFret <= 4 ? 1 : Math.min(...fretted);
