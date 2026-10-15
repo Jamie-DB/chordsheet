@@ -26,7 +26,7 @@ Fully static SPA: Vite + React 19 + TypeScript. No backend, no API keys, no .env
 - Stored chords are always SOUNDING chords. Capo is a pure display transform: displayed shape = sounding chord transposed down capo semitones. The header renders like "Key: Eb, Capo 3" and the sounding key never changes when capo changes.
 - Chord entry while capo > 0 is in shape space (what you see is what you type); the editor converts up by capo semitones before storing.
 - Transpose rewrites stored sounding chords (a real key change). It is a separate control from capo; both exist on purpose.
-- Enharmonic spelling: displayed shapes follow the shaped key (sounding key minus capo); the header and capo-0 chords follow the sounding key. Flat keys spell flat, sharp keys spell sharp.
+- Enharmonic spelling: a chord that does not move keeps its own spelling, so at capo 0 every chord shows as written (a Bb in C stays Bb). A chord that moves (shapes under a capo, transpose, a section copied into another key) is respelled for its target key: displayed shapes follow the shaped key (sounding key minus capo), stored chords follow the new sounding key, and the header follows the sounding key. Flat keys spell flat, sharp keys spell sharp.
 - Alignment is character-cell based: monospace font, chord at column col sits at `left: col * 1ch`. Print output is literal text rows built by `buildChordRow`, never positioned elements.
 - Import accepts placements by column or by anchor substring; anchors are resolved deterministically by `resolveAnchor`. Import review only ever accepts the placements array; lyric changes in imported JSON are rejected.
 
