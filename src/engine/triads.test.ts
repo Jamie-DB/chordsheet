@@ -30,7 +30,7 @@ describe("triadOf", () => {
     ["sus4", "sus4"],
     ["7sus4", "sus4"],
     ["sus42", "sus4"],
-    ["5", "5"],
+    ["5", ""],
   ])("reduces %j to the %j triad", (quality, suffix) => {
     expect(triadOf(quality).suffix).toBe(suffix);
   });
@@ -38,59 +38,60 @@ describe("triadOf", () => {
 
 describe("triadHome", () => {
   it.each([
-    ["E", 1 / 3], // G-B-E 1-0-0
-    ["C", 1 / 3], // G-B-E 0-1-0
-    ["Am", 1], // G-B-E 2-1-0
-    ["not a key", 0],
-  ])("puts %s at fret %d", (key, fret) => {
+    ["E", 9], // D-G-B 9-9-9
+    ["C", 5], // D-G-B 5-5-5
+    ["Am", 17 / 3], // D-G-B 7-5-5
+    ["not a key", 6],
+  ])("starts %s at fret %d", (key, fret) => {
     expect(triadHome(key)).toBeCloseTo(fret);
   });
 });
 
 describe("triadVoicingFor", () => {
   it.each([
-    ["E", [X, X, X, 1, 0, 0], "E", false],
-    ["C#m7", [X, X, X, 1, 2, 0], "C#m", true],
-    ["B", [X, X, X, 4, 4, 2], "B", false],
-    ["G/B", [X, X, 0, 0, 0, X], "G", true],
-  ] as const)("voices %s near the key of E", (symbol, frets, playedAs, approximated) => {
-    const result = triadVoicingFor(symbol, triadHome("E"))!;
+    ["E", "E", [X, X, 9, 9, 9, X], "E", false, 9],
+    ["C#m7", "E", [X, X, 6, 6, 5, X], "C#m", true, 5],
+    ["B", "E", [X, X, 9, 8, 7, X], "B", false, 7],
+    ["E5", "E", [X, X, 9, 9, 9, X], "E", true, 9],
+    ["C", "C", [X, X, 5, 5, 5, X], "C", false, 5],
+    ["G/B", "C", [X, X, 5, 4, 3, X], "G", true, 3],
+  ] as const)("voices %s near the key of %s", (symbol, key, frets, playedAs, approximated, baseFret) => {
+    const result = triadVoicingFor(symbol, triadHome(key))!;
     expect(result.voicing.frets).toEqual(frets);
+    expect(result.voicing.baseFret).toBe(baseFret);
     expect(result.playedAs).toBe(playedAs);
     expect(result.approximated).toBe(approximated);
   });
 
-  it("moves up the neck with a higher home", () => {
-    const low = triadVoicingFor("C", 0)!.voicing.frets;
-    const high = triadVoicingFor("C", 8)!.voicing.frets;
-    expect(Math.max(...high)).toBeGreaterThan(Math.max(...low));
+  it("takes the shape nearest the place it is given", () => {
+    expect(triadVoicingFor("B", 4)!.voicing.frets).toEqual([X, X, 4, 4, 4, X]);
+    expect(triadVoicingFor("B", 8)!.voicing.frets).toEqual([X, X, 9, 8, 7, X]);
   });
 
   it("keeps the root as written", () => {
-    expect(triadVoicingFor("Dbmaj7", 0)!.playedAs).toBe("Db");
+    expect(triadVoicingFor("Dbmaj7", 6)!.playedAs).toBe("Db");
   });
 
   it("returns null for symbols that do not parse", () => {
-    expect(triadVoicingFor("N.C.", 0)).toBeNull();
+    expect(triadVoicingFor("N.C.", 6)).toBeNull();
   });
 
-  const suffixes = ["", "m", "dim", "aug", "sus2", "sus4", "5"];
+  const suffixes = ["", "m", "dim", "aug", "sus2", "sus4"];
   const roots = Array.from({ length: 12 }, (_, pc) => pcToName(pc, "flat"));
   it.each(roots.flatMap((root) => suffixes.map((suffix) => `${root}${suffix}`)))(
-    "plays exactly the triad tones of %s on three adjacent top strings",
+    "plays exactly the triad tones of %s on D-G-B between frets 3 and 9",
     (symbol) => {
-      for (const home of [0, 5, 10]) {
-        const { frets } = triadVoicingFor(symbol, home)!.voicing;
-        const played = frets.flatMap((f, s) => (f >= 0 ? [s] : []));
-        expect(played).toHaveLength(3);
-        expect(played[0]).toBeGreaterThanOrEqual(2);
-        expect(played[2] - played[0]).toBe(2);
-        const fretted = played.map((s) => frets[s]);
+      for (const near of [3, 6, 9]) {
+        const { frets } = triadVoicingFor(symbol, near)!.voicing;
+        expect(frets.map((f, s) => (f >= 0 ? s : -1)).filter((s) => s >= 0)).toEqual([2, 3, 4]);
+        const fretted = [frets[2], frets[3], frets[4]];
+        expect(Math.min(...fretted)).toBeGreaterThanOrEqual(3);
+        expect(Math.max(...fretted)).toBeLessThanOrEqual(9);
         expect(Math.max(...fretted) - Math.min(...fretted)).toBeLessThanOrEqual(3);
         const { intervals } = triadOf(symbol.replace(/^[A-G]b?/, ""));
         const rootPc = roots.indexOf(symbol.match(/^[A-G]b?/)![0]);
         const tones = new Set(intervals.map((i) => mod12(rootPc + i)));
-        expect(new Set(played.map((s) => mod12(OPEN_PCS[s] + frets[s])))).toEqual(tones);
+        expect(new Set([2, 3, 4].map((s) => mod12(OPEN_PCS[s] + frets[s])))).toEqual(tones);
       }
     },
   );
