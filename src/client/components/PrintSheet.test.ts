@@ -210,3 +210,34 @@ describe("PrintSheet in a set", () => {
     expect(html).toContain("<h1>Amazing Grace (Short)</h1>");
   });
 });
+
+describe("PrintSheet electric charts", () => {
+  const electric = (capo = 0): Song => ({
+    ...song(["[Intro]", "Amazing grace"], [
+      { id: "a", line: 1, col: 0, chord: "G" },
+      { id: "b", line: 1, col: 14, chord: "Riff A" },
+    ]),
+    capo,
+    bpm: 72,
+    tone: "Clean",
+    riffs: [{ id: "r", name: "Riff A", tab: ["D|-2-4-|"], ref: "0:04" }],
+  });
+
+  it("prints the tone strip and each riff once, as the hands play it", () => {
+    const html = render(electric(2));
+    expect(html).toContain('<div class="print-tone">Tone: Delay dotted 8th 625 ms. Clean</div>');
+    expect(html.match(/class="print-riff"/g)).toHaveLength(1);
+    expect(html).toContain("Riff A · open position · ref 0:04");
+    expect(html).toContain("<pre>D|-0-2-|</pre>");
+  });
+
+  it("sets a cue apart from the chords in its row", () => {
+    expect(render(electric())).toContain('<span class="print-cue">Riff A</span>');
+  });
+
+  it("prints a plain chart with no tone strip or riff boxes", () => {
+    const html = render({ ...song(["Amazing grace"]), bpm: 72 });
+    expect(html).not.toContain("print-tone");
+    expect(html).not.toContain("print-riff");
+  });
+});

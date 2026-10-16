@@ -36,6 +36,7 @@
   .autoscroll,
   .chord-panel,
   .notes-panel,
+  .riff-panel,
   .version-bar,
   .version-hint,
   .arrangement-panel,
@@ -229,6 +230,49 @@
     font-weight: 700;
     letter-spacing: 0.05em;
     color: #374151;
+  }
+
+  /* Electric charts: the tone strip under the header, then each riff's tab
+     once, in boxes that span the page above the columns. Cues in the chord
+     rows print bold and underlined so they read apart from chords. */
+  .print-tone {
+    border: 1.5pt solid black;
+    border-radius: 3pt;
+    padding: 2pt 6pt;
+    margin-bottom: 6pt;
+    font: 600 9.5pt -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    break-inside: avoid;
+  }
+
+  .print-riffs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4pt 8pt;
+    margin-bottom: 8pt;
+  }
+
+  .print-riff {
+    border: 1.2pt solid black;
+    border-radius: 3pt;
+    padding: 3pt 5pt 4pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-riff-head {
+    font: 600 8.5pt -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 75mm;
+    margin-bottom: 2pt;
+  }
+
+  .print-riff pre {
+    font-size: 9.5pt;
+    line-height: 1.1;
+  }
+
+  .print-cue {
+    font-weight: 800;
+    text-decoration: underline;
   }
 
   /* Diagram row spans the page above the columns. */

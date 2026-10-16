@@ -3,6 +3,7 @@ import type { Arrangement, Chart, Song } from "../../shared/types";
 import type { Block } from "./arrangement";
 import { arrangeableSections, sectionSummaries, toBlocks } from "./arrangement";
 import { slugify } from "./storage";
+import { chordSymbols } from "./riffs";
 import { findArrangement } from "./versions";
 
 /** The song as written has no name of its own; the pickers call it this. */
@@ -19,6 +20,8 @@ function pickChart(from: Chart): Chart {
     notes: from.notes,
     sectionMarks: from.sectionMarks,
     outSections: from.outSections,
+    riffs: from.riffs,
+    tone: from.tone,
   };
 }
 
@@ -83,7 +86,7 @@ export function withoutArrangement(song: Song, id: string): Song {
 
 /** The key a chart's header shows: its own pick, else the key its chords suggest. */
 export function soundingKeyOf(chart: Song): string | null {
-  return chart.keyOverride ?? detectKey(chart.placements.map((p) => p.chord))?.name ?? null;
+  return chart.keyOverride ?? detectKey(chordSymbols(chart))?.name ?? null;
 }
 
 /** A section's chords moved from one chart's key into another's; unchanged when either key is unknown. */

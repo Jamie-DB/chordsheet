@@ -17,7 +17,7 @@ interface ChordPlacement {
   id: string;
   line: number;
   col: number;
-  chord: string;         // canonical SOUNDING symbol, e.g. "Bbmaj7", "G/B", "F#m7"
+  chord: string;         // canonical SOUNDING symbol, e.g. "Bbmaj7", "G/B", "F#m7", or a riff cue ("Riff A x2")
   hold?: boolean;        // full-measure hold, drawn as a diamond
 }
 
@@ -30,6 +30,16 @@ interface Chart {            // what one playable chart holds; the song as writt
   notes?: string;        // free text under the header
   sectionMarks?: SectionMark[];
   outSections?: SectionRef[];   // sections the player sits out, anchored like marks
+  riffs?: Riff[];        // named lead lines in ASCII tab, see Riffs and tone
+  tone?: string;         // electric tone in words; prints in a strip with the delay time
+}
+
+interface Riff {
+  id: string;
+  name: string;          // "Riff A", "Intro hook"; never a chord symbol
+  tab: string[];         // staff lines as pasted, frets SOUNDING (no capo)
+  hint?: string;         // where it plays and how
+  ref?: string;          // time in the reference recording, "0:42"
 }
 
 interface Song extends Chart {   // the top-level chart is "As written"
@@ -138,9 +148,18 @@ A finished song often gets played differently from the chart: a double chorus, a
 - Versions saved before this model were only an ordering over the song's sections. `upgradeVersions` (legacyVersions.ts) renders each one once, through the same logic print used, and stores the result as the version's own chart with the song's key, capo, tempo, and notes. It runs in `cleanSong` (the load-time migration and `npm run repair-songs`) and on import, and an upgraded song re-saves.
 - AI placement (Copy AI prompt, Paste AI reply) acts on the chart being edited.
 
+## Riffs and tone (src/engine/tab.ts, lib/riffs.ts, RiffPanel.tsx)
+
+Lead lines follow the guitar-book convention: each riff is written once in ASCII tab and named, and the chart cues it by name where it plays. The ELECTRIC panel holds a tone line, delay times from the chart's tempo (dotted eighth = 0.75 x 60000 / BPM, plus quarter and eighth), and the riffs, added one at a time or pasted several at once with "Name | hint | ref" heading lines.
+
+- A cue is an ordinary placement whose text names one of the chart's riffs, with an optional repeat ("Riff A x2"). So cues move with lines, sections, versions, and repeats exactly as chords do, and the engine passes them through untouched (transpose, capo display, and diagrams all leave non-chords alone). `chordSymbols` leaves cues out of key detection and capo suggestions. Riff names can never parse as chords, so a cue cannot be mistaken for one. Renaming a riff renames its cues, and deleting it removes them.
+- Tab follows the chord invariants. Frets are stored sounding, with no capo. Under a capo the panel, print, and copied text show the tab shifted down to the shapes the hands play, and tab typed under a capo is shifted up before it is stored. Transpose rewrites the frets. `shiftTab` groups numbers that share columns across strings and redraws a group as wide as its widest new number, so the staff stays aligned when 9 becomes 11. A riff that would fall below the nut moves up an octave, one that would pass fret 24 moves down one.
+- Print puts a tone strip under the header (only on a chart with a tone or riffs), then every riff in a box above the columns, then the chart with cues bold and underlined. Copy text adds the same tone line and the riffs at the end.
+- Per-section electric notes ("SWELLS", "OCTAVES") need no new field: a label note such as "[Verse 1 - Swells]" already becomes the section's tag.
+- `tools/riff-lab/` is the design lab the layout was picked in (variants for cue style, riff placement, part notes, and tone line).
+
 ## Later ideas (not scheduled)
 
-- Short tablature snippets for riffs.
 - Smarter placement re-anchoring when lyrics are edited after placement.
 - Voicing picker (cycle alternates per diagram); hand-editable fingerings.
 

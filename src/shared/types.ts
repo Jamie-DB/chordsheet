@@ -2,7 +2,11 @@ export interface ChordPlacement {
   id: string;
   line: number;
   col: number;
-  /** Canonical SOUNDING chord symbol, e.g. "Bbmaj7", "G/B", "F#m7". */
+  /**
+   * Canonical SOUNDING chord symbol, e.g. "Bbmaj7", "G/B", "F#m7". Or a riff
+   * cue naming one of the chart's riffs ("Riff A", "Riff A x2"), which never
+   * transposes and draws no diagram.
+   */
   chord: string;
   /** Full-measure hold, drawn as a diamond (Nashville convention). */
   hold?: boolean;
@@ -28,6 +32,27 @@ export interface Chart {
   sectionMarks?: SectionMark[];
   /** Sections the player sits out, anchored like marks. */
   outSections?: SectionRef[];
+  /** Named lead lines in ASCII tab, printed once and cued from the chord rows. */
+  riffs?: Riff[];
+  /** Electric tone in a few words; prints in a strip with the delay time. */
+  tone?: string;
+}
+
+/**
+ * A short lead line written once and cued by name. Frets are stored as
+ * sounding positions with no capo, like chords: under a capo the tab shows
+ * shifted down, and transpose rewrites it.
+ */
+export interface Riff {
+  id: string;
+  /** "Riff A", "Intro hook". Never a chord symbol, so a cue cannot read as one. */
+  name: string;
+  /** Lines as pasted: six staff lines, plus any text lines around them. */
+  tab: string[];
+  /** One line on how to play it: sections, feel, where the hand starts. */
+  hint?: string;
+  /** Where it is in the reference recording, e.g. "0:42". */
+  ref?: string;
 }
 
 /** The song as written is the top-level chart; versions hold the others. */

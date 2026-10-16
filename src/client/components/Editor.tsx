@@ -19,6 +19,7 @@ import {
   withoutMark,
 } from "../lib/sectionMarks";
 import { usePrintDiagrams } from "../lib/printPrefs";
+import { chordSymbols, cueText, isCue, parseCue } from "../lib/riffs";
 import { capoBadge, sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { lyricsFromPaste } from "../lib/storage";
@@ -30,6 +31,7 @@ import { ChordChartRow } from "./ChordChartRow";
 import { ImportReviewPanel, PasteReplyModal, type ReviewState } from "./ImportReview";
 import { LyricLine, type EditingModel } from "./LyricLine";
 import { PrintSheet } from "./PrintSheet";
+import { RiffPanel } from "./RiffPanel";
 import { SectionControls } from "./SectionControls";
 import { Toolbar } from "./Toolbar";
 import { VersionBar } from "./VersionBar";
@@ -58,7 +60,7 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
   const song = chartOf(stored, active?.id);
   /** Writes an edited chart back to its own place; no other chart changes. */
   const onChange = (next: Song) => saveStored(withChart(stored, active?.id, next));
-  const detectedKey = detectKey(song.placements.map((p) => p.chord))?.name ?? null;
+  const detectedKey = detectKey(chordSymbols(song))?.name ?? null;
   const soundingKey = song.keyOverride ?? detectedKey;
   const shaped = soundingKey ? shapedKey(soundingKey, song.capo) : "C";
 
@@ -181,11 +183,14 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
 
   /** Convert typed text (shape space under capo) to the stored sounding symbol. */
   function toSounding(typed: string): string {
+    const cue = parseCue(typed, song.riffs);
+    if (cue) return cueText(cue.riff.name, cue.times);
     if (song.capo === 0) return typed;
     return soundingFromShape(typed, song.capo, soundingKey ?? "C");
   }
 
   function toShape(sounding: string): string {
+    if (parseCue(sounding, song.riffs)) return sounding;
     return displayChord(sounding, song.capo, shaped);
   }
 
@@ -202,7 +207,7 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
               line: editing.line,
               col: editing.col,
               chord: toSounding(text),
-              ...(hold ? { hold: true } : {}),
+              ...(hold && !parseCue(text, song.riffs) ? { hold: true } : {}),
             },
           ],
         });
@@ -213,7 +218,9 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
       onChange({
         ...song,
         placements: song.placements.map((p) =>
-          p.id === editing.id ? { ...p, chord: toSounding(text), hold: hold || undefined } : p,
+          p.id === editing.id
+            ? { ...p, chord: toSounding(text), hold: (hold && !parseCue(text, song.riffs)) || undefined }
+            : p,
         ),
       });
     }
@@ -414,12 +421,14 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
         </details>
       )}
 
-      {song.placements.length > 0 && lyricsDraft === null && (
+      {chordSymbols(song).length > 0 && lyricsDraft === null && (
         <details className="chord-panel" open>
           <summary>Chords</summary>
           <ChordChartRow song={song} shapedKeyName={shaped} />
         </details>
       )}
+
+      {lyricsDraft === null && <RiffPanel song={song} onChange={onChange} />}
 
       {lyricsDraft === null && (
         <ArrangementPanel
@@ -482,7 +491,13 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
               chips={song.placements
                 .filter((p) => p.line === i)
                 .sort((a, b) => a.col - b.col)
-                .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
+                .map((p) => ({
+                  id: p.id,
+                  col: p.col,
+                  label: toShape(p.chord),
+                  hold: p.hold === true,
+                  cue: isCue(p, song.riffs),
+                }))}
               proposals={(review?.fresh ?? [])
                 .filter((p) => p.line === i)
                 .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
@@ -491,7 +506,8 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
               lineCount={song.lyrics.length}
               editing={editing}
               maxColForLine={maxColForLine}
-              validate={isChordSymbol}
+              validate={(t) => isChordSymbol(t) || parseCue(t, song.riffs) !== null}
+              cueNames={(song.riffs ?? []).map((r) => r.name)}
               onPlace={(line2, col) =>
                 setEditing({ line: line2, col, id: null, initial: "", initialHold: false })
               }

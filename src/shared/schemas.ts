@@ -16,6 +16,14 @@ export const sectionMarkSchema = z.object({
   color: z.enum(["red", "blue", "amber", "green"]).optional(),
 });
 
+export const riffSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  tab: z.array(z.string()),
+  hint: z.string().optional(),
+  ref: z.string().optional(),
+});
+
 const chartShape = {
   lyrics: z.array(z.string()),
   placements: z.array(chordPlacementSchema),
@@ -25,6 +33,8 @@ const chartShape = {
   notes: z.string().optional(),
   sectionMarks: z.array(sectionMarkSchema).optional(),
   outSections: z.array(sectionMarkSchema.pick({ section: true, occurrence: true })).optional(),
+  riffs: z.array(riffSchema).optional(),
+  tone: z.string().optional(),
 };
 
 export const arrangementSchema = z.object({

@@ -63,6 +63,8 @@ export function parseImport(jsonText: string, existing?: Song): ImportResult {
     notes: imported.notes,
     sectionMarks: imported.sectionMarks,
     outSections: imported.outSections,
+    riffs: imported.riffs,
+    tone: imported.tone,
     arrangements: imported.arrangements,
     createdAt: imported.createdAt,
     updatedAt: imported.updatedAt,

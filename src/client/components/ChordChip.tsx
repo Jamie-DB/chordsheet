@@ -23,6 +23,8 @@ interface Props {
   onOpenEdit(id: string): void;
   /** Hover diagrams only: no drag, no click to edit. */
   readOnly?: boolean;
+  /** A riff cue rather than a chord: riff color, no hover diagram. */
+  cue?: boolean;
 }
 
 interface HoverCard {
@@ -78,12 +80,12 @@ export function ChordChip(props: Props) {
     return { newLine, newCol, dy };
   }
 
-  const shape = card ? voicingFor(label) : null;
+  const shape = card && !props.cue ? voicingFor(label) : null;
 
   return (
     <span
       ref={el}
-      className={`chord-chip${hold ? " hold-diamond" : ""}${offset ? " dragging" : ""}${props.readOnly ? " read-only" : ""}`}
+      className={`chord-chip${props.cue ? " cue" : ""}${hold ? " hold-diamond" : ""}${offset ? " dragging" : ""}${props.readOnly ? " read-only" : ""}`}
       style={{
         left: `${col}ch`,
         transform: offset ? `translate(${offset.dx}px, ${offset.dy}px)` : undefined,
