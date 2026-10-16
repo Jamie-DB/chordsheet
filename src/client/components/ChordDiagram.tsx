@@ -5,21 +5,25 @@ interface Props {
   voicing: Voicing;
   /** Tooltip when the shape approximates the labeled chord. */
   title?: string;
+  /** 4 draws only the top four strings (D G B E), for triad shapes. */
+  strings?: 4 | 6;
 }
 
-const STRINGS = 6;
 const FRETS_SHOWN = 4;
 const LEFT = 10;
-const RIGHT = 50;
+const RIGHT_SIX = 50;
+/** Four strings sit narrower, so the fret number clears a dot on the top string. */
+const RIGHT_FOUR = 44;
 const TOP = 24;
 const BOTTOM = 68;
-const STRING_GAP = (RIGHT - LEFT) / (STRINGS - 1);
 const FRET_GAP = (BOTTOM - TOP) / FRETS_SHOWN;
 
 /** One chord grid: name above, X/O markers, dots on a 4-fret window. */
-export function ChordDiagram({ label, voicing, title }: Props) {
-  const { frets, baseFret } = voicing;
-  const xFor = (string: number) => LEFT + string * STRING_GAP;
+export function ChordDiagram({ label, voicing, title, strings = 6 }: Props) {
+  const { baseFret } = voicing;
+  const frets = voicing.frets.slice(6 - strings);
+  const RIGHT = strings === 4 ? RIGHT_FOUR : RIGHT_SIX;
+  const xFor = (string: number) => LEFT + string * ((RIGHT - LEFT) / (strings - 1));
 
   return (
     <svg
@@ -31,7 +35,7 @@ export function ChordDiagram({ label, voicing, title }: Props) {
       aria-label={`${label} chord diagram`}
     >
       {title && <title>{title}</title>}
-      <text x="30" y="9" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily="inherit" fill="currentColor">
+      <text x={(LEFT + RIGHT) / 2} y="9" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily="inherit" fill="currentColor">
         {label}
       </text>
 
@@ -54,12 +58,12 @@ export function ChordDiagram({ label, voicing, title }: Props) {
       {baseFret === 1 ? (
         <rect x={LEFT - 0.5} y={TOP - 2.5} width={RIGHT - LEFT + 1} height="2.5" fill="currentColor" />
       ) : (
-        <text x={RIGHT + 2.5} y={TOP + FRET_GAP * 0.65} fontSize="6.5" fontFamily="inherit" fill="currentColor">
+        <text x={RIGHT + (strings === 4 ? 5 : 2.5)} y={TOP + FRET_GAP * 0.65} fontSize="6.5" fontFamily="inherit" fill="currentColor">
           {baseFret}fr
         </text>
       )}
 
-      {Array.from({ length: STRINGS }, (_, i) => (
+      {Array.from({ length: strings }, (_, i) => (
         <line key={`s${i}`} x1={xFor(i)} y1={TOP} x2={xFor(i)} y2={BOTTOM} stroke="currentColor" strokeWidth="0.8" />
       ))}
       {Array.from({ length: FRETS_SHOWN + 1 }, (_, i) => (

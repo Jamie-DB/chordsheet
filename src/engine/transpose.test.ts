@@ -23,6 +23,17 @@ describe("transposeSymbol", () => {
     expect(transposeSymbol("F", 1, "flat")).toBe("Gb");
   });
 
+  it.each([
+    ["Bb", "sharp", "Bb"],
+    ["A#", "flat", "A#"],
+    ["B/C#", "flat", "B/C#"],
+    ["Gb/Db", "sharp", "Gb/Db"],
+    ["Em/C#", "flat", "Em/C#"],
+    ["BbM7", "sharp", "Bbmaj7"],
+  ] as const)("keeps %s as written at 0 semitones (prefer %s)", (symbol, prefer, expected) => {
+    expect(transposeSymbol(symbol, 0, prefer)).toBe(expected);
+  });
+
   it("handles negative distances", () => {
     expect(transposeSymbol("C", -1, "sharp")).toBe("B");
     expect(transposeSymbol("Eb", -3, "sharp")).toBe("C");

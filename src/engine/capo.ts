@@ -9,7 +9,7 @@ export function shapedKey(soundingKeyName: string, capo: number): string {
 
 /**
  * What the sheet shows for a stored (sounding) chord at a given capo.
- * Spelling follows the shaped key. At capo 0 this is just a respell.
+ * Spelling follows the shaped key. At capo 0 the chord shows as written.
  */
 export function displayChord(soundingSymbol: string, capo: number, shapedKeyName: string): string {
   const prefer = keyPrefersFlat(shapedKeyName) ? "flat" : "sharp";

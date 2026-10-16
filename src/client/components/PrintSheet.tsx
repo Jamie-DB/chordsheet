@@ -4,6 +4,7 @@ import { parseCue, tabAsShape } from "../lib/riffs";
 import type { Song } from "../../shared/types";
 import { markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
 import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
+import type { DiagramStyle } from "../lib/printPrefs";
 import { capoBadge, printFooterCss, printTagline, riffHeading, toneLine } from "../lib/sheetText";
 import { wrapLine } from "../lib/printWrap";
 import { ChordChartRow } from "./ChordChartRow";
@@ -17,6 +18,7 @@ interface Props {
   versionName?: string;
   /** The chord diagram row under the title. */
   showDiagrams?: boolean;
+  diagramStyle?: DiagramStyle;
   /**
    * One song among several in a set print: no footer of its own (the set
    * sets one), the version named beside the title, and a rule above it.
@@ -36,7 +38,7 @@ const WRAP_INDENT = 2;
  * once, with each pass's dynamics under the label. Blank lines are left
  * out (section gaps separate sections) and lines too wide for a column wrap.
  */
-export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName, showDiagrams = true, inSet = false }: Props) {
+export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName, showDiagrams = true, diagramStyle = "full", inSet = false }: Props) {
   const { song, passNotes } = collapseRepeats(written);
   const riffs = song.riffs ?? [];
   const tone = toneLine(song.tone, song.bpm, riffs.length > 0);
@@ -87,7 +89,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
       {tone && <div className="print-tone">{tone}</div>}
       {showDiagrams && (
         <div className="print-diagrams">
-          <ChordChartRow song={song} shapedKeyName={shapedKeyName} />
+          <ChordChartRow song={song} shapedKeyName={shapedKeyName} style={diagramStyle} />
         </div>
       )}
       {riffs.length > 0 && (

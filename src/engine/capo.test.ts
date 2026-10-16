@@ -18,9 +18,12 @@ describe("displayChord", () => {
     expect(displayChord("Bb", 3, shaped)).toBe("G");
     expect(displayChord("Cm", 3, shaped)).toBe("Am");
   });
-  it("is a pure respell at capo 0", () => {
+  it("shows each chord as written at capo 0", () => {
     expect(displayChord("Eb", 0, "Eb")).toBe("Eb");
-    expect(displayChord("D#", 0, "Eb")).toBe("Eb");
+    expect(displayChord("D#", 0, "Eb")).toBe("D#");
+    expect(displayChord("Bb/C", 0, "C")).toBe("Bb/C");
+    expect(displayChord("Db", 0, "C")).toBe("Db");
+    expect(displayChord("G/F#", 0, "C")).toBe("G/F#");
   });
   it("keeps slash chords coherent", () => {
     expect(displayChord("Eb/G", 3, "C")).toBe("C/E");
@@ -32,6 +35,10 @@ describe("soundingFromShape", () => {
     expect(soundingFromShape("C", 3, "Eb")).toBe("Eb");
     expect(soundingFromShape("Am", 3, "Eb")).toBe("Cm");
     expect(soundingFromShape("G", 2, "A")).toBe("A");
+  });
+  it("stores what was typed at capo 0", () => {
+    expect(soundingFromShape("Bb", 0, "C")).toBe("Bb");
+    expect(soundingFromShape("A#", 0, "Bb")).toBe("A#");
   });
   it("spells the stored chord for the sounding key", () => {
     expect(soundingFromShape("A", 1, "Bb")).toBe("Bb");
