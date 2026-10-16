@@ -1,9 +1,10 @@
 import { keyName, shapedKey } from "../../engine";
 import type { Song } from "../../shared/types";
-import type { DiagramStyle } from "../lib/printPrefs";
+import type { DiagramStyle, RiffPlacement } from "../lib/printPrefs";
 import { headerKeyLine } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
 import { DiagramStylePicker } from "./DiagramStylePicker";
+import { RiffPlacementPicker } from "./RiffPlacementPicker";
 
 interface Props {
   song: Song;
@@ -20,6 +21,9 @@ interface Props {
   /** Full chord shapes or top-four-string triads, on screen and in print. */
   diagramStyle?: DiagramStyle;
   onDiagramStyle?(style: DiagramStyle): void;
+  /** Shown only when the chart has riffs. */
+  riffPlacement?: RiffPlacement;
+  onRiffPlacement?(placement: RiffPlacement): void;
   onCopyText?(): void;
   copiedText?: boolean;
 }
@@ -100,6 +104,9 @@ export function Toolbar(props: Props) {
       )}
       {props.onDiagramStyle && (
         <DiagramStylePicker style={props.diagramStyle ?? "full"} onChange={props.onDiagramStyle} />
+      )}
+      {props.onRiffPlacement && (song.riffs ?? []).length > 0 && (
+        <RiffPlacementPicker placement={props.riffPlacement ?? "top"} onChange={props.onRiffPlacement} />
       )}
       {props.onPrint && (
         <button className="primary" onClick={props.onPrint}>

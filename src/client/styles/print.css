@@ -251,6 +251,12 @@
     margin-bottom: 8pt;
   }
 
+  /* After the chart, the riffs start below both columns. */
+  .print-riffs.at-end {
+    margin: 10pt 0 0;
+    break-before: avoid;
+  }
+
   .print-riff {
     border: 1.2pt solid black;
     border-radius: 3pt;

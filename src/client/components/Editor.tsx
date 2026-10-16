@@ -18,7 +18,7 @@ import {
   withMark,
   withoutMark,
 } from "../lib/sectionMarks";
-import { useDiagramStyle, usePrintDiagrams } from "../lib/printPrefs";
+import { useDiagramStyle, usePrintDiagrams, useRiffPlacement } from "../lib/printPrefs";
 import { chordSymbols, cueText, isCue, parseCue } from "../lib/riffs";
 import { capoBadge, sheetText } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
@@ -67,6 +67,7 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showDiagrams, setShowDiagrams] = usePrintDiagrams();
   const [diagramStyle, setDiagramStyle] = useDiagramStyle();
+  const [riffPlacement, setRiffPlacement] = useRiffPlacement();
 
   const [editing, setEditing] = useState<EditingModel | null>(null);
   const [lyricsDraft, setLyricsDraft] = useState<string | null>(null);
@@ -364,6 +365,8 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
         onToggleDiagrams={setShowDiagrams}
         diagramStyle={diagramStyle}
         onDiagramStyle={setDiagramStyle}
+        riffPlacement={riffPlacement}
+        onRiffPlacement={setRiffPlacement}
         onPrint={() => window.print()}
         copiedText={copiedText}
         onCopyText={() => {
@@ -384,6 +387,7 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
         versionName={active?.name}
         showDiagrams={showDiagrams}
         diagramStyle={diagramStyle}
+        riffPlacement={riffPlacement}
       />
 
       {showSuggestions && soundingKey && (

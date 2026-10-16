@@ -1,9 +1,10 @@
 import { useState } from "react";
 import type { Setlist, Song } from "../../shared/types";
-import { useDiagramStyle, usePrintDiagrams } from "../lib/printPrefs";
+import { useDiagramStyle, usePrintDiagrams, useRiffPlacement } from "../lib/printPrefs";
 import { capoBadge } from "../lib/sheetText";
 import { findArrangement } from "../lib/versions";
 import { DiagramStylePicker } from "./DiagramStylePicker";
+import { RiffPlacementPicker } from "./RiffPlacementPicker";
 import { SetPrint } from "./SetPrint";
 
 interface Props {
@@ -24,6 +25,7 @@ export function SetView({ set, songs, ...props }: Props) {
   const [adding, setAdding] = useState("");
   const [showDiagrams, setShowDiagrams] = usePrintDiagrams();
   const [diagramStyle, setDiagramStyle] = useDiagramStyle();
+  const [riffPlacement, setRiffPlacement] = useRiffPlacement();
   const byId = new Map(songs.map((s) => [s.id, s]));
   const inSet = new Set(set.entries.map((e) => e.songId));
   const addable = [...songs].sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
@@ -42,6 +44,7 @@ export function SetView({ set, songs, ...props }: Props) {
             Chord diagram page first
           </label>
           <DiagramStylePicker style={diagramStyle} onChange={setDiagramStyle} />
+          <RiffPlacementPicker placement={riffPlacement} onChange={setRiffPlacement} />
           <button className="primary" disabled={set.entries.length === 0} onClick={() => window.print()}>
             Print set
           </button>
@@ -144,7 +147,7 @@ export function SetView({ set, songs, ...props }: Props) {
           </div>
         </section>
       </div>
-      <SetPrint set={set} songs={songs} showDiagrams={showDiagrams} diagramStyle={diagramStyle} />
+      <SetPrint set={set} songs={songs} showDiagrams={showDiagrams} diagramStyle={diagramStyle} riffPlacement={riffPlacement} />
     </>
   );
 }

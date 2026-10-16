@@ -4,7 +4,7 @@ import { parseCue, tabAsShape } from "../lib/riffs";
 import type { Song } from "../../shared/types";
 import { markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
 import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
-import type { DiagramStyle } from "../lib/printPrefs";
+import type { DiagramStyle, RiffPlacement } from "../lib/printPrefs";
 import { capoBadge, printFooterCss, printTagline, riffHeading, toneLine } from "../lib/sheetText";
 import { wrapLine } from "../lib/printWrap";
 import { ChordChartRow } from "./ChordChartRow";
@@ -24,6 +24,8 @@ interface Props {
    * sets one), the version named beside the title, and a rule above it.
    */
   inSet?: boolean;
+  /** Where the riff boxes print: above the chart (default), after it, or not at all. */
+  riffPlacement?: RiffPlacement;
 }
 
 /** Widest row (chords or lyric) that fits a column; longer lines wrap. */
@@ -38,9 +40,22 @@ const WRAP_INDENT = 2;
  * once, with each pass's dynamics under the label. Blank lines are left
  * out (section gaps separate sections) and lines too wide for a column wrap.
  */
-export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName, showDiagrams = true, diagramStyle = "full", inSet = false }: Props) {
+export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName, showDiagrams = true, diagramStyle = "full", inSet = false, riffPlacement = "top" }: Props) {
   const { song, passNotes } = collapseRepeats(written);
   const riffs = song.riffs ?? [];
+  const riffBoxes = riffs.length > 0 && (
+    <div className={`print-riffs${riffPlacement === "end" ? " at-end" : ""}`}>
+      {riffs.map((riff) => {
+        const shown = tabAsShape(riff.tab, song.capo);
+        return (
+          <div className="print-riff" key={riff.id}>
+            <div className="print-riff-head">{riffHeading(riff, shown)}</div>
+            <pre>{shown.join("\n")}</pre>
+          </div>
+        );
+      })}
+    </div>
+  );
   const tone = toneLine(song.tone, song.bpm, riffs.length > 0);
   const marks = song.sectionMarks ?? [];
   const ranges = sectionRanges(song.lyrics);
@@ -92,19 +107,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
           <ChordChartRow song={song} shapedKeyName={shapedKeyName} style={diagramStyle} />
         </div>
       )}
-      {riffs.length > 0 && (
-        <div className="print-riffs">
-          {riffs.map((riff) => {
-            const shown = tabAsShape(riff.tab, song.capo);
-            return (
-              <div className="print-riff" key={riff.id}>
-                <div className="print-riff-head">{riffHeading(riff, shown)}</div>
-                <pre>{shown.join("\n")}</pre>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {riffPlacement === "top" && riffBoxes}
       <div className="print-body two-col">
         {(() => {
           type Label = {
@@ -220,6 +223,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
           return body;
         })()}
       </div>
+      {riffPlacement === "end" && riffBoxes}
     </div>
   );
 }

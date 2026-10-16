@@ -231,6 +231,18 @@ describe("PrintSheet electric charts", () => {
     expect(html).toContain("<pre>D|-0-2-|</pre>");
   });
 
+  it("prints the riffs after the chart, or not at all, when asked", () => {
+    const at = (riffPlacement: "top" | "end" | "off") =>
+      renderToStaticMarkup(
+        createElement(PrintSheet, { song: electric(), soundingKey: "G", shapedKeyName: "G", riffPlacement }),
+      );
+    expect(at("top").indexOf("print-riffs")).toBeLessThan(at("top").indexOf("print-body"));
+    expect(at("end")).toContain('class="print-riffs at-end"');
+    expect(at("end").indexOf("print-riffs")).toBeGreaterThan(at("end").indexOf("print-body"));
+    expect(at("off")).not.toContain("print-riff");
+    expect(at("off")).toContain('<span class="print-cue">Riff A</span>');
+  });
+
   it("sets a cue apart from the chords in its row", () => {
     expect(render(electric())).toContain('<span class="print-cue">Riff A</span>');
   });
