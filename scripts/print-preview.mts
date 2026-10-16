@@ -4,8 +4,10 @@
  * browser dialog. Uses the real print components and print.css, headless
  * Chrome for the PDF, and pdftoppm for the pages.
  *
- *   npm run print-preview -- <song.json> [--version <id>] [--no-diagrams]
- *   npm run print-preview -- --set <setId> --dir <library folder> [--no-diagrams]
+ *   npm run print-preview -- <song.json> [--version <id>] [--no-diagrams] [--triads]
+ *   npm run print-preview -- --set <setId> --dir <library folder> [--no-diagrams] [--triads]
+ *
+ * --triads draws top-four-string triad diagrams instead of full chords.
  *
  * Pages land in a fresh temp folder each run (or --out, cleared of old pages
  * first), never in the repo, so no page from an earlier run is listed and a
@@ -36,6 +38,7 @@ const option = (name: string) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 const showDiagrams = !flag("no-diagrams");
+const diagramStyle = flag("triads") ? "triads" : "full";
 const outOption = option("out");
 const out = outOption ? resolve(outOption) : mkdtempSync(join(tmpdir(), "chordsheet-print-preview-"));
 mkdirSync(out, { recursive: true });
@@ -57,7 +60,7 @@ if (setId !== undefined) {
   const { setlists } = JSON.parse(readFileSync(join(dir, "setlists.json"), "utf8")) as { setlists: unknown[] };
   const set = setlists.map((s) => setlistSchema.parse(s)).find((s) => s.id === setId);
   if (!set) throw new Error(`No set "${setId}" in ${dir}/setlists.json`);
-  body = renderToStaticMarkup(createElement(SetPrint, { set, songs, showDiagrams }));
+  body = renderToStaticMarkup(createElement(SetPrint, { set, songs, showDiagrams, diagramStyle }));
 } else {
   const file = args.find((a) => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--version" && args[args.indexOf(a) - 1] !== "--out");
   if (!file) throw new Error("Give a song.json, or --set <id> --dir <folder>");
@@ -77,6 +80,7 @@ if (setId !== undefined) {
       shapedKeyName: soundingKey ? shapedKey(soundingKey, chart.capo) : "C",
       versionName: version?.name,
       showDiagrams,
+      diagramStyle,
     }),
   );
 }

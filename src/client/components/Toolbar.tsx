@@ -1,7 +1,9 @@
 import { keyName, shapedKey } from "../../engine";
 import type { Song } from "../../shared/types";
+import type { DiagramStyle } from "../lib/printPrefs";
 import { headerKeyLine } from "../lib/sheetText";
 import { transposeSong } from "../lib/songOps";
+import { DiagramStylePicker } from "./DiagramStylePicker";
 
 interface Props {
   song: Song;
@@ -15,6 +17,9 @@ interface Props {
   /** Whether printing includes the chord diagram row; set with its toggle. */
   showDiagrams?: boolean;
   onToggleDiagrams?(show: boolean): void;
+  /** Full chord shapes or top-four-string triads, on screen and in print. */
+  diagramStyle?: DiagramStyle;
+  onDiagramStyle?(style: DiagramStyle): void;
   onCopyText?(): void;
   copiedText?: boolean;
 }
@@ -92,6 +97,9 @@ export function Toolbar(props: Props) {
           />
           Print chord diagrams
         </label>
+      )}
+      {props.onDiagramStyle && (
+        <DiagramStylePicker style={props.diagramStyle ?? "full"} onChange={props.onDiagramStyle} />
       )}
       {props.onPrint && (
         <button className="primary" onClick={props.onPrint}>
