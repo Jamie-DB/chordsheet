@@ -2,7 +2,7 @@ import { Fragment, type ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import { isCue, parseCue, tabAsShape } from "../lib/riffs";
 import type { Song } from "../../shared/types";
-import { capoChange, markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
+import { capoByLine, capoChange, markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
 import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
 import type { DiagramStyle, RiffPlacement } from "../lib/printPrefs";
 import { capoBadge, printFooterCss, printTagline, riffHeading, toneLine } from "../lib/sheetText";
@@ -66,18 +66,21 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
   const marks = song.sectionMarks ?? [];
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
+  // Each line's chords show for the capo it is played at, after any capo-move notes.
+  const lineCapo = capoByLine(song.lyrics, marks, song.capo);
+  const shapeAt = (line: number) => (chord: string) => displayChord(chord, lineCapo[line] ?? song.capo, shapedKeyName);
   // A label line's own text is replaced by the title, so only its chords wrap.
   const wrapped = song.lyrics.map((lyric, i) =>
     wrapLine(
       rangeByStart.has(i) ? "" : lyric,
       song.placements.filter((p) => p.line === i),
-      (chord) => displayChord(chord, song.capo, shapedKeyName),
+      shapeAt(i),
       COLUMN_CHARS,
       WRAP_INDENT,
     ),
   );
   const rowSegments = (placements: Song["placements"]) =>
-    buildChordRowSegments(placements, (chord) => displayChord(chord, song.capo, shapedKeyName));
+    buildChordRowSegments(placements, shapeAt(placements[0]?.line ?? 0));
   const hasChords = (i: number) => wrapped[i].some((r) => r.placements.length > 0);
 
   const { typeByLine, tacetLines } = sectionStyling(song.lyrics, marks);

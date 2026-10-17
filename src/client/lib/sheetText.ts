@@ -1,6 +1,7 @@
 import { buildChordRow, displayChord, positionLabel } from "../../engine";
 import type { Riff, Song } from "../../shared/types";
 import { delayTimes, tabAsShape } from "./riffs";
+import { capoByLine } from "./sectionMarks";
 
 /**
  * The header's key line, e.g. "Key: Eb, Capo 3". The key shown is always the
@@ -70,6 +71,7 @@ export function sheetText(
   if (tone) out.push(tone);
   out.push("");
 
+  const lineCapo = capoByLine(song.lyrics, song.sectionMarks ?? [], song.capo);
   song.lyrics.forEach((line, i) => {
     // Holds print as <C>, the ASCII form of the diamond; the opening bracket
     // borrows the column to the left so the chord letter stays put.
@@ -77,7 +79,7 @@ export function sheetText(
       .filter((p) => p.line === i)
       .map((p) => (p.hold ? { ...p, col: Math.max(0, p.col - 1) } : p));
     const row = buildChordRow(linePlacements, (chord, hold) => {
-      const display = displayChord(chord, song.capo, shapedKeyName);
+      const display = displayChord(chord, lineCapo[i], shapedKeyName);
       return hold ? `<${display}>` : display;
     });
     if (row.length > 0) out.push(row);

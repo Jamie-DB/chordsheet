@@ -8,6 +8,7 @@ import { parseImport } from "../lib/exchange";
 import { freshId } from "../lib/ids";
 import { chordsOnLine, deleteLine, editLine, insertLine, replaceLyrics } from "../lib/lineOps";
 import {
+  capoByLine,
   markFor,
   markName,
   sectionRanges,
@@ -183,17 +184,22 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
   const gridCols = Math.max(50, ...song.lyrics.map((l) => l.length));
   const maxColForLine = (_line: number) => gridCols;
 
-  /** Convert typed text (shape space under capo) to the stored sounding symbol. */
-  function toSounding(typed: string): string {
+  /** The capo each line is played at, after any "Capo +1" section notes. */
+  const lineCapo = capoByLine(song.lyrics, marks, song.capo);
+  const capoAt = (line?: number) => (line === undefined ? song.capo : lineCapo[line] ?? song.capo);
+
+  /** Convert typed text (shape space under the line's capo) to the stored sounding symbol. */
+  function toSounding(typed: string, line?: number): string {
     const cue = parseCue(typed, song.riffs);
     if (cue) return cueText(cue.riff.name, cue.times);
-    if (song.capo === 0) return typed;
-    return soundingFromShape(typed, song.capo, soundingKey ?? "C");
+    const capo = capoAt(line);
+    if (capo === 0) return typed;
+    return soundingFromShape(typed, capo, soundingKey ?? "C");
   }
 
-  function toShape(sounding: string): string {
+  function toShape(sounding: string, line?: number): string {
     if (parseCue(sounding, song.riffs)) return sounding;
-    return displayChord(sounding, song.capo, shaped);
+    return displayChord(sounding, capoAt(line), shaped);
   }
 
   function commitEdit(text: string, hold: boolean) {
@@ -208,7 +214,7 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
               id: freshId(),
               line: editing.line,
               col: editing.col,
-              chord: toSounding(text),
+              chord: toSounding(text, editing.line),
               ...(hold && !parseCue(text, song.riffs) ? { hold: true } : {}),
             },
           ],
@@ -221,7 +227,7 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
         ...song,
         placements: song.placements.map((p) =>
           p.id === editing.id
-            ? { ...p, chord: toSounding(text), hold: (hold && !parseCue(text, song.riffs)) || undefined }
+            ? { ...p, chord: toSounding(text, editing.line), hold: (hold && !parseCue(text, song.riffs)) || undefined }
             : p,
         ),
       });
@@ -458,7 +464,7 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
       {review && (
         <ImportReviewPanel
           review={review}
-          renderChord={toShape}
+          renderChord={(chord) => toShape(chord)}
           onAcceptAll={acceptAll}
           onAcceptLine={acceptLine}
           onDiscard={() => setReview(null)}
@@ -502,13 +508,13 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
                 .map((p) => ({
                   id: p.id,
                   col: p.col,
-                  label: toShape(p.chord),
+                  label: toShape(p.chord, p.line),
                   hold: p.hold === true,
                   cue: isCue(p, song.riffs),
                 }))}
               proposals={(review?.fresh ?? [])
                 .filter((p) => p.line === i)
-                .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord), hold: p.hold === true }))}
+                .map((p) => ({ id: p.id, col: p.col, label: toShape(p.chord, p.line), hold: p.hold === true }))}
               charWidth={tacetLines.has(i) ? charWidth * 0.67 : charWidth}
               pairHeight={pairHeight}
               lineCount={song.lyrics.length}
@@ -534,7 +540,7 @@ export function Editor({ song: stored, initialArrangementId, onBack, onChange: s
                     line: p.line,
                     col: p.col,
                     id,
-                    initial: toShape(p.chord),
+                    initial: toShape(p.chord, p.line),
                     initialHold: p.hold === true,
                   });
                 }

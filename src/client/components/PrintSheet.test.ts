@@ -262,7 +262,27 @@ describe("PrintSheet electric charts", () => {
 });
 
 describe("PrintSheet capo moves", () => {
-  it("prints a capo-move note as a red badge and leaves the chords as written", () => {
+  it("shows the chords after a capo move as shapes for the new capo", () => {
+    // In C at capo 5 (G shapes); the key change to Db is played at capo 6, still G shapes.
+    const s: Song = {
+      ...song(
+        ["[Chorus 3]", "Amazing grace", "[Chorus 4]", "Amazing grace"],
+        [
+          { id: "a", line: 1, col: 0, chord: "C" },
+          { id: "b", line: 3, col: 0, chord: "Db" },
+          { id: "c", line: 3, col: 6, chord: "Ab" },
+        ],
+      ),
+      capo: 5,
+      sectionMarks: [{ section: "[Chorus 4]", occurrence: 1, kind: "custom", text: "Capo +1" }],
+    };
+    const html = renderToStaticMarkup(createElement(PrintSheet, { song: s, soundingKey: "C", shapedKeyName: "G" }));
+    expect(html).toContain('<pre class="print-chords">G</pre>');
+    expect(html).toContain('<pre class="print-chords">G     D</pre>');
+    expect(html).not.toContain("G#");
+  });
+
+  it("prints a capo-move note as a red badge on the section label", () => {
     const s: Song = {
       ...song(["[Chorus 4]", "Amazing grace"], [{ id: "a", line: 1, col: 0, chord: "Db" }]),
       sectionMarks: [{ section: "[Chorus 4]", occurrence: 1, kind: "custom", text: "Capo +1" }],
@@ -270,6 +290,7 @@ describe("PrintSheet capo moves", () => {
     const html = renderToStaticMarkup(createElement(PrintSheet, { song: s, soundingKey: "Db", shapedKeyName: "Db" }));
     expect(html).toContain('<span class="print-capo-change">CAPO +1</span>');
     expect(html).not.toContain("print-mark-name");
-    expect(html).toContain('<pre class="print-chords">Db</pre>');
+    // Capo 0 plus 1: the Db is played as a C shape.
+    expect(html).toContain('<pre class="print-chords">C</pre>');
   });
 });

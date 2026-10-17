@@ -52,8 +52,35 @@ export function markName(mark: SectionMark): string {
  * prints big and red.
  */
 export function capoChange(note: string | null | undefined): string | null {
+  const move = capoMove(note);
+  return move === null ? null : `CAPO ${move > 0 ? "+" : "-"}${Math.abs(move)}`;
+}
+
+/** Frets a capo-move note moves the capo ("Capo +1" is 1), or null for any other note. */
+export function capoMove(note: string | null | undefined): number | null {
   const m = /^\s*capo\s*([+-])\s*(\d{1,2})\s*$/i.exec(note ?? "");
-  return m ? `CAPO ${m[1]}${m[2]}` : null;
+  if (!m) return null;
+  const frets = Number(m[2]);
+  return frets === 0 ? null : m[1] === "-" ? -frets : frets;
+}
+
+/**
+ * The capo each line is played at: the chart's capo, moved by every
+ * capo-move note on a section at or above the line. A move only changes
+ * which shapes the chords display as; stored chords stay sounding. Never
+ * below 0.
+ */
+export function capoByLine(lyrics: string[], marks: SectionMark[], capo: number): number[] {
+  const at = lyrics.map(() => capo);
+  let current = capo;
+  let next = 0;
+  for (const r of sectionRanges(lyrics)) {
+    const move = capoMove(markFor(marks, r.label, r.occurrence)?.text);
+    for (; next < r.start; next++) at[next] = current;
+    if (move !== null) current = Math.max(0, current + move);
+  }
+  for (; next < lyrics.length; next++) at[next] = current;
+  return at;
 }
 
 /** "[Verse 1]" to "Verse 1" for tags and sidebars. */

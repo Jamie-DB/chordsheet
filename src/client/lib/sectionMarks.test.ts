@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { SectionMark } from "../../shared/types";
 import {
+  capoByLine,
   capoChange,
+  capoMove,
   extractLabelNotes,
   inferKind,
   markFor,
@@ -223,5 +225,36 @@ describe("capoChange", () => {
 
   it.each(["Capo 3", "Soft", "capo +", "Move capo up", "", null, undefined])("reads %j as an ordinary note", (note) => {
     expect(capoChange(note)).toBeNull();
+  });
+});
+
+describe("capoMove and capoByLine", () => {
+  it.each([
+    ["Capo +1", 1],
+    ["capo -2", -2],
+    ["Capo +0", null],
+    ["Soft", null],
+  ])("reads %j as %s", (note, move) => {
+    expect(capoMove(note)).toBe(move);
+  });
+
+  const lyrics = ["[Verse 1]", "a", "", "[Chorus]", "b", "", "[Chorus]", "c"];
+  const move = (text: string, occurrence = 1) => ({ section: "[Chorus]", occurrence, kind: "custom" as const, text });
+
+  it("keeps the chart's capo when no section moves it", () => {
+    expect(capoByLine(lyrics, [], 5)).toEqual([5, 5, 5, 5, 5, 5, 5, 5]);
+  });
+
+  it("moves the capo from the marked section on, label line included", () => {
+    expect(capoByLine(lyrics, [move("Capo +1")], 5)).toEqual([5, 5, 5, 6, 6, 6, 6, 6]);
+  });
+
+  it("adds moves up and never goes below 0", () => {
+    expect(capoByLine(lyrics, [move("Capo +1"), move("Capo +2", 2)], 5)).toEqual([5, 5, 5, 6, 6, 6, 8, 8]);
+    expect(capoByLine(lyrics, [move("Capo -3")], 1)).toEqual([1, 1, 1, 0, 0, 0, 0, 0]);
+  });
+
+  it("ignores ordinary notes", () => {
+    expect(capoByLine(lyrics, [move("Sing out")], 2)).toEqual([2, 2, 2, 2, 2, 2, 2, 2]);
   });
 });
