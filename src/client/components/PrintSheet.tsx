@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
-import { parseCue, tabAsShape } from "../lib/riffs";
+import { isCue, parseCue, tabAsShape } from "../lib/riffs";
 import type { Song } from "../../shared/types";
 import { markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
 import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
@@ -41,7 +41,12 @@ const WRAP_INDENT = 2;
  * out (section gaps separate sections) and lines too wide for a column wrap.
  */
 export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName, showDiagrams = true, diagramStyle = "full", inSet = false, riffPlacement = "top" }: Props) {
-  const { song, passNotes } = collapseRepeats(written);
+  // With the riffs left off the page, their cues would point at nothing.
+  const printed =
+    riffPlacement === "off"
+      ? { ...written, placements: written.placements.filter((p) => !isCue(p, written.riffs)) }
+      : written;
+  const { song, passNotes } = collapseRepeats(printed);
   const riffs = song.riffs ?? [];
   const riffBoxes = riffs.length > 0 && (
     <div className={`print-riffs${riffPlacement === "end" ? " at-end" : ""}`}>
@@ -56,7 +61,8 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
       })}
     </div>
   );
-  const tone = toneLine(song.tone, song.bpm, riffs.length > 0);
+  // An electric chart with riffs left off prints its tone strip only when it has a tone written.
+  const tone = toneLine(song.tone, song.bpm, riffs.length > 0 && riffPlacement !== "off");
   const marks = song.sectionMarks ?? [];
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));

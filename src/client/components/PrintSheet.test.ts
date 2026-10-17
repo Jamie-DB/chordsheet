@@ -240,7 +240,14 @@ describe("PrintSheet electric charts", () => {
     expect(at("end")).toContain('class="print-riffs at-end"');
     expect(at("end").indexOf("print-riffs")).toBeGreaterThan(at("end").indexOf("print-body"));
     expect(at("off")).not.toContain("print-riff");
-    expect(at("off")).toContain('<span class="print-cue">Riff A</span>');
+    expect(at("off")).not.toContain("Riff A");
+    expect(at("off")).toMatch(/<pre class="print-chords">G<\/pre>/);
+    // The tone text still prints; a strip that only held the delay time goes with the riffs.
+    expect(at("off")).toContain('<div class="print-tone">Tone: Delay dotted 8th 625 ms. Clean</div>');
+    const noTone = renderToStaticMarkup(
+      createElement(PrintSheet, { song: { ...electric(), tone: undefined }, soundingKey: "G", shapedKeyName: "G", riffPlacement: "off" }),
+    );
+    expect(noTone).not.toContain("print-tone");
   });
 
   it("sets a cue apart from the chords in its row", () => {
