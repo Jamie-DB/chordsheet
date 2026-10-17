@@ -356,6 +356,20 @@
     -webkit-print-color-adjust: exact;
   }
 
+  /* A capo move on a section label, as loud as the header's capo badge, in red. */
+  .print-capo-change {
+    display: inline-block;
+    padding: 0 6pt;
+    font: 900 15pt/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0.06em;
+    color: #b91c1c;
+    background: #fee2e2;
+    border: 2.5pt solid #dc2626;
+    border-radius: 4pt;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   .print-pair {
     break-inside: avoid;
     page-break-inside: avoid;

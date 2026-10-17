@@ -513,6 +513,19 @@ textarea {
   max-width: 100%;
 }
 
+/* A capo move: the chords stay as written, so this badge is the only cue. */
+.section-tag .tag-capo {
+  display: block;
+  margin-top: 0.15rem;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: white;
+  background: #dc2626;
+  border-radius: 3px;
+}
+
 .section-tag .tag-note {
   display: block;
   font-size: 0.6rem;
@@ -528,6 +541,19 @@ textarea {
 }
 
 /* Dynamics notes stay neutral; the pill color is the section type. */
+/* A capo move: the chords stay as written, so this badge is the only cue. */
+.section-tag .tag-capo {
+  display: block;
+  margin-top: 0.15rem;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: white;
+  background: #dc2626;
+  border-radius: 3px;
+}
+
 .section-tag .tag-note {
   color: var(--muted);
 }

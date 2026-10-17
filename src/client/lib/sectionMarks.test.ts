@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { SectionMark } from "../../shared/types";
 import {
+  capoChange,
   extractLabelNotes,
   inferKind,
   markFor,
@@ -207,5 +208,20 @@ describe("outStyling", () => {
   it("is empty with no outs", () => {
     const out = outStyling(lyrics, [], new Set());
     expect(out.lines.size + out.starts.size + out.ends.size).toBe(0);
+  });
+});
+
+describe("capoChange", () => {
+  it.each([
+    ["Capo +1", "CAPO +1"],
+    ["capo -2", "CAPO -2"],
+    ["  CAPO+3 ", "CAPO +3"],
+    ["Capo + 10", "CAPO +10"],
+  ])("reads %j as a capo move", (note, badge) => {
+    expect(capoChange(note)).toBe(badge);
+  });
+
+  it.each(["Capo 3", "Soft", "capo +", "Move capo up", "", null, undefined])("reads %j as an ordinary note", (note) => {
+    expect(capoChange(note)).toBeNull();
   });
 });

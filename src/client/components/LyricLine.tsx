@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode, PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import type { MarkKind, SectionMark } from "../../shared/types";
 import { xToCol } from "../lib/grid";
-import type { SectionType } from "../lib/sectionMarks";
+import { capoChange, type SectionType } from "../lib/sectionMarks";
 import { ChordChip } from "./ChordChip";
 import { ChordEditPopover } from "./ChordEditPopover";
 import { SectionMarkPicker } from "./SectionMarkPicker";
@@ -233,7 +233,7 @@ export function LyricLine(props: Props) {
             {sectionUi.title}
             {props.stepUi.hold && <span className="tag-hold">&#9671;</span>}
             {sectionUi.outStart && <span className="tag-out">OUT</span>}
-            {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
+            {sectionUi.name && <TagNote name={sectionUi.name} />}
           </button>
         </div>
       ) : sectionUi && readOnly ? (
@@ -241,7 +241,7 @@ export function LyricLine(props: Props) {
           <span className={`section-tag read-only pill-${sectionUi.type}`}>
             {sectionUi.title}
             {sectionUi.outStart && <span className="tag-out">OUT</span>}
-            {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
+            {sectionUi.name && <TagNote name={sectionUi.name} />}
           </span>
         </div>
       ) : sectionUi ? (
@@ -259,7 +259,7 @@ export function LyricLine(props: Props) {
           >
             {sectionUi.title}
             {sectionUi.outStart && <span className="tag-out">OUT</span>}
-            {sectionUi.name && <span className="tag-note">{sectionUi.name}</span>}
+            {sectionUi.name && <TagNote name={sectionUi.name} />}
           </button>
         </div>
       ) : readOnly ? (
@@ -279,4 +279,10 @@ export function LyricLine(props: Props) {
       )}
     </div>
   );
+}
+
+/** The note under a section title; a capo move shows as a red badge. */
+function TagNote({ name }: { name: string }) {
+  const capo = capoChange(name);
+  return capo ? <span className="tag-capo">{capo}</span> : <span className="tag-note">{name}</span>;
 }

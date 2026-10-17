@@ -45,6 +45,17 @@ export function markName(mark: SectionMark): string {
   return mark.kind === "custom" ? "Custom" : PRESETS[mark.kind].name;
 }
 
+/**
+ * A section note that tells the player to move the capo ("Capo +1",
+ * "capo -2"), as the badge text "CAPO +1"; null for any other note. The
+ * chords stay as written, so the badge is the only sign of the move and
+ * prints big and red.
+ */
+export function capoChange(note: string | null | undefined): string | null {
+  const m = /^\s*capo\s*([+-])\s*(\d{1,2})\s*$/i.exec(note ?? "");
+  return m ? `CAPO ${m[1]}${m[2]}` : null;
+}
+
 /** "[Verse 1]" to "Verse 1" for tags and sidebars. */
 export function stripBrackets(label: string): string {
   return label.trim().replace(/^\[|\]$/g, "");

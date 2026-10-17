@@ -2,7 +2,7 @@ import { Fragment, type ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
 import { isCue, parseCue, tabAsShape } from "../lib/riffs";
 import type { Song } from "../../shared/types";
-import { markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
+import { capoChange, markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
 import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
 import type { DiagramStyle, RiffPlacement } from "../lib/printPrefs";
 import { capoBadge, printFooterCss, printTagline, riffHeading, toneLine } from "../lib/sheetText";
@@ -164,10 +164,13 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
                 {repeat > 1 && " "}
                 {repeatBadge(repeat)}
                 {outStamp(line)}
-                {mark && (
-                  <span className="print-mark-name">
-                    {"  " + markName(mark).toUpperCase()}
-                  </span>
+                {mark && capoChange(markName(mark)) ? (
+                  <>
+                    {"  "}
+                    <span className="print-capo-change">{capoChange(markName(mark))}</span>
+                  </>
+                ) : (
+                  mark && <span className="print-mark-name">{"  " + markName(mark).toUpperCase()}</span>
                 )}
                 {passes?.map(passLine)}
               </pre>

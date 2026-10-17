@@ -260,3 +260,16 @@ describe("PrintSheet electric charts", () => {
     expect(html).not.toContain("print-riff");
   });
 });
+
+describe("PrintSheet capo moves", () => {
+  it("prints a capo-move note as a red badge and leaves the chords as written", () => {
+    const s: Song = {
+      ...song(["[Chorus 4]", "Amazing grace"], [{ id: "a", line: 1, col: 0, chord: "Db" }]),
+      sectionMarks: [{ section: "[Chorus 4]", occurrence: 1, kind: "custom", text: "Capo +1" }],
+    };
+    const html = renderToStaticMarkup(createElement(PrintSheet, { song: s, soundingKey: "Db", shapedKeyName: "Db" }));
+    expect(html).toContain('<span class="print-capo-change">CAPO +1</span>');
+    expect(html).not.toContain("print-mark-name");
+    expect(html).toContain('<pre class="print-chords">Db</pre>');
+  });
+});
