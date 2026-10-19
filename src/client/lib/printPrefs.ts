@@ -56,3 +56,35 @@ export function useDiagramStyle(): [DiagramStyle, (style: DiagramStyle) => void]
     },
   ];
 }
+
+const RIFFS_KEY = "chordsheet.printRiffs.v1";
+
+/** Where a chart's riff tab prints: above the chart, after it, or not at all. */
+export type RiffPlacement = "top" | "end" | "off";
+
+/**
+ * Where printed sheets put the riff boxes. Top keeps them in one place to
+ * look; after the chart keeps a long riff list from pushing the chart off
+ * the first page. One choice for every song and set; top by default.
+ */
+export function useRiffPlacement(): [RiffPlacement, (placement: RiffPlacement) => void] {
+  const [placement, setPlacement] = useState<RiffPlacement>(() => {
+    try {
+      const saved = localStorage.getItem(RIFFS_KEY);
+      return saved === "end" || saved === "off" ? saved : "top";
+    } catch {
+      return "top";
+    }
+  });
+  return [
+    placement,
+    (next) => {
+      setPlacement(next);
+      try {
+        localStorage.setItem(RIFFS_KEY, next);
+      } catch (err) {
+        console.warn("chordsheet: could not save riff placement", err);
+      }
+    },
+  ];
+}

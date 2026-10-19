@@ -210,3 +210,87 @@ describe("PrintSheet in a set", () => {
     expect(html).toContain("<h1>Amazing Grace (Short)</h1>");
   });
 });
+
+describe("PrintSheet electric charts", () => {
+  const electric = (capo = 0): Song => ({
+    ...song(["[Intro]", "Amazing grace"], [
+      { id: "a", line: 1, col: 0, chord: "G" },
+      { id: "b", line: 1, col: 14, chord: "Riff A" },
+    ]),
+    capo,
+    bpm: 72,
+    tone: "Clean",
+    riffs: [{ id: "r", name: "Riff A", tab: ["D|-2-4-|"], ref: "0:04" }],
+  });
+
+  it("prints the tone strip and each riff once, as the hands play it", () => {
+    const html = render(electric(2));
+    expect(html).toContain('<div class="print-tone">Tone: Delay dotted 8th 625 ms. Clean</div>');
+    expect(html.match(/class="print-riff"/g)).toHaveLength(1);
+    expect(html).toContain("Riff A · open position · ref 0:04");
+    expect(html).toContain("<pre>D|-0-2-|</pre>");
+  });
+
+  it("prints the riffs after the chart, or not at all, when asked", () => {
+    const at = (riffPlacement: "top" | "end" | "off") =>
+      renderToStaticMarkup(
+        createElement(PrintSheet, { song: electric(), soundingKey: "G", shapedKeyName: "G", riffPlacement }),
+      );
+    expect(at("top").indexOf("print-riffs")).toBeLessThan(at("top").indexOf("print-body"));
+    expect(at("end")).toContain('class="print-riffs at-end"');
+    expect(at("end").indexOf("print-riffs")).toBeGreaterThan(at("end").indexOf("print-body"));
+    expect(at("off")).not.toContain("print-riff");
+    expect(at("off")).not.toContain("Riff A");
+    expect(at("off")).toMatch(/<pre class="print-chords">G<\/pre>/);
+    // The tone text still prints; a strip that only held the delay time goes with the riffs.
+    expect(at("off")).toContain('<div class="print-tone">Tone: Delay dotted 8th 625 ms. Clean</div>');
+    const noTone = renderToStaticMarkup(
+      createElement(PrintSheet, { song: { ...electric(), tone: undefined }, soundingKey: "G", shapedKeyName: "G", riffPlacement: "off" }),
+    );
+    expect(noTone).not.toContain("print-tone");
+  });
+
+  it("sets a cue apart from the chords in its row", () => {
+    expect(render(electric())).toContain('<span class="print-cue">Riff A</span>');
+  });
+
+  it("prints a plain chart with no tone strip or riff boxes", () => {
+    const html = render({ ...song(["Amazing grace"]), bpm: 72 });
+    expect(html).not.toContain("print-tone");
+    expect(html).not.toContain("print-riff");
+  });
+});
+
+describe("PrintSheet capo moves", () => {
+  it("shows the chords after a capo move as shapes for the new capo", () => {
+    // In C at capo 5 (G shapes); the key change to Db is played at capo 6, still G shapes.
+    const s: Song = {
+      ...song(
+        ["[Chorus 3]", "Amazing grace", "[Chorus 4]", "Amazing grace"],
+        [
+          { id: "a", line: 1, col: 0, chord: "C" },
+          { id: "b", line: 3, col: 0, chord: "Db" },
+          { id: "c", line: 3, col: 6, chord: "Ab" },
+        ],
+      ),
+      capo: 5,
+      sectionMarks: [{ section: "[Chorus 4]", occurrence: 1, kind: "custom", text: "Capo +1" }],
+    };
+    const html = renderToStaticMarkup(createElement(PrintSheet, { song: s, soundingKey: "C", shapedKeyName: "G" }));
+    expect(html).toContain('<pre class="print-chords">G</pre>');
+    expect(html).toContain('<pre class="print-chords">G     D</pre>');
+    expect(html).not.toContain("G#");
+  });
+
+  it("prints a capo-move note as a red badge on the section label", () => {
+    const s: Song = {
+      ...song(["[Chorus 4]", "Amazing grace"], [{ id: "a", line: 1, col: 0, chord: "Db" }]),
+      sectionMarks: [{ section: "[Chorus 4]", occurrence: 1, kind: "custom", text: "Capo +1" }],
+    };
+    const html = renderToStaticMarkup(createElement(PrintSheet, { song: s, soundingKey: "Db", shapedKeyName: "Db" }));
+    expect(html).toContain('<span class="print-capo-change">CAPO +1</span>');
+    expect(html).not.toContain("print-mark-name");
+    // Capo 0 plus 1: the Db is played as a C shape.
+    expect(html).toContain('<pre class="print-chords">C</pre>');
+  });
+});

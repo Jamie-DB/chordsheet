@@ -1,10 +1,11 @@
 import { Fragment, type ReactNode } from "react";
 import { buildChordRowSegments, displayChord } from "../../engine";
+import { isCue, parseCue, tabAsShape } from "../lib/riffs";
 import type { Song } from "../../shared/types";
-import { markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
+import { capoByLine, capoChange, markFor, markName, outStyling, sectionRanges, sectionStyling } from "../lib/sectionMarks";
 import { collapseRepeats, parseLabel, passBadge, type PassNote } from "../lib/printRepeats";
-import type { DiagramStyle } from "../lib/printPrefs";
-import { capoBadge, printFooterCss, printTagline } from "../lib/sheetText";
+import type { DiagramStyle, RiffPlacement } from "../lib/printPrefs";
+import { capoBadge, printFooterCss, printTagline, riffHeading, toneLine } from "../lib/sheetText";
 import { wrapLine } from "../lib/printWrap";
 import { ChordChartRow } from "./ChordChartRow";
 import { DiamondOutline } from "./DiamondOutline";
@@ -23,6 +24,8 @@ interface Props {
    * sets one), the version named beside the title, and a rule above it.
    */
   inSet?: boolean;
+  /** Where the riff boxes print: above the chart (default), after it, or not at all. */
+  riffPlacement?: RiffPlacement;
 }
 
 /** Widest row (chords or lyric) that fits a column; longer lines wrap. */
@@ -37,23 +40,47 @@ const WRAP_INDENT = 2;
  * once, with each pass's dynamics under the label. Blank lines are left
  * out (section gaps separate sections) and lines too wide for a column wrap.
  */
-export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName, showDiagrams = true, diagramStyle = "full", inSet = false }: Props) {
-  const { song, passNotes } = collapseRepeats(written);
+export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionName, showDiagrams = true, diagramStyle = "full", inSet = false, riffPlacement = "top" }: Props) {
+  // With the riffs left off the page, their cues would point at nothing.
+  const printed =
+    riffPlacement === "off"
+      ? { ...written, placements: written.placements.filter((p) => !isCue(p, written.riffs)) }
+      : written;
+  const { song, passNotes } = collapseRepeats(printed);
+  const riffs = song.riffs ?? [];
+  const riffBoxes = riffs.length > 0 && (
+    <div className={`print-riffs${riffPlacement === "end" ? " at-end" : ""}`}>
+      {riffs.map((riff) => {
+        const shown = tabAsShape(riff.tab, song.capo);
+        return (
+          <div className="print-riff" key={riff.id}>
+            <div className="print-riff-head">{riffHeading(riff, shown)}</div>
+            <pre>{shown.join("\n")}</pre>
+          </div>
+        );
+      })}
+    </div>
+  );
+  // An electric chart with riffs left off prints its tone strip only when it has a tone written.
+  const tone = toneLine(song.tone, song.bpm, riffs.length > 0 && riffPlacement !== "off");
   const marks = song.sectionMarks ?? [];
   const ranges = sectionRanges(song.lyrics);
   const rangeByStart = new Map(ranges.map((r) => [r.start, r]));
+  // Each line's chords show for the capo it is played at, after any capo-move notes.
+  const lineCapo = capoByLine(song.lyrics, marks, song.capo);
+  const shapeAt = (line: number) => (chord: string) => displayChord(chord, lineCapo[line] ?? song.capo, shapedKeyName);
   // A label line's own text is replaced by the title, so only its chords wrap.
   const wrapped = song.lyrics.map((lyric, i) =>
     wrapLine(
       rangeByStart.has(i) ? "" : lyric,
       song.placements.filter((p) => p.line === i),
-      (chord) => displayChord(chord, song.capo, shapedKeyName),
+      shapeAt(i),
       COLUMN_CHARS,
       WRAP_INDENT,
     ),
   );
   const rowSegments = (placements: Song["placements"]) =>
-    buildChordRowSegments(placements, (chord) => displayChord(chord, song.capo, shapedKeyName));
+    buildChordRowSegments(placements, shapeAt(placements[0]?.line ?? 0));
   const hasChords = (i: number) => wrapped[i].some((r) => r.placements.length > 0);
 
   const { typeByLine, tacetLines } = sectionStyling(song.lyrics, marks);
@@ -83,11 +110,13 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
         {capoBadge(song.capo) && <span className="print-capo">{capoBadge(song.capo)}</span>}
         <span className="print-key">{printTagline(soundingKey, song.bpm)}</span>
       </div>
+      {tone && <div className="print-tone">{tone}</div>}
       {showDiagrams && (
         <div className="print-diagrams">
           <ChordChartRow song={song} shapedKeyName={shapedKeyName} style={diagramStyle} />
         </div>
       )}
+      {riffPlacement === "top" && riffBoxes}
       <div className="print-body two-col">
         {(() => {
           type Label = {
@@ -138,10 +167,13 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
                 {repeat > 1 && " "}
                 {repeatBadge(repeat)}
                 {outStamp(line)}
-                {mark && (
-                  <span className="print-mark-name">
-                    {"  " + markName(mark).toUpperCase()}
-                  </span>
+                {mark && capoChange(markName(mark)) ? (
+                  <>
+                    {"  "}
+                    <span className="print-capo-change">{capoChange(markName(mark))}</span>
+                  </>
+                ) : (
+                  mark && <span className="print-mark-name">{"  " + markName(mark).toUpperCase()}</span>
                 )}
                 {passes?.map(passLine)}
               </pre>
@@ -162,6 +194,10 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
                             <span key={j} className="hold-diamond">
                               {s.text}
                               <DiamondOutline />
+                            </span>
+                          ) : parseCue(s.text, song.riffs) ? (
+                            <span key={j} className="print-cue">
+                              {s.text}
                             </span>
                           ) : (
                             s.text
@@ -199,6 +235,7 @@ export function PrintSheet({ song: written, soundingKey, shapedKeyName, versionN
           return body;
         })()}
       </div>
+      {riffPlacement === "end" && riffBoxes}
     </div>
   );
 }

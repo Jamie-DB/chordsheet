@@ -513,6 +513,19 @@ textarea {
   max-width: 100%;
 }
 
+/* A capo move: the chords stay as written, so this badge is the only cue. */
+.section-tag .tag-capo {
+  display: block;
+  margin-top: 0.15rem;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: white;
+  background: #dc2626;
+  border-radius: 3px;
+}
+
 .section-tag .tag-note {
   display: block;
   font-size: 0.6rem;
@@ -528,6 +541,19 @@ textarea {
 }
 
 /* Dynamics notes stay neutral; the pill color is the section type. */
+/* A capo move: the chords stay as written, so this badge is the only cue. */
+.section-tag .tag-capo {
+  display: block;
+  margin-top: 0.15rem;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: white;
+  background: #dc2626;
+  border-radius: 3px;
+}
+
 .section-tag .tag-note {
   color: var(--muted);
 }
@@ -775,6 +801,147 @@ button.mini {
 
 .notes-panel textarea {
   margin-top: 0.5rem;
+}
+
+/* Electric panel: tone, delay times, and riffs in tab */
+
+.riff-panel {
+  --riff: #b4530b;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 10px;
+  padding: 0.5rem 1rem 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.riff-panel summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.riff-panel summary .muted {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+.tone-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+}
+
+.tone-row input {
+  flex: 1 1 18rem;
+}
+
+.delay-pill {
+  border: 1px solid #b45309;
+  color: #7c2d12;
+  background: #fff7ed;
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.riff-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.5rem 0;
+}
+
+.riff-card {
+  border: 1px solid #f0c9a5;
+  background: #fffaf5;
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem 0.45rem;
+  font-size: 0.8rem;
+}
+
+.riff-card strong {
+  color: var(--riff);
+}
+
+.riff-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.25rem;
+}
+
+.riff-actions {
+  margin-left: auto;
+  padding-left: 0.75rem;
+}
+
+.riff-card pre {
+  margin: 0.3rem 0 0.15rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.15;
+}
+
+.riff-hint {
+  color: var(--muted);
+  max-width: 26rem;
+}
+
+.riff-form {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+}
+
+.riff-form textarea {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.riff-form p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.riff-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.chord-chip.cue {
+  color: #b4530b;
+  outline: 1.5px solid #b4530b;
+  background: #fff7ed;
+}
+
+.chord-chip.cue:hover {
+  background: #ffedd5;
+}
+
+.cue-picks {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin-left: 0.4rem;
+  padding-left: 0.4rem;
+  border-left: 1px solid var(--border);
+}
+
+.chord-popover button.cue {
+  color: #b4530b;
+  border-color: #f0c9a5;
 }
 
 /* Chord diagram panel */

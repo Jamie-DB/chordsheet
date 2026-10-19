@@ -27,4 +27,5 @@ export {
 } from "./capo";
 export { buildChordRow, buildChordRowSegments, resolveAnchor, type ChordRowSegment } from "./layout";
 export { voicingFor, type ShapeResult, type Voicing } from "./shapes";
+export { isStaffLine, lowestFret, positionLabel, shiftTab } from "./tab";
 export { triadHome, triadOf, triadVoicingFor, type Triad } from "./triads";

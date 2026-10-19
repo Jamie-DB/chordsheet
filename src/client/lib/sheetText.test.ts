@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Song } from "../../shared/types";
-import { capoBadge, headerKeyLine, printFooterCss, printTagline, sheetText } from "./sheetText";
+import { capoBadge, headerKeyLine, printFooterCss, printTagline, riffHeading, sheetText, toneLine } from "./sheetText";
 import { transposeSong } from "./songOps";
 
 const song: Song = {
@@ -118,5 +118,43 @@ describe("transposeSong", () => {
   it("spells for the destination key", () => {
     const down = transposeSong(song, "G", -2);
     expect(down.placements.map((p) => p.chord)).toEqual(["F", "Bb"]);
+  });
+});
+
+describe("electric charts", () => {
+  const riff = { id: "r", name: "Riff A", tab: ["D|-2-4-6-|"], hint: "Into the verse", ref: "0:04" };
+  const electric: Song = {
+    ...song,
+    tone: "Clean, plate verb",
+    bpm: 72,
+    riffs: [riff],
+    placements: [...song.placements, { id: "3", line: 1, col: 14, chord: "Riff A x2" }],
+  };
+
+  it("leaves the tone line off a chart with no tone and no riffs", () => {
+    expect(toneLine(undefined, 72, false)).toBe("");
+  });
+
+  it("gives the delay time from the tempo, then the tone", () => {
+    expect(toneLine("Clean, plate verb", 72, false)).toBe("Tone: Delay dotted 8th 625 ms. Clean, plate verb");
+    expect(toneLine(undefined, 72, true)).toBe("Tone: Delay dotted 8th 625 ms");
+    expect(toneLine("Clean", undefined, false)).toBe("Tone: Clean");
+  });
+
+  it("heads a riff with its position, reference, and hint", () => {
+    expect(riffHeading(riff, riff.tab)).toBe("Riff A · fret 2 · ref 0:04 · Into the verse");
+  });
+
+  it("copies the tone, cues, and riffs as the hands play them under the capo", () => {
+    const text = sheetText({ ...electric, capo: 2 }, "A", "G");
+    expect(text).toContain("Tone: Delay dotted 8th 625 ms. Clean, plate verb");
+    expect(text).toContain("              Riff A x2\nno chords here");
+    expect(text).toContain("Riff A · open position · ref 0:04 · Into the verse\nD|-0-2-4-|");
+  });
+
+  it("moves riff frets with a transpose and leaves cues alone", () => {
+    const up = transposeSong(electric, "G", 2);
+    expect(up.riffs?.[0].tab).toEqual(["D|-4-6-8-|"]);
+    expect(up.placements.map((p) => p.chord)).toEqual(["A", "D", "Riff A x2"]);
   });
 });

@@ -7,11 +7,13 @@ interface Props {
   isNew: boolean;
   /** Validates a typed shape symbol; empty text is always allowed (delete/cancel). */
   validate(text: string): boolean;
+  /** Riff names; each is a button that commits a cue for that riff here. */
+  cueNames?: string[];
   onCommit(text: string, hold: boolean): void;
   onCancel(): void;
 }
 
-export function ChordEditPopover({ col, initial, initialHold, isNew, validate, onCommit, onCancel }: Props) {
+export function ChordEditPopover({ col, initial, initialHold, isNew, validate, cueNames = [], onCommit, onCancel }: Props) {
   const [text, setText] = useState(initial);
   const [hold, setHold] = useState(initialHold);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -64,6 +66,15 @@ export function ChordEditPopover({ col, initial, initialHold, isNew, validate, o
       <button className="mini" onClick={onCancel} title="Cancel">
         Esc
       </button>
+      {cueNames.length > 0 && (
+        <span className="cue-picks">
+          {cueNames.map((name) => (
+            <button key={name} className="mini cue" onClick={() => onCommit(name, false)} title={`Cue ${name} here`}>
+              {name}
+            </button>
+          ))}
+        </span>
+      )}
     </span>
   );
 }

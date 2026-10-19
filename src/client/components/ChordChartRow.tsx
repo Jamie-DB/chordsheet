@@ -1,6 +1,7 @@
 import { displayChord, triadHome, triadVoicingFor, voicingFor, type ShapeResult } from "../../engine";
 import type { Song } from "../../shared/types";
 import type { DiagramStyle } from "../lib/printPrefs";
+import { capoByLine } from "../lib/sectionMarks";
 import { ChordDiagram } from "./ChordDiagram";
 
 export interface DiagramSpec extends ShapeResult {
@@ -17,8 +18,9 @@ export function diagramSpecs(song: Song, shapedKeyName: string, style: DiagramSt
   const out: DiagramSpec[] = [];
   let near = triadHome(shapedKeyName);
   const ordered = [...song.placements].sort((a, b) => a.line - b.line || a.col - b.col);
+  const lineCapo = capoByLine(song.lyrics, song.sectionMarks ?? [], song.capo);
   for (const p of ordered) {
-    const shown = displayChord(p.chord, song.capo, shapedKeyName);
+    const shown = displayChord(p.chord, lineCapo[p.line] ?? song.capo, shapedKeyName);
     if (style === "triads") {
       const triad = triadVoicingFor(shown, near);
       if (!triad || seen.has(triad.playedAs)) continue;

@@ -1,5 +1,6 @@
 import { suggestCapo } from "../../engine";
 import type { Song } from "../../shared/types";
+import { chordSymbols } from "../lib/riffs";
 
 interface Props {
   song: Song;
@@ -8,10 +9,7 @@ interface Props {
 }
 
 export function CapoSuggestions({ song, soundingKey, onApply }: Props) {
-  const ranked = suggestCapo(
-    song.placements.map((p) => p.chord),
-    soundingKey,
-  ).slice(0, 5);
+  const ranked = suggestCapo(chordSymbols(song), soundingKey).slice(0, 5);
 
   return (
     <div className="capo-suggestions">

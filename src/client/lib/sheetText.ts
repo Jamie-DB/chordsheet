@@ -1,5 +1,7 @@
-import { buildChordRow, displayChord } from "../../engine";
-import type { Song } from "../../shared/types";
+import { buildChordRow, displayChord, positionLabel } from "../../engine";
+import type { Riff, Song } from "../../shared/types";
+import { delayTimes, tabAsShape } from "./riffs";
+import { capoByLine } from "./sectionMarks";
 
 /**
  * The header's key line, e.g. "Key: Eb, Capo 3". The key shown is always the
@@ -65,8 +67,11 @@ export function sheetText(
   const keyLine = headerKeyLine(soundingKey, song.capo);
   if (keyLine) out.push(keyLine);
   if (song.notes?.trim()) out.push(...song.notes.trim().split("\n"));
+  const tone = toneLine(song.tone, song.bpm, (song.riffs ?? []).length > 0);
+  if (tone) out.push(tone);
   out.push("");
 
+  const lineCapo = capoByLine(song.lyrics, song.sectionMarks ?? [], song.capo);
   song.lyrics.forEach((line, i) => {
     // Holds print as <C>, the ASCII form of the diamond; the opening bracket
     // borrows the column to the left so the chord letter stays put.
@@ -74,11 +79,33 @@ export function sheetText(
       .filter((p) => p.line === i)
       .map((p) => (p.hold ? { ...p, col: Math.max(0, p.col - 1) } : p));
     const row = buildChordRow(linePlacements, (chord, hold) => {
-      const display = displayChord(chord, song.capo, shapedKeyName);
+      const display = displayChord(chord, lineCapo[i], shapedKeyName);
       return hold ? `<${display}>` : display;
     });
     if (row.length > 0) out.push(row);
     out.push(line);
   });
+  for (const riff of song.riffs ?? []) {
+    const shown = tabAsShape(riff.tab, song.capo);
+    out.push("", riffHeading(riff, shown), ...shown);
+  }
   return out.join("\n") + "\n";
+}
+
+/**
+ * The tone strip's text: the dotted-eighth delay time when the chart sets a
+ * tempo, then the tone in words. Only an electric chart (one with a tone or
+ * riffs) gets one, so a plain chord chart prints as before.
+ */
+export function toneLine(tone: string | undefined, bpm: number | undefined, hasRiffs: boolean): string {
+  if (!tone?.trim() && !hasRiffs) return "";
+  const bits: string[] = [];
+  if (bpm) bits.push(`Delay dotted 8th ${delayTimes(bpm).dottedEighth} ms`);
+  if (tone?.trim()) bits.push(tone.trim());
+  return bits.length > 0 ? `Tone: ${bits.join(". ")}` : "";
+}
+
+/** "Riff A · fret 5 · ref 0:42 · hint", from the tab as the hands play it. */
+export function riffHeading(riff: Riff, shown: string[]): string {
+  return [riff.name, positionLabel(shown), riff.ref && `ref ${riff.ref}`, riff.hint].filter(Boolean).join(" · ");
 }

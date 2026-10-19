@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Riff lab</title>
+<style>
+  :root { --bg:#e9e9e4; --panel:#16181f; --line:#262a35; --text:#d9dce4; --dim:#8a90a0; --accent:#f7c740;
+    /* App palette, from src/client/styles/app.css */
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --ink:#1a1d21; --paper:#fafaf8; --app-accent:#2563eb; --muted:#6b7280; --border:#d1d5db;
+    --sec-verse:#6aa36f; --sec-intro:#6f93b5; --sec-outro:#6f93b5; --riff:#b4530b; }
+  * { box-sizing:border-box; } html, body { margin:0; height:100%; background:var(--bg); font:13px/1.35 -apple-system, system-ui, sans-serif; }
+  body { display:flex; overflow:hidden; }
+  #stage { flex:0 0 auto; overflow:auto; padding:12px; display:flex; gap:16px; align-items:flex-start; height:100%; }
+  #panel { flex:1; overflow-y:auto; padding:14px 18px 40px; border-left:1px solid var(--line); background:var(--panel); color:var(--text); min-width:320px; }
+  #panel button { background:#232733; color:var(--text); border:1px solid #333948; border-radius:8px; padding:5px 10px; margin:0 4px 4px 0; font:inherit; cursor:pointer; }
+  #panel button.on, .variant.on b { background:var(--accent); color:#111; } #panel section { border-top:1px solid var(--line); padding:10px 0; } #panel h2 { font-size:13px; margin:0 0 6px; }
+  #panel small, #panel em, .row label { color:var(--dim); font-weight:400; font-style:normal; font-size:12px; }
+  .variant { display:flex; gap:8px; padding:4px 8px; border-radius:8px; border:1px solid transparent; cursor:pointer; }
+  .variant.on { border-color:var(--accent); } .variant em { display:block; } .variant b { flex:0 0 22px; text-align:center; border-radius:6px; background:#2b3040; }
+  .row { display:grid; grid-template-columns:150px 1fr 48px; gap:8px; align-items:center; margin-top:4px; }
+  #picks { font-family:ui-monospace, Menlo, monospace; font-size:12px; background:#0f1116; border:1px solid var(--line); border-radius:8px; padding:8px; margin:6px 0; }
+  .view-title { font:700 11px -apple-system, system-ui, sans-serif; letter-spacing:.08em; color:#555; text-transform:uppercase; margin:0 0 6px 2px; }
+
+  /* ---------- Screen view: mirrors the editor's cards ---------- */
+  #screen { width:700px; background:var(--paper); color:var(--ink); border-radius:10px; padding:14px 16px 20px; box-shadow:0 0 0 1px #d6d6d0; }
+  #screen button { font:inherit; padding:.3rem .65rem; border:1px solid var(--border); border-radius:6px; background:white; color:var(--ink); }
+  #screen button.primary { background:var(--app-accent); border-color:var(--app-accent); color:white; }
+  .s-top { display:flex; gap:10px; align-items:center; margin-bottom:10px; } .s-top b { font-size:14px; } .s-top span { color:var(--muted); }
+  .card { border:1px solid var(--border); border-radius:8px; background:white; padding:10px 12px; margin-bottom:10px; }
+  .card h4 { margin:0 0 6px; font:600 11px -apple-system, system-ui, sans-serif; letter-spacing:.06em; color:#374151; }
+  .toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:12px; }
+  .toolbar .lbl { color:var(--muted); letter-spacing:.06em; font-size:11px; }
+  .toolbar .keytext { font-family:var(--mono); font-weight:700; margin-left:auto; }
+  .tone-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; font-size:12px; }
+  .pill { border:1px solid var(--border); border-radius:999px; padding:1px 9px; background:#f8fafc; }
+  .pill.delay { border-color:#b45309; color:#7c2d12; background:#fff7ed; font-weight:700; }
+  .notes-text { font-family:var(--mono); font-size:12px; color:#374151; white-space:pre-wrap; }
+  .riff-cards { display:flex; gap:10px; flex-wrap:wrap; }
+  .riff-card { border:1px solid #f0c9a5; border-radius:6px; padding:6px 8px; background:#fffaf5; }
+  .riff-card .rh { font-size:12px; } .riff-card .rh b { color:var(--riff); }
+  .riff-card pre { margin:4px 0 2px; font:12px/1.15 var(--mono); }
+  .riff-card .hint { font-size:11px; color:var(--muted); max-width:230px; }
+  .sheet { display:grid; grid-template-columns:110px 1fr; column-gap:12px; font-family:var(--mono); font-size:14px; }
+  .gutter { text-align:right; padding-top:2px; }
+  .sec-pill { display:inline-block; text-align:center; border:1.5px solid var(--c); color:var(--c); border-radius:9px; padding:2px 8px; font:700 11px -apple-system, system-ui, sans-serif; background:white; }
+  .sec-pill small { display:block; font-size:9px; letter-spacing:.06em; }
+  .gutter-note { margin-top:5px; font:italic 11px/1.3 -apple-system, system-ui, sans-serif; color:#4b5563; text-align:right; }
+  .s-lines { border-left:3px solid var(--c); padding-left:9px; margin-bottom:14px; }
+  .s-cue { font:600 12px -apple-system, system-ui, sans-serif; color:var(--riff); margin-bottom:3px; }
+  pre.row-c, pre.row-l { margin:0; font:inherit; line-height:1.45; white-space:pre; }
+  pre.row-c { color:var(--app-accent); font-weight:700; }
+  .chip { color:var(--riff); outline:1.5px solid var(--riff); outline-offset:0; border-radius:4px; background:#fff7ed; }
+  .s-riff-inline { margin:6px 0 2px; }
+
+  /* ---------- Paper view: mirrors src/client/styles/print.css ---------- */
+  #paper { width:816px; min-height:1056px; background:white; color:black; padding:57px; box-shadow:0 1px 4px rgba(0,0,0,.25); font-family:var(--mono); font-size:14px; line-height:1.22; position:relative; }
+  .p-header { display:flex; flex-wrap:wrap; align-items:baseline; column-gap:16px; margin-bottom:8px; }
+  .p-header h1 { font:700 21px -apple-system, system-ui, sans-serif; margin:0; }
+  .p-key { font:700 15px -apple-system, system-ui, sans-serif; }
+  .p-capo { padding:1px 10px; font:900 22px/1.15 -apple-system, system-ui, sans-serif; letter-spacing:.06em; text-transform:uppercase; background:#fbcfe8; border:3px solid var(--out-ink, #d0247a); border-radius:6px; }
+  .p-tone { display:flex; gap:12px; align-items:baseline; border:1.5px solid #111; border-radius:4px; padding:3px 8px; margin:0 0 9px; font:12px -apple-system, system-ui, sans-serif; }
+  .p-tone b { letter-spacing:.08em; font-size:11px; } .p-tone .d { font-weight:800; font-size:13px; white-space:nowrap; }
+  .p-riffs-top { display:flex; gap:14px; flex-wrap:wrap; margin:0 0 10px; }
+  .p-body { column-count:2; column-gap:26px; column-fill:auto; padding-left:11px; height:860px; }
+  .p-sec { border-left:3px solid var(--c); padding-left:7px; margin-left:-10px; margin-bottom:12px; }
+  .p-label { font:800 13px -apple-system, system-ui, sans-serif; break-after:avoid; }
+  .p-label .tag { font-size:12px; font-weight:700; letter-spacing:.05em; color:#374151; }
+  .p-label .cue { font-weight:700; }
+  .p-part { font:italic 12px/1.3 -apple-system, system-ui, sans-serif; margin:1px 0 2px; }
+  #paper pre { margin:0; font:inherit; white-space:pre; }
+  .p-chords { font-weight:700; }
+  .p-cue { font-weight:800; text-decoration:underline; }
+  .p-riff { border:1.5px solid #111; border-radius:4px; padding:4px 7px 5px; margin:4px 0 12px; break-inside:avoid; display:inline-block; }
+  .p-riff .rh { font:12px -apple-system, system-ui, sans-serif; } .p-riff .rh b { font-size:13px; }
+  .p-riff pre { font-size:13px !important; line-height:1.1 !important; margin:3px 0 !important; }
+  .p-riff .hint { font:italic 11px -apple-system, system-ui, sans-serif; max-width:300px; }
+  .p-riffs-h { font:800 13px -apple-system, system-ui, sans-serif; margin:4px 0 2px; }
+  .p-foot { position:absolute; left:57px; right:57px; bottom:22px; display:flex; justify-content:space-between; font:600 11px -apple-system, system-ui, sans-serif; color:#6b7280; }
+</style></head><body>
+<div id="stage">
+  <div><div class="view-title">Screen (editor)</div><div id="screen"></div></div>
+  <div><div class="view-title">Print (one Letter page)</div><div id="paper"></div></div>
+</div>
+<div id="panel"><h1 style="font-size:15px;margin:0 0 4px">Riff lab</h1>
+  <p style="margin:0 0 8px;color:var(--dim)">Options B (named riffs and cues) and E (electric part notes and tone) on the Amazing Grace demo. Static layout, so there is nothing to play; every control redraws both views.</p>
+  <div id="bar"></div><div id="sections"></div>
+  <section><h2>Picks <small>paste this back into chat</small></h2><div id="picks"></div><button id="copy">Copy picks and values</button></section>
+</div>
+<script>
+'use strict';
+// Contract (design-lab skill): SECTIONS of numbered variants with sliders and checks; PRESETS holding a baseline that
+// mirrors what ships today and a recommendation; a Picks line and a copy button; settings in localStorage; URL options;
+// ?manual=1 exposes window.labStep(dt, frames) for the recorder; ?bare=1 hides the panel.
+// Variant 1 of each section is what ships today (no riffs, no part notes, tone only in the Notes card, which never prints).
+const SECTIONS = [
+  { key:'cue', title:'B. Riff cue on the chart', hint:'where the chart says "play Riff A here"', variants:[
+    ['None', 'Today: no cue. The riff lives in your head or the Notes card.'],
+    ['Inline chip', 'A cue sits in the chord row at an exact column, like a chord. Prints as literal text, [Riff B].'],
+    ['Section line', 'One line per section under its label: "w/ Riff B, end of line 2". No column.'],
+  ] },
+  { key:'riffbox', title:'B. Where the riff tab prints', hint:'each riff is written once', variants:[
+    ['None', 'Today: tab is not stored.'],
+    ['Top of sheet', 'A row of riff boxes under the header, beside where chord diagrams sit. One predictable spot.'],
+    ['At first use', 'The box prints right after the section that first cues it (the guitar-book convention).'],
+    ['End of sheet', 'A "Riffs" block after the last section.'],
+  ], sliders:[['transpose','Transpose (semitones)',-5,5,1],['capo','Capo',0,7,1]] },
+  { key:'parts', title:'E. Electric part notes per section', hint:'swells, octaves, sit out', variants:[
+    ['None', 'Today: nothing per section beyond dynamics marks.'],
+    ['Tag on the label', 'One word in caps beside the section label, like a dynamics mark: VERSE 1 · SWELLS.'],
+    ['Note under the label', 'A full sentence in italics under the label (gutter on screen).'],
+    ['Both', 'The tag on the label and the sentence under it.'],
+  ] },
+  { key:'tone', title:'E. Tone and delay line', hint:'dotted-eighth delay from the BPM', variants:[
+    ['None', 'Today: tone goes in Notes, which stays off the printed page.'],
+    ['In the tagline', 'Appended to the header: "Key: G, 72 BPM, dotted 8th 625 ms".'],
+    ['Tone strip', 'A boxed line under the header: delay time plus the tone text.'],
+  ], sliders:[['bpm','BPM',50,160,1]], checks:[['allDivs','Also show quarter and eighth delay times']] },
+];
+const PRESETS = {
+  // Mirrors the app on main: no riff, part or tone data exist. Header per PrintSheet.tsx and sheetText.ts printTagline.
+  'Today': { cue:0, riffbox:0, parts:0, tone:0, transpose:0, capo:0, bpm:72, allDivs:false },
+  'Recommended': { cue:1, riffbox:1, parts:1, tone:2, transpose:0, capo:0, bpm:72, allDivs:false },
+};
+const STORE_KEY = 'riff-lab-v1';
+let S = Object.assign({}, PRESETS.Recommended, JSON.parse(localStorage.getItem(STORE_KEY) || '{}'));
+const save = () => localStorage.setItem(STORE_KEY, JSON.stringify(S));
+const qp = new URLSearchParams(location.search), BARE = qp.get('bare') === '1';
+
+// ---------- Song: the public-domain demo, verse 1 as in songs/amazing-grace.json, plus verse 2, intro and outro ----------
+// Chords anchor to a substring, the way resolveAnchor places imported chords.
+const SONG = {
+  title:'Amazing Grace', artist:'John Newton (1779, public domain)',
+  sections: [
+    { label:'Intro', type:'intro', part:{ tag:'RIFF', text:'Riff A twice over the bars. Clean, delay on.' },
+      lines:[ { text:'| G  . . | C  . G | G  . . | D  . . |', chords:[], cues:[{ riff:'A', times:2, at:40 }] } ],
+      sectionCue:'w/ Riff A x2' },
+    { label:'Verse 1', type:'verse', part:{ tag:'SWELLS', text:'Volume swells on each chord. Let them ring into the delay.' },
+      lines:[
+        { text:'Amazing grace, how sweet the sound', chords:[['G','Amazing'],['C','sweet'],['G','sound']] },
+        { text:'That saved a wretch like me', chords:[['D','me']], cues:[{ riff:'B', at:28 }] },
+        { text:'I once was lost, but now am found', chords:[['G','once'],['C','now'],['G','found']] },
+        { text:'Was blind, but now I see', chords:[['D','now'],['G','see']] } ],
+      sectionCue:'w/ Riff B, end of line 2' },
+    { label:'Verse 2', type:'verse', part:{ tag:'OCTAVES', text:'Octaves on the melody, D and G strings. Light drive.' },
+      lines:[
+        { text:"'Twas grace that taught my heart to fear,", chords:[['G',"'Twas"],['C','heart'],['G','fear']] },
+        { text:'And grace my fears relieved;', chords:[['D','relieved']], cues:[{ riff:'B', at:28 }] },
+        { text:'How precious did that grace appear', chords:[['G','precious'],['C','grace appear'],['G','appear']] },
+        { text:'The hour I first believed.', chords:[['D','first'],['G','believed']] } ],
+      sectionCue:'w/ Riff B, end of line 2' },
+    { label:'Outro', type:'outro', part:{ tag:'RING OUT', text:'Riff A once, then hold G and let the delay trail off.' },
+      lines:[ { text:'| G  . . | C  . G | G  . . | G  . . |', chords:[], cues:[{ riff:'A', at:40 }] } ],
+      sectionCue:'w/ Riff A, last G rings' },
+  ],
+};
+// Riffs in standard tuning, as [string, fret] per note; string 0 = high e ... 5 = low E. Frets read from the capo.
+const RIFFS = {
+  A: { name:'Riff A', where:'Intro, Outro', ref:'ref 0:04',
+       hint:'Climbs the D string into G. Let the last note ring.', notes:[[3,0],[3,2],[3,4],[2,0],[2,2],[1,0],[2,0]] },
+  B: { name:'Riff B', where:'End of verse line 2', ref:'ref 0:31',
+       hint:'Pickup into line 3, lands on the D.', notes:[[2,2],[2,4],[1,3]] },
+};
+const STRINGS = ['e','B','G','D','A','E'];
+
+// ---------- Pitch rules (a sketch of src/engine: transpose, capo shapes, key spelling) ----------
+const SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'], FLAT = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const KEY_NAMES = ['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+const mod12 = n => ((n % 12) + 12) % 12;
+const PC = n => { const i = SHARP.indexOf(n); return i >= 0 ? i : FLAT.indexOf(n); };
+const keyName = pc => KEY_NAMES[mod12(pc)];
+const usesFlats = k => k.includes('b') || k === 'F';
+function shiftChord(sym, n, key) {
+  const m = /^([A-G][#b]?)(.*)$/.exec(sym); const names = usesFlats(key) ? FLAT : SHARP;
+  return names[mod12(PC(m[1]) + n)] + m[2];
+}
+// Tab follows the shapes: frets move by (transpose - capo), up an octave if any note would fall below the nut.
+function riffFrets(notes) {
+  const shift = S.transpose - S.capo; let out = notes.map(([s, f]) => [s, f + shift]);
+  const lo = Math.min(...out.map(n => n[1]));
+  if (lo < 0) out = out.map(([s, f]) => [s, f + 12]); else if (lo >= 12) out = out.map(([s, f]) => [s, f - 12]);
+  return out;
+}
+function tabLines(notes) {
+  return STRINGS.map((name, s) => name + '|' + notes.map(([ns, f]) => '-' + (ns === s ? String(f) : '-'.repeat(String(f).length))).join('') + '-|');
+}
+const posHint = notes => { const lo = Math.min(...notes.map(n => n[1])); return lo === 0 ? 'open position' : `fret ${lo}`; };
+
+// ---------- Rows: a sketch of buildChordRow. Collisions push a symbol right of the previous one. ----------
+function chordItems(line, shapeShift, shapeKey) {
+  const items = line.chords.map(([c, anchor]) => ({ col: line.text.indexOf(anchor), text: shiftChord(c, shapeShift, shapeKey), cls: 'chord' }));
+  if (S.cue === 1) for (const q of line.cues || []) items.push({ col: Math.max(q.at, line.text.length + 2), text: `[${RIFFS[q.riff].name}${q.times ? ' x' + q.times : ''}]`, cls: 'cue' });
+  items.sort((a, b) => a.col - b.col);
+  let end = -1;
+  for (const it of items) { it.col = Math.max(it.col, end + 1); end = it.col + it.text.length; }
+  return items;
+}
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+function rowHtml(items, cueCls, chordCls) {
+  let out = '', pos = 0;
+  for (const it of items) { out += ' '.repeat(it.col - pos); out += `<span class="${it.cls === 'cue' ? cueCls : chordCls}">${esc(it.text)}</span>`; pos = it.col + it.text.length; }
+  return out || ' ';
+}
+const delayMs = () => { const q = 60000 / S.bpm; return { d8: Math.round(q * 0.75), q: Math.round(q), e: Math.round(q / 2) }; };
+const TONE_TEXT = 'Clean, light drive on V2, plate verb, delay mix about 25%';
+function delayText(long) {
+  const d = delayMs();
+  return `dotted 8th ${d.d8} ms` + (S.allDivs && long ? ` (quarter ${d.q}, 8th ${d.e})` : '');
+}
+
+// ---------- Render ----------
+const $ = id => document.getElementById(id);
+function riffsInUse() { const seen = []; for (const sec of SONG.sections) for (const l of sec.lines) for (const q of l.cues || []) if (!seen.includes(q.riff)) seen.push(q.riff); return seen; }
+function firstUse() { const m = {}; SONG.sections.forEach((sec, i) => { for (const l of sec.lines) for (const q of l.cues || []) if (!(q.riff in m)) m[q.riff] = i; }); return m; }
+function riffBlock(id, cls) {
+  const r = RIFFS[id], notes = riffFrets(r.notes);
+  return `<div class="${cls}"><div class="rh"><b>${r.name}</b> · ${r.where} · ${posHint(notes)} · ${r.ref}</div><pre>${tabLines(notes).join('\n')}</pre><div class="hint">${r.hint}</div></div>`;
+}
+
+function render() {
+  const soundingPc = 7 + S.transpose, soundKey = keyName(soundingPc), shapeKey = keyName(soundingPc - S.capo);
+  const shapeShift = S.transpose - S.capo;
+  const showParts = S.parts > 0, tagOn = S.parts === 1 || S.parts === 3, noteOn = S.parts === 2 || S.parts === 3;
+  const used = riffsInUse(), first = firstUse();
+
+  // Screen
+  let h = `<div class="s-top"><button>Back to library</button><b>${SONG.title}</b><span>${SONG.artist}</span></div>`;
+  h += `<div class="card"><div class="toolbar"><span class="lbl">TRANSPOSE</span><button>-1</button><button>+1</button><span class="lbl">KEY</span><button>Auto (${soundKey})</button><span class="lbl">CAPO</span><button>${S.capo ? 'Fret ' + S.capo : 'None'}</button>`
+    + `<span class="keytext">Key: ${soundKey}${S.capo ? `, Capo ${S.capo} (play ${shapeKey} shapes)` : ''}</span></div>`;
+  if (S.tone > 0) { const d = delayMs(); h += `<div class="tone-row"><span class="pill delay">Delay: dotted 8th ${d.d8} ms</span>${S.allDivs ? `<span class="pill">quarter ${d.q} ms</span><span class="pill">8th ${d.e} ms</span>` : ''}<span class="pill">${TONE_TEXT}</span></div>`; }
+  h += `</div>`;
+  h += `<div class="card"><h4>▾ NOTES</h4><div class="notes-text">${S.tone === 0 ? 'Electric: clean, light drive on V2. Delay dotted 8th, 625 ms at 72.' : 'Lead the intro, sit back in V1.'}</div></div>`;
+  if (S.riffbox > 0 || S.cue > 0) h += `<div class="card"><h4>▾ RIFFS <span style="font-weight:400;color:var(--muted)">(paste ASCII tab, name it, add a hint and a reference time)</span></h4><div class="riff-cards">${used.map(id => riffBlock(id, 'riff-card')).join('')}</div></div>`;
+  h += `<div class="card sheet">`;
+  for (const sec of SONG.sections) {
+    const c = `var(--sec-${sec.type})`;
+    h += `<div class="gutter" style="--c:${c}"><span class="sec-pill" style="--c:${c}">${sec.label}${showParts && tagOn ? `<small>${sec.part.tag}</small>` : ''}</span>`
+      + (showParts && noteOn ? `<div class="gutter-note">${sec.part.text}</div>` : '') + `</div>`;
+    h += `<div class="s-lines" style="--c:${c}">`;
+    if (S.cue === 2) h += `<div class="s-cue">${sec.sectionCue}</div>`;
+    for (const line of sec.lines) {
+      h += `<pre class="row-c">${rowHtml(chordItems(line, shapeShift, shapeKey), 'chip', '')}</pre><pre class="row-l">${esc(line.text)}</pre>`;
+    }
+    h += `</div>`;
+  }
+  h += `</div>`;
+  $('screen').innerHTML = h;
+
+  // Paper
+  let p = `<div class="p-header"><h1>${SONG.title}</h1>${S.capo ? `<span class="p-capo">Capo ${S.capo}</span>` : ''}`
+    + `<span class="p-key">Key: ${soundKey}, ${S.bpm} BPM${S.tone === 1 ? ', ' + delayText(true) : ''}</span></div>`;
+  if (S.tone === 2) p += `<div class="p-tone"><b>TONE</b><span class="d">Delay ${delayText(true)}</span><span>${TONE_TEXT}</span></div>`;
+  if (S.riffbox === 1) p += `<div class="p-riffs-top">${used.map(id => riffBlock(id, 'p-riff')).join('')}</div>`;
+  p += `<div class="p-body">`;
+  SONG.sections.forEach((sec, i) => {
+    const c = `var(--sec-${sec.type})`;
+    let label = sec.label;
+    if (showParts && tagOn) label += ` <span class="tag">· ${sec.part.tag}</span>`;
+    if (S.cue === 2) label += ` <span class="cue">· ${sec.sectionCue}</span>`;
+    p += `<div class="p-sec" style="--c:${c}"><div class="p-label">${label}</div>`;
+    if (showParts && noteOn) p += `<div class="p-part">${sec.part.text}</div>`;
+    for (const line of sec.lines) p += `<pre class="p-chords">${rowHtml(chordItems(line, shapeShift, shapeKey), 'p-cue', '')}</pre><pre>${esc(line.text)}</pre>`;
+    p += `</div>`;
+    if (S.riffbox === 2) for (const id of used) if (first[id] === i) p += riffBlock(id, 'p-riff');
+  });
+  if (S.riffbox === 3) p += `<div class="p-riffs-h">Riffs</div>` + used.map(id => riffBlock(id, 'p-riff')).join('');
+  p += `</div><div class="p-foot"><span>${SONG.title}</span><span>Page 1 of 1</span></div>`;
+  $('paper').innerHTML = p;
+}
+
+// ---------- Panel: numbered variants, sliders, checks, presets and the Picks line ----------
+function syncBar() {
+  $('bar').innerHTML = '';
+  const btn = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; $('bar').appendChild(b); };
+  for (const name in PRESETS) btn(`Preset: ${name}`, () => { S = Object.assign({}, PRESETS[name]); save(); buildPanel(); });
+}
+function buildPanel() {
+  $('sections').innerHTML = '';
+  for (const sec of SECTIONS) {
+    const el = document.createElement('section');
+    el.innerHTML = `<h2>${sec.title} <small>${sec.hint}</small></h2>`;
+    sec.variants.forEach(([name, desc], i) => {
+      const v = document.createElement('div'); v.className = 'variant' + (S[sec.key] === i ? ' on' : '');
+      v.innerHTML = `<b>${i + 1}</b><span>${name}<em>${desc}</em></span>`;
+      v.onclick = () => { S[sec.key] = i; save(); buildPanel(); };
+      el.appendChild(v);
+    });
+    for (const [key, label, min, max, step] of sec.sliders || []) {
+      const row = document.createElement('div'); row.className = 'row';
+      row.innerHTML = `<label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}" value="${S[key]}"><output>${S[key]}</output>`;
+      row.querySelector('input').oninput = e => { S[key] = parseFloat(e.target.value); row.querySelector('output').textContent = e.target.value; save(); updatePicks(); render(); };
+      el.appendChild(row);
+    }
+    for (const [key, label] of sec.checks || []) {
+      const c = document.createElement('label'); c.className = 'row'; c.style.display = 'block';
+      c.innerHTML = `<input type="checkbox" ${S[key] ? 'checked' : ''}> ${label}`;
+      c.querySelector('input').onchange = e => { S[key] = e.target.checked; save(); updatePicks(); render(); };
+      el.appendChild(c);
+    }
+    $('sections').appendChild(el);
+  }
+  updatePicks(); render();
+}
+function picksLine() { return SECTIONS.map(s => `${s.key} ${S[s.key] + 1}`).join(' · '); }
+function updatePicks() { $('picks').textContent = picksLine(); }
+$('copy').onclick = () => navigator.clipboard.writeText(picksLine() + '\n' + JSON.stringify(S)).then(() => { $('copy').textContent = 'Copied'; setTimeout(() => $('copy').textContent = 'Copy picks and values', 1200); });
+
+// URL options: ?preset=Today&cue=2&bpm=90&transpose=2&capo=2&allDivs=true&bare=1&manual=1
+if (qp.has('preset') && PRESETS[qp.get('preset')]) S = Object.assign({}, PRESETS[qp.get('preset')]);
+for (const sec of SECTIONS) if (qp.has(sec.key)) S[sec.key] = parseInt(qp.get(sec.key), 10) - 1;
+for (const [k, v] of qp) if (k in S && !SECTIONS.some(s => s.key === k)) S[k] = v === 'true' ? true : v === 'false' ? false : parseFloat(v);
+const VIEW = qp.get('view');   // view=screen or view=paper shows one view only (for recordings)
+if (VIEW === 'screen') $('paper').parentElement.style.display = 'none';
+if (VIEW === 'paper') $('screen').parentElement.style.display = 'none';
+if (BARE) $('panel').style.display = 'none';
+syncBar(); buildPanel();
+// Static layout: labStep only redraws, so the recorder can screenshot any variant.
+if (qp.get('manual') === '1') window.labStep = () => render();
+</script></body></html>
