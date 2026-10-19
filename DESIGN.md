@@ -156,7 +156,12 @@ Lead lines follow the guitar-book convention: each riff is written once in ASCII
 - Tab follows the chord invariants. Frets are stored sounding, with no capo. Under a capo the panel, print, and copied text show the tab shifted down to the shapes the hands play, and tab typed under a capo is shifted up before it is stored. Transpose rewrites the frets. `shiftTab` groups numbers that share columns across strings and redraws a group as wide as its widest new number, so the staff stays aligned when 9 becomes 11. A riff that would fall below the nut moves up an octave, one that would pass fret 24 moves down one.
 - Print puts a tone strip under the header (only on a chart with a tone or riffs), then every riff in a box above the columns, then the chart with cues bold and underlined. Copy text adds the same tone line and the riffs at the end.
 - Per-section electric notes ("SWELLS", "OCTAVES") need no new field: a label note such as "[Verse 1 - Swells]" already becomes the section's tag.
+- A picker beside Print puts the riff boxes above the chart (default), after it (so a chart with many riffs still starts on page one), or nowhere. With no riffs in print, the cues and a tone strip that held only the delay time are left off too.
 - `tools/riff-lab/` is the design lab the layout was picked in (variants for cue style, riff placement, part notes, and tone line).
+
+## Capo moves (sectionMarks.ts capoMove, capoByLine)
+
+A key change played by moving the capo (Never Lost goes up a half step at a late chorus, played as G shapes at capo 5 and then capo 6) is a section note: "Capo +1", "Capo -2". It prints as a large red CAPO +1 badge on that section's label and tag, and `capoByLine` gives every line the capo it is played at, so the editor, print, copy text, and chord diagrams show each chord as the shape played at that point. Stored chords stay sounding, so transpose and the header are untouched. Chords typed after the badge are read as shapes at the moved capo. Riff tab still shows at the chart's own capo.
 
 ## Later ideas (not scheduled)
 
